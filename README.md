@@ -176,12 +176,12 @@ npm run db:studio
 
 ### Database
 
-- [ ] Konvensi Database
+- [x] Konvensi Database
 - [ ] Schema User
-- [ ] Schema Device
-- [ ] Schema Temperature Log
-- [ ] Schema Alert
-- [ ] Schema Notification
+- [x] Schema Device
+- [x] Schema Temperature Log
+- [x] Schema Alert
+- [x] Schema Notification
 - [ ] Relasi Antar Tabel
 - [ ] Seeder
 
