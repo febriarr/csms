@@ -1,0 +1,37 @@
+{
+  "name": "ci-csms",
+  "version": "1.0.0",
+  "description": "project continuous cold storage monitoring system",
+  "keywords": [
+    "express"
+  ],
+  "license": "MIT",
+  "author": "Febri Ardiansyah",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/express-ejs-layouts": "^2.5.4",
+    "@types/node": "^26.1.1",
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "helmet": "^8.3.0",
+    "pg": "^8.22.0",
+    "postgres": "^3.4.9"
+  }
+}

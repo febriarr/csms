@@ -1,0 +1,80 @@
+:root {
+  --header-height: 3rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.nav {
+  width: 100%;
+  height: var(--header-height);
+  border-bottom: solid 1px #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+}
+
+.nav-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn {
+  padding: 0 1rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  height: 2rem;
+}
+
+.btn-primary {
+  background-color: blue;
+  color: white;
+}
+
+.btn-outline {
+  border: solid 1px #ddd;
+  background-color: transparent;
+}
+
+.app {
+  min-height: calc(100vh - var(--header-height));
+  padding: 1rem;
+}
+
+/* Tablet */
+
+@media screen and (min-width: 768px) {
+  .app {
+    padding: 1rem 2rem;
+  }
+}
+
+/* desktop */
+@media screen and (min-width: 1200px) {
+  .app {
+    padding: 1rem 3rem;
+  }
+}
