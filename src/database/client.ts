@@ -4,6 +4,7 @@ import { Pool } from 'pg';
 import { env } from '../config/env.js';
 import * as schema from './schema/index.js';
 import { Logger } from 'drizzle-orm';
+import { logger } from '../shared/logger/logger.js';
 
 // Config Pool
 export const pool = new Pool({
@@ -25,7 +26,7 @@ class SlowQueryLogger implements Logger {
       const duration = performance.now() - start;
 
       if (duration > this.thresholdMs) {
-        console.warn(`[SLOW QUERY] ${duration.toFixed(1)}ms\n${query}\nparams: ${JSON.stringify(params)}`);
+        logger.warn(`[SLOW QUERY] ${duration.toFixed(1)}ms\n${query}\nparams: ${JSON.stringify(params)}`);
       }
     });
   }
@@ -42,10 +43,10 @@ export async function connectWithRetry(maxRetries = 10, delayMs = 3000): Promise
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       await pool.query('SELECT 1');
-      console.log('Database connected!');
+      logger.info('Database connected!');
       return;
     } catch (error) {
-      console.log(`DB connection attempt ${attempt}/${maxRetries} failed: `, (error as Error).message);
+      logger.error(`DB connection attempt ${attempt}/${maxRetries} failed: ${(error as Error).message}`);
       if (attempt === maxRetries) {
         throw new Error('Failed to connect to database after max retries');
       }

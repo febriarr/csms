@@ -1,20 +1,28 @@
 import dotenv from 'dotenv';
+import z from 'zod';
 
 dotenv.config();
 
-function required(name: string): string {
-  const value = process.env[name];
+const envSchema = z.object({
+  APP_NAME: z.string().default('CI-CSMS'),
 
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
+  PORT: z.coerce.number().int().positive().default(3000),
 
-  return value;
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+
+  DATABASE_URL: z.string().min(1),
+});
+
+const result = envSchema.safeParse(process.env);
+
+if (!result.success) {
+  console.error(result.error.format());
+  throw new Error('Invalid environment variables.');
 }
 
 export const env = {
-  appName: process.env.APP_NAME ?? 'CI-CSMS',
-  port: Number(process.env.PORT ?? 3000),
-  nodeEnv: process.env.NODE_ENV ?? 'development',
-  databaseUrl: required('DATABASE_URL'),
+  appName: result.data.APP_NAME,
+  port: result.data.PORT,
+  nodeEnv: result.data.NODE_ENV,
+  databaseUrl: result.data.DATABASE_URL,
 };

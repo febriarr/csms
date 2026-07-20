@@ -1,35 +1,36 @@
 import app from './app.js';
 import { env } from './config/env.js';
 import { connectWithRetry, pool } from './database/client.js';
+import { logger } from './shared/logger/logger.js';
 
 async function main() {
   await connectWithRetry();
 
   const server = app.listen(env.port, () => {
-    console.log(`Server running on port ${env.port}`);
+    logger.info(`Server running on port ${env.port}`);
   });
 
   async function shutdown(signal: string) {
-    console.log(`${signal} received, shutting down gracefully...`);
+    logger.info(`${signal} received, shutting down gracefully...`);
 
     server.close(async err => {
       if (err) {
-        console.error('Error closing HTTP server', err);
+        logger.error(`Error closing HTTP server: ${err}`);
         process.exit(1);
       }
 
       try {
         await pool.end();
-        console.log('PG pool closed');
+        logger.info('PG pool closed');
         process.exit(0);
       } catch (poolErr) {
-        console.error('Error closing PG pool', poolErr);
+        logger.error({ poolErr }, 'Error closing PG pool');
         process.exit(1);
       }
     });
 
     setTimeout(() => {
-      console.error('Forced shutdown after timeout');
+      logger.error('Forced shutdown after timeout');
       process.exit(1);
     }, 10_000).unref();
   }
@@ -39,6 +40,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error('Failed to start server', err);
+  logger.error({ err }, 'Failed to start server');
   process.exit(1);
 });

@@ -3,6 +3,8 @@ import webRouter from './routes/web.route.js';
 import path from 'node:path';
 import expressLayouts from 'express-ejs-layouts';
 import helmet from 'helmet';
+import { errorHandler } from './middleware/error-handler.js';
+import { notFoundHandler } from './middleware/not-found-handler.js';
 
 const app = express();
 
@@ -20,4 +22,8 @@ app.set('layout', 'layouts/app');
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.use(webRouter);
+
+app.use(notFoundHandler);
+
+app.use(errorHandler);
 export default app;
