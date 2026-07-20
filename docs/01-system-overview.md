@@ -314,28 +314,6 @@ Beberapa fitur yang telah dipertimbangkan pada desain sistem:
 
 ---
 
-# Repository Structure
-
-```
-ci-csms/
-│
-├── docs/
-├── src/
-│   ├── controllers/
-│   ├── services/
-│   ├── repositories/
-│   ├── routes/
-│   ├── middleware/
-│   ├── database/
-│   ├── views/
-│   └── public/
-│
-├── drizzle/
-└── package.json
-```
-
----
-
 # Development Philosophy
 
 Seluruh sistem dikembangkan berdasarkan beberapa prinsip berikut:

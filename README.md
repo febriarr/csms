@@ -57,30 +57,6 @@ Beberapa tujuan utama dari project ini antara lain:
 
 ---
 
-## 📂 Struktur Project
-
-```text
-src/
-├── config/
-├── controllers/
-├── database/
-│   ├── client.ts
-│   ├── index.ts
-│   ├── schema/
-│   └── types.ts
-├── middleware/
-├── repositories/
-├── routes/
-├── services/
-├── types/
-├── utils/
-├── views/
-├── app.ts
-└── server.ts
-```
-
----
-
 ## 🚀 Instalasi
 
 ### Clone Repository

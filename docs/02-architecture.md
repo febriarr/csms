@@ -402,29 +402,6 @@ Yang **tidak boleh** dilakukan:
 
 ---
 
-# Project Structure
-
-```text
-src/
-├── config/
-├── controllers/
-├── services/
-├── repositories/
-├── routes/
-├── middleware/
-├── database/
-├── alert-engine/
-│   ├── rules/
-│   ├── rule-engine.ts
-│   ├── state-manager.ts
-│   └── notification-dispatcher.ts
-├── views/
-├── public/
-└── app.ts
-```
-
----
-
 # Why Repository Pattern?
 
 Repository memisahkan business logic dari database.
