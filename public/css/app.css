@@ -1,5 +1,10 @@
 :root {
   --header-height: 3rem;
+  --background: oklch(98.5% 0 none);
+  --foreground: oklch(14.1% 0.005 285.823);
+  --muted-foreground: oklch(55.2% 0.016 285.938);
+  --primary: oklch(48.8% 0.243 264.376);
+  --muted: oklch(92% 0.004 286.32);
 }
 
 *,
@@ -8,6 +13,12 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 .nav {
@@ -20,6 +31,19 @@
   display: flex;
   align-items: center;
   padding: 0.5rem 1.5rem;
+  background: var(--background);
+}
+
+.foreground {
+  color: var(--foreground);
+}
+
+.muted {
+  background: var(--muted);
+}
+
+.muted-foreground {
+  color: var(--muted-foreground);
 }
 
 .nav-container {
@@ -43,14 +67,14 @@
 
 .btn {
   padding: 0 1rem;
-  border-radius: 8px;
+  border-radius: 9px;
   border: none;
   outline: none;
   height: 2rem;
 }
 
 .btn-primary {
-  background-color: blue;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -61,6 +85,10 @@
 
 .app {
   min-height: calc(100vh - var(--header-height));
+  padding: 1rem;
+}
+
+footer {
   padding: 1rem;
 }
 
