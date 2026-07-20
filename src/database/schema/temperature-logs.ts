@@ -50,3 +50,6 @@ export const temperatureLogs = pgTable(
     index('temperature_logs_recorded_at_idx').on(t.recordedAt),
   ]
 );
+
+export type InsertTemperature = typeof temperatureLogs.$inferInsert;
+export type SelectTemperature = typeof temperatureLogs.$inferSelect;
