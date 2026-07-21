@@ -2,9 +2,9 @@ import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 
 import { env } from '../config/env.js';
-import { HTTP_STATUS } from '../shared/constants/index.js';
-import { AppError } from '../shared/errors/index.js';
-import { logger } from '../shared/logger/index.js';
+import { HTTP_STATUS } from '../shared/constants/index';
+import { AppError } from '../shared/errors/index';
+import { logger } from '../shared/logger/index';
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   // Business Error

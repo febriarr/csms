@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '../constants/index.js';
+import { HTTP_STATUS } from '../constants/index';
 
 import { AppError } from './app-error.js';
 

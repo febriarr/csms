@@ -1,10 +1,10 @@
 import express from 'express';
-import webRouter from './routes/web.route.js';
+import webRouter from './routes/web.route';
 import path from 'node:path';
 import expressLayouts from 'express-ejs-layouts';
 import helmet from 'helmet';
-import { errorHandler } from './middleware/error-handler.js';
-import { notFoundHandler } from './middleware/not-found-handler.js';
+import { errorHandler } from './middleware/error-handler';
+import { notFoundHandler } from './middleware/not-found-handler';
 
 const app = express();
 

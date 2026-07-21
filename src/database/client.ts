@@ -1,10 +1,10 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-import { env } from '../config/env.js';
-import * as schema from './schema/index.js';
+import { env } from '../config/env';
+import * as schema from './schema';
 import { Logger } from 'drizzle-orm';
-import { logger } from '../shared/logger/logger.js';
+import { logger } from '../shared/logger/logger';
 
 // Config Pool
 export const pool = new Pool({

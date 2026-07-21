@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { Database, type InsertTemperature, type SelectTemperature, temperatureLogs } from '../../database/index.js';
+import { Database, type InsertTemperature, type SelectTemperature, temperatureLogs } from '../../database';
 
 export class TemperatureRepository {
   constructor(private readonly db: Database) {}

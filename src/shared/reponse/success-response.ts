@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 
-import { HTTP_STATUS, type HttpStatus } from '../constants/index.js';
+import { HTTP_STATUS, type HttpStatus } from '../constants';
 
 type SuccessResponseOptions<T> = {
   data?: T;

@@ -1,7 +1,7 @@
-import app from './app.js';
-import { env } from './config/env.js';
-import { connectWithRetry, pool } from './database/client.js';
-import { logger } from './shared/logger/logger.js';
+import app from './app';
+import { env } from './config/env';
+import { connectWithRetry, pool } from './database/client';
+import { logger } from './shared/logger/logger';
 
 async function main() {
   await connectWithRetry();

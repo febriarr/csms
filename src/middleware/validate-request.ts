@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { ZodType, z } from 'zod';
-import { TypedRequest } from '../types/typed-request.js';
+import { TypedRequest } from '../types/typed-request';
 
 interface Schemas<
   TBody extends ZodType = ZodType,

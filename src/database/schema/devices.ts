@@ -52,3 +52,6 @@ export const devices = pgTable('devices', {
     .defaultNow()
     .$onUpdateFn(() => new Date()),
 });
+
+export type InserDevices = typeof devices.$inferInsert;
+export type SelectDevices = typeof devices.$inferSelect;
