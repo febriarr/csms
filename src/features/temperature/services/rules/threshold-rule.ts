@@ -7,15 +7,15 @@ import { TemperatureState } from './temperature-state';
 
 export class ThresholdRule implements TemperatureRule {
   async evaluate(context: RuleContext): Promise<RuleResult | null> {
-    const state = getTemperatureState(context.current.temperature);
+    const state = getTemperatureState(context.device, context.current.temperature);
 
-    if (state.state === TemperatureState.NORMAL) {
+    if (state === TemperatureState.NORMAL) {
       return null;
     }
 
     return {
-      state: state.state,
-      message: state.message,
+      state,
+      message: `Temperature entered ${state} state.`,
     };
   }
 }

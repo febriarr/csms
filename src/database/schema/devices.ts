@@ -1,6 +1,6 @@
 import { boolean, numeric, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export const deviceStateEnum = pgEnum('device_state', ['NORMAL', 'WARNING', 'CRITICAL', 'DEFROST', 'OFFLINE']);
+export const deviceStateEnum = pgEnum('device_state', ['NORMAL', 'DEFROST', 'WARNING', 'CRITICAL', 'OFFLINE']);
 
 export const devices = pgTable('devices', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -10,6 +10,8 @@ export const devices = pgTable('devices', {
   name: varchar('name', { length: 100 }).notNull(),
 
   location: varchar('location', { length: 150 }),
+
+  // Temperature Thresholds
 
   normalMinTemperature: numeric('normal_min_temperature', {
     precision: 5,
@@ -22,6 +24,38 @@ export const devices = pgTable('devices', {
     scale: 2,
     mode: 'number',
   }).notNull(),
+
+  defrostMinTemperature: numeric('defrost_min_temperature', {
+    precision: 5,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+
+  defrostMaxTemperature: numeric('defrost_max_temperature', {
+    precision: 5,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+
+  warningMinTemperature: numeric('warning_min_temperature', {
+    precision: 5,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+
+  warningMaxTemperature: numeric('warning_max_temperature', {
+    precision: 5,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+
+  criticalMinTemperature: numeric('critical_min_temperature', {
+    precision: 5,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+
+  // Current Device State
 
   state: deviceStateEnum('state').notNull().default('NORMAL'),
 
@@ -41,17 +75,18 @@ export const devices = pgTable('devices', {
     mode: 'date',
     withTimezone: true,
   })
-    .notNull()
-    .defaultNow(),
+    .defaultNow()
+    .notNull(),
 
   updatedAt: timestamp('updated_at', {
     mode: 'date',
     withTimezone: true,
   })
-    .notNull()
     .defaultNow()
-    .$onUpdateFn(() => new Date()),
+    .$onUpdateFn(() => new Date())
+    .notNull(),
 });
 
-export type InserDevices = typeof devices.$inferInsert;
 export type SelectDevices = typeof devices.$inferSelect;
+
+export type InsertDevices = typeof devices.$inferInsert;

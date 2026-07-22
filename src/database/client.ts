@@ -15,27 +15,9 @@ export const pool = new Pool({
   connectionTimeoutMillis: 5_000,
 });
 
-// Logger
-class SlowQueryLogger implements Logger {
-  constructor(private thresholdMs = 300) {}
-
-  logQuery(query: string, params: unknown[]): void {
-    const start = performance.now();
-
-    setImmediate(() => {
-      const duration = performance.now() - start;
-
-      if (duration > this.thresholdMs) {
-        logger.warn(`[SLOW QUERY] ${duration.toFixed(1)}ms\n${query}\nparams: ${JSON.stringify(params)}`);
-      }
-    });
-  }
-}
-
 // Config drizzle
 export const db = drizzle(pool, {
   schema,
-  logger: env.nodeEnv === 'development' ? new SlowQueryLogger(300) : false,
 });
 
 // utils

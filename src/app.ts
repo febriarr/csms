@@ -5,8 +5,11 @@ import expressLayouts from 'express-ejs-layouts';
 import helmet from 'helmet';
 import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
+import { appVersion } from './config/app-info';
 
 const app = express();
+
+app.locals.appVersion = appVersion;
 
 app.use(helmet());
 
