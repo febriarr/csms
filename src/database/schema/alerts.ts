@@ -62,5 +62,5 @@ export const alerts = pgTable(
 );
 
 export type InserAlert = typeof alerts.$inferInsert;
-export type SelectInsert = typeof alerts.$inferSelect;
+export type SelectAlert = typeof alerts.$inferSelect;
 export type AlertReason = (typeof alertReasonEnum.enumValues)[number];
