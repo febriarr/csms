@@ -1,12 +1,10 @@
 import { eq } from 'drizzle-orm';
-import { Database, type InsertTemperature, type SelectTemperature, temperatureLogs } from '../../database';
+import { Database, type SelectTemperature, temperatureLogs } from '../../database';
+import { BaseRepository } from '../../shared/abstract/base-repository';
 
-export class TemperatureRepository {
-  constructor(private readonly db: Database) {}
-
-  async insert(input: InsertTemperature): Promise<SelectTemperature | undefined> {
-    const [row] = await this.db.insert(temperatureLogs).values(input).returning();
-    return row;
+export class TemperatureRepository extends BaseRepository<typeof temperatureLogs> {
+  constructor(db: Database) {
+    super(db, temperatureLogs);
   }
 
   async selectOne(id: string): Promise<SelectTemperature | null> {

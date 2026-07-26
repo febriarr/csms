@@ -1,12 +1,11 @@
-export class TemperatureResponseDto {
+export class ResponseTemperatureDTO {
   public readonly id!: string;
   public readonly deviceId!: string;
-  public readonly temperature!: string;
+  public readonly temperature!: number;
   public readonly recordedAt!: Date;
   public readonly receivedAt!: Date;
-  public readonly crestedAt!: Date;
 
-  constructor(partial: Partial<TemperatureResponseDto>) {
+  constructor(partial: Partial<ResponseTemperatureDTO>) {
     Object.assign(this, partial);
   }
 }

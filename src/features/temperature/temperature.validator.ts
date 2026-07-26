@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createTemperatureSchema = z.object({
-  deviceId: z.string().trim().min(1, 'Device ID is required').max(100, 'Device ID is too long'),
+  deviceCode: z.string().min(3),
 
   timestamp: z.iso.datetime(),
 
