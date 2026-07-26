@@ -90,3 +90,5 @@ export const devices = pgTable('devices', {
 export type SelectDevices = typeof devices.$inferSelect;
 
 export type InsertDevices = typeof devices.$inferInsert;
+
+export type DevicesState = (typeof deviceStateEnum.enumValues)[number];

@@ -1,0 +1,21 @@
+import { SelectDevices } from '../../database';
+import { NotFoundError } from '../../shared/errors';
+import { DevicesRepository } from './devices.repository';
+import { CreateDeviceInput, UpdateDeviceInput } from './devices.validator';
+
+export class DevicesService {
+  constructor(private readonly deviceRepository: DevicesRepository) {}
+
+  async createrDevices(input: CreateDeviceInput): Promise<SelectDevices> {
+    return this.deviceRepository.create(input);
+  }
+
+  async updateDevices(id: string, input: UpdateDeviceInput): Promise<SelectDevices> {
+    const devicesUpdate = await this.deviceRepository.updateDevices(id, input);
+    if (!devicesUpdate) {
+      throw new NotFoundError(`Device with id ${id} not found`);
+    }
+
+    return devicesUpdate;
+  }
+}

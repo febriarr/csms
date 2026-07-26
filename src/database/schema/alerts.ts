@@ -3,10 +3,12 @@ import { index, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-co
 import { deviceStateEnum, devices } from './devices';
 
 export const alertReasonEnum = pgEnum('alert_reason', [
-  'HIGH_TEMPERATURE',
-  'LOW_TEMPERATURE',
-  'DEVICE_OFFLINE',
   'DEFROST_DETECTED',
+  'WARNING_TEMPERATURE',
+  'CRITICAL_TEMPERATURE',
+  'TEMPERATURE_RECOVERED',
+  'DEVICE_OFFLINE',
+  'DEVICE_RECOVERED',
 ]);
 
 export const alerts = pgTable(
@@ -58,3 +60,7 @@ export const alerts = pgTable(
     index('alerts_to_state_idx').on(t.toState),
   ]
 );
+
+export type InserAlert = typeof alerts.$inferInsert;
+export type SelectInsert = typeof alerts.$inferSelect;
+export type AlertReason = (typeof alertReasonEnum.enumValues)[number];
