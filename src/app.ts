@@ -1,5 +1,6 @@
 import express from 'express';
 import webRouter from './routes/web.route';
+import apiRouter from './routes/api.route';
 import path from 'node:path';
 import expressLayouts from 'express-ejs-layouts';
 import helmet from 'helmet';
@@ -12,6 +13,7 @@ const app = express();
 app.locals.appVersion = appVersion;
 
 app.use(helmet());
+app.use(express.json());
 
 // Gunnakan views engine dari ejs
 app.set('view engine', 'ejs');
@@ -24,6 +26,7 @@ app.set('layout', 'layouts/app');
 // aktifkan static file dari public
 app.use(express.static(path.join(process.cwd(), 'public')));
 
+app.use('/api', apiRouter);
 app.use(webRouter);
 
 app.use(notFoundHandler);

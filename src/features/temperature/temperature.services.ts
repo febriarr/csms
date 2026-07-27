@@ -9,7 +9,7 @@ import { TemperatureRepository } from './temperature.repository';
 import { ResponseTemperatureDTO } from './temperature.response.dto';
 import { CreateTemperatureDto } from './temperature.validator';
 
-export class TemperatureServices {
+export class TemperatureService {
   constructor(
     private readonly repo: TemperatureRepository,
     private readonly deviceRepository: DevicesRepository,
