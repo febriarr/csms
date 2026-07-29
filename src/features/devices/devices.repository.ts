@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { Database, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
+import { Database, DatabaseTransaction, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
 export const HEARTBEAT_INTERVAL_MS = 30_000;
@@ -24,15 +24,19 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
     return device ?? undefined;
   }
 
-  async updateLastSeen(id: SelectDevices['id'], lastSeenAt: Date = new Date()) {
-    return this.update(eq(devices.id, id), { lastSeenAt });
+  async updateLastSeen(id: SelectDevices['id'], tx?: DatabaseTransaction) {
+    return this.update(eq(devices.id, id), { lastSeenAt: new Date() }, tx);
   }
 
-  async updateState(id: SelectDevices['id'], state: DevicesState) {
-    return this.update(eq(devices.id, id), {
-      state,
-      stateChangedAt: new Date(),
-    });
+  async updateState(id: SelectDevices['id'], state: DevicesState, tx?: DatabaseTransaction) {
+    return this.update(
+      eq(devices.id, id),
+      {
+        state,
+        stateChangedAt: new Date(),
+      },
+      tx
+    );
   }
 
   async updateDevices(id: string, input: Partial<InsertDevices>): Promise<SelectDevices | null> {

@@ -12,6 +12,10 @@ export abstract class BaseRepository<TTable extends PgTable> {
     return tx ?? this.db;
   }
 
+  async withTransaction<T>(callback: (tx: DatabaseTransaction) => Promise<T>): Promise<T> {
+    return this.db.transaction(callback);
+  }
+
   async create(input: InferInsertModel<TTable>, tx?: DatabaseTransaction): Promise<InferSelectModel<TTable>> {
     const [row] = (await this.executor(tx)
       .insert(this.table)
