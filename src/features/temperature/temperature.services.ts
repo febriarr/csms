@@ -2,6 +2,7 @@ import { SelectTemperature } from '../../database';
 import { NotFoundError } from '../../shared/errors';
 import { buildAlertReason } from '../../shared/utils/buildReason';
 import { getAlertReason } from '../../shared/utils/getAlertReason';
+import { deviceEventBus } from '../../sse/device-events';
 import { AlertsRepository } from '../alerts/alerts.repository';
 import { DevicesRepository } from '../devices/devices.repository';
 import { getTemperatureState } from './rules/get-temperature-state';
@@ -30,9 +31,11 @@ export class TemperatureService {
       receivedAt: new Date(),
     });
 
-    await this.deviceRepository.updateLastSeen(device.id);
+    const updatedDevice = await this.deviceRepository.updateLastSeen(device.id);
 
     const newState = getTemperatureState(device, input.temperature);
+
+    let finalDevice = updatedDevice;
 
     if (newState !== device.state) {
       const reasonCode = getAlertReason(device.state, newState);
@@ -41,7 +44,7 @@ export class TemperatureService {
         device,
       });
 
-      await this.deviceRepository.updateState(device.id, newState);
+      finalDevice = await this.deviceRepository.updateState(device.id, newState);
 
       await this.alertRepository.create({
         deviceId: device.id,
@@ -57,6 +60,18 @@ export class TemperatureService {
         console.log(`Temperature entered ${newState}: ${reason}`);
       }
     }
+
+    deviceEventBus.broadcast('device-update', {
+      id: finalDevice?.id,
+      code: finalDevice?.code,
+      name: finalDevice?.name,
+      location: finalDevice?.location,
+      state: finalDevice?.state,
+      isActive: finalDevice?.isActive,
+      lastTemperature: input.temperature,
+      lastSeenAt: finalDevice?.lastSeenAt,
+      stateChangedAt: finalDevice?.stateChangedAt,
+    });
 
     return this.toResponse(data);
   }

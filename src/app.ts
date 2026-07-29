@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
 import { appVersion } from './config/app-info';
+import { formatLastSeen, stateLabelMap } from './shared/utils/view-helper';
 
 const app = express();
 
@@ -27,6 +28,11 @@ app.set('layout', 'layouts/app');
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.use('/api', apiRouter);
+app.use((req, res, next) => {
+  res.locals.formatLastSeen = formatLastSeen;
+  res.locals.stateLabelMap = stateLabelMap;
+  next();
+});
 app.use(webRouter);
 
 app.use(notFoundHandler);

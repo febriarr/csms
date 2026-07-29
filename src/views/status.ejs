@@ -1,0 +1,18 @@
+<div class="device-dashboard-header">
+  <div>
+    <h1>Cold Storage Temperature Monitoring</h1>
+    <p>Real-time device status</p>
+  </div>
+  <div class="system-status">
+    <div class="status-dot-global"></div>
+    <span id="device-count"><%= devices.length %> DEVICES MONITORED</span>
+  </div>
+</div>
+
+<div class="device-grid" id="device-grid">
+  <% devices.forEach(device => { %>
+    <%- include('partials/device-card', { device, stateLabelMap, formatLastSeen }) %>
+  <% }) %>
+</div>
+
+<% contentFor?.('pageScripts') %>

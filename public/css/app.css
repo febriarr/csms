@@ -5,6 +5,20 @@
   --muted-foreground: oklch(55.2% 0.016 285.938);
   --primary: oklch(48.8% 0.243 264.376);
   --muted: oklch(92% 0.004 286.32);
+  --state-normal: oklch(62% 0.17 145);
+  --state-normal-bg: oklch(96% 0.03 145);
+  --state-defrost: oklch(58% 0.14 235);
+  --state-defrost-bg: oklch(96% 0.025 235);
+  --state-warning: oklch(72% 0.16 70);
+  --state-warning-bg: oklch(96% 0.045 70);
+  --state-critical: oklch(56% 0.22 25);
+  --state-critical-bg: oklch(96% 0.04 25);
+  --state-offline: oklch(58% 0.006 285);
+  --state-offline-bg: oklch(94% 0.004 285);
+
+  --mono: 'JetBrains Mono', monospace;
+  --card-radius: 10px;
+  --card-border: oklch(89% 0.004 286);
 }
 
 *,
@@ -92,11 +106,289 @@ footer {
   padding: 1rem;
 }
 
+/* ---------- Page shell ---------- */
+
+.device-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.device-dashboard-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.device-dashboard-header p {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  background: var(--muted);
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+}
+
+.status-dot-global {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--state-normal);
+}
+
+/* ---------- Grid ---------- */
+
+.device-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* ---------- Card ---------- */
+
+.device-card {
+  background: var(--background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.125rem 1.125rem 1rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* status accent strip on top edge */
+.device-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--state-normal);
+}
+
+.device-card:has(.status-defrost)::before {
+  background: var(--state-defrost);
+}
+.device-card:has(.status-warning)::before {
+  background: var(--state-warning);
+}
+.device-card:has(.status-critical)::before {
+  background: var(--state-critical);
+}
+.device-card:has(.status-offline)::before {
+  background: var(--state-offline);
+}
+
+.device-card:hover {
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.05);
+}
+
+/* ---------- Header ---------- */
+
+.device-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.device-info h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.device-info p {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-top: 1px;
+}
+
+.status-badge {
+  font-size: 0.625rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-normal {
+  color: var(--state-normal);
+  background: var(--state-normal-bg);
+}
+.status-defrost {
+  color: var(--state-defrost);
+  background: var(--state-defrost-bg);
+}
+.status-warning {
+  color: var(--state-warning);
+  background: var(--state-warning-bg);
+}
+.status-critical {
+  color: var(--state-critical);
+  background: var(--state-critical-bg);
+}
+.status-offline {
+  color: var(--state-offline);
+  background: var(--state-offline-bg);
+}
+
+/* ---------- Gauge ---------- */
+
+.gauge-box {
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gauge-label {
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.gauge-temp {
+  font-family: var(--mono);
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin-top: 2px;
+  color: var(--foreground);
+}
+
+.device-card:has(.status-normal) .gauge-temp {
+  color: var(--state-normal);
+}
+.device-card:has(.status-defrost) .gauge-temp {
+  color: var(--state-defrost);
+}
+.device-card:has(.status-warning) .gauge-temp {
+  color: var(--state-warning);
+}
+.device-card:has(.status-critical) .gauge-temp {
+  color: var(--state-critical);
+}
+.device-card:has(.status-offline) .gauge-temp {
+  color: var(--state-offline);
+}
+
+.state-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-top: 2px;
+  text-align: right;
+  color: var(--foreground);
+}
+
+/* ---------- Threshold grid ---------- */
+
+.threshold-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.threshold-item {
+  background: var(--background);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.threshold-title {
+  font-size: 0.5625rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.threshold-val {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+  color: var(--foreground);
+}
+
+/* ---------- Meta footer ---------- */
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  border-top: 1px solid var(--card-border);
+  padding-top: 0.75rem;
+}
+
+.meta-code {
+  font-family: var(--mono);
+  background: var(--muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.625rem;
+}
+
+/* ---------- Card buttons (reuse .btn, smaller) ---------- */
+
+.device-card .sk-button-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.device-card .btn {
+  flex: 1;
+  font-size: 0.75rem;
+  height: 1.875rem;
+  padding: 0 0.75rem;
+}
+
+/* ---------- Responsive ---------- */
+
 /* Tablet */
 
 @media screen and (min-width: 768px) {
   .app {
     padding: 1rem 2rem;
+  }
+  .device-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .device-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -104,5 +396,8 @@ footer {
 @media screen and (min-width: 1200px) {
   .app {
     padding: 1rem 3rem;
+  }
+  .device-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

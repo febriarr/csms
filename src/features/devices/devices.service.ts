@@ -18,4 +18,14 @@ export class DevicesService {
 
     return devicesUpdate;
   }
+
+  async renderStatusPage() {
+    const rows = await this.deviceRepository.findAllWithLatestTemperature();
+    const devices = rows.map(r => ({
+      ...r,
+      lastTemperature: r.temperatureLogs[0]?.temperature ?? null,
+    }));
+
+    return devices;
+  }
 }

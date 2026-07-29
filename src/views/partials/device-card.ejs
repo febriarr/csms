@@ -1,0 +1,45 @@
+<div class="device-card" id="device-<%= device.id %>" data-device-id="<%= device.id %>">
+  <div class="device-card-header">
+    <div class="device-info">
+      <h3><%= device.name %></h3>
+      <p><%= device.location ?? '-' %></p>
+    </div>
+    <span class="status-badge status-<%= device.state.toLowerCase() %>"><%= device.state %></span>
+  </div>
+
+  <div class="gauge-box">
+    <div>
+      <div class="gauge-label">Current Temperature</div>
+      <div class="gauge-temp temp-value"><%= device.lastTemperature ?? '--.--' %> °C</div>
+    </div>
+    <div>
+      <div class="gauge-label">State Status</div>
+      <div class="state-label"><%= stateLabelMap[device.state] %></div>
+    </div>
+  </div>
+
+  <div class="threshold-grid">
+    <div class="threshold-item">
+      <div class="threshold-title">Normal</div>
+      <div class="threshold-val"><%= device.normalMinTemperature %> – <%= device.normalMaxTemperature %></div>
+    </div>
+    <div class="threshold-item">
+      <div class="threshold-title">Warning</div>
+      <div class="threshold-val"><%= device.warningMinTemperature %> – <%= device.warningMaxTemperature %></div>
+    </div>
+    <div class="threshold-item">
+      <div class="threshold-title">Critical</div>
+      <div class="threshold-val">&gt; <%= device.criticalMinTemperature %></div>
+    </div>
+  </div>
+
+  <div class="card-meta">
+    <span class="meta-code"><%= device.code %></span>
+    <span class="last-seen-label"><%= formatLastSeen(device.lastSeenAt) %></span>
+  </div>
+
+  <div class="sk-button-group">
+    <button class="btn btn-outline">Log History</button>
+    <button class="btn btn-primary">Config</button>
+  </div>
+</div>

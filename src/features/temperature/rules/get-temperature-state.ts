@@ -13,7 +13,7 @@ type DeviceThreshold = Pick<
 >;
 
 export function getTemperatureState(device: DeviceThreshold, temperature: number): TemperatureState {
-  if (temperature > device.criticalMinTemperature) {
+  if (temperature >= device.criticalMinTemperature) {
     return TemperatureState.CRITICAL;
   }
   if (temperature > device.warningMinTemperature && temperature <= device.warningMaxTemperature) {
