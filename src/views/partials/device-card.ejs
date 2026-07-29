@@ -7,7 +7,7 @@
     <span class="status-badge status-<%= device.state.toLowerCase() %>"><%= device.state %></span>
   </div>
 
-  <div class="gauge-box">
+  <div class="gauge-box status-<%= device.state.toLowerCase() %>">
     <div>
       <div class="gauge-label">Current Temperature</div>
       <div class="gauge-temp temp-value"><%= device.lastTemperature ?? '--.--' %> °C</div>
@@ -40,7 +40,7 @@
 
   <div class="sk-button-group">
     <button
-      class="btn btn-outline"
+      class="btn btn-primary"
       hx-get="/device/<%= device.id %>/alerts-partial"
       hx-target="#alert-modal-body"
       hx-swap="innerHTML"
@@ -48,6 +48,5 @@
     >
       Log History
     </button>
-    <button class="btn btn-primary">Config</button>
   </div>
 </div>
