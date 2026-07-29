@@ -1,13 +1,5 @@
-import { desc, eq } from 'drizzle-orm';
-import {
-  alerts,
-  Database,
-  DatabaseTransaction,
-  devices,
-  DevicesState,
-  InsertDevices,
-  SelectDevices,
-} from '../../database';
+import { eq } from 'drizzle-orm';
+import { Database, DatabaseTransaction, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
 export const HEARTBEAT_INTERVAL_MS = 30_000;

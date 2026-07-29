@@ -15,6 +15,13 @@
       "when": 1785070539841,
       "tag": "0001_blue_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785343851205,
+      "tag": "0002_spicy_madame_masque",
+      "breakpoints": true
     }
   ]
 }
