@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
 import { appVersion } from './config/app-info';
 import { formatLastSeen, stateLabelMap } from './shared/utils/view-helper';
+import { viewHelpers } from './middleware/view-helper';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.set('layout', 'layouts/app');
 // aktifkan static file dari public
 app.use(express.static(path.join(process.cwd(), 'public')));
 
+app.use(viewHelpers);
 app.use('/api', apiRouter);
 app.use((req, res, next) => {
   res.locals.formatLastSeen = formatLastSeen;

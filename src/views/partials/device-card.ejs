@@ -1,4 +1,4 @@
-<div class="device-card" id="device-<%= device.id %>" data-device-id="<%= device.id %>">
+<div class="device-card" id="device-<%= device.id %>" data-device-id="<%= device.id %>" x-data="{}">
   <div class="device-card-header">
     <div class="device-info">
       <h3><%= device.name %></h3>
@@ -39,7 +39,15 @@
   </div>
 
   <div class="sk-button-group">
-    <button class="btn btn-outline">Log History</button>
+    <button
+      class="btn btn-outline"
+      hx-get="/device/<%= device.id %>/alerts-partial"
+      hx-target="#alert-modal-body"
+      hx-swap="innerHTML"
+      x-on:click="$dispatch('open-alert-modal')"
+    >
+      Log History
+    </button>
     <button class="btn btn-primary">Config</button>
   </div>
 </div>

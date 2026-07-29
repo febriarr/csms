@@ -1,5 +1,5 @@
-import { eq, sql } from 'drizzle-orm';
-import { Database, devices, DevicesState, InsertDevices, SelectDevices, temperatureLogs } from '../../database';
+import { eq } from 'drizzle-orm';
+import { Database, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
 export const HEARTBEAT_INTERVAL_MS = 30_000;
@@ -45,9 +45,18 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
     return this.db.query.devices.findMany({
       with: {
         temperatureLogs: {
-          orderBy: (logs, { desc }) => [desc(logs.recordedAt)],
+          orderBy: (logs, { desc }) => [desc(logs.createdAt)],
           limit: 1,
         },
+      },
+    });
+  }
+
+  async findDeviceByIdWithAlert(deviceId: string) {
+    return this.db.query.devices.findFirst({
+      where: eq(devices.id, deviceId),
+      with: {
+        alerts: true,
       },
     });
   }

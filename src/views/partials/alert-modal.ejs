@@ -1,0 +1,20 @@
+<div
+  x-data="{ open: false }"
+  x-on:open-alert-modal.window="open = true"
+  x-on:close-alert-modal.window="open = false"
+  x-on:keydown.escape.window="open = false"
+  x-show="open"
+  x-cloak
+  class="modal-overlay"
+>
+  <div class="modal-box" x-on:click.outside="open = false">
+    <div class="modal-header">
+      <h3>Log History</h3>
+      <button class="modal-close" x-on:click="open = false">&times;</button>
+    </div>
+
+    <div id="alert-modal-body" class="modal-body">
+      <p class="modal-loading htmx-indicator">Memuat riwayat alert...</p>
+    </div>
+  </div>
+</div>

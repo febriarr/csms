@@ -28,4 +28,8 @@ export class DevicesService {
 
     return devices;
   }
+
+  async findDeviceByIdWithAlerts(deviceId: string) {
+    return this.deviceRepository.findDeviceByIdWithAlert(deviceId);
+  }
 }

@@ -1,17 +1,13 @@
 <table id="device-table">
   <thead>
-    <tr><th>Nama</th><th>Suhu</th><th>Status</th><th>Terakhir Terlihat</th></tr>
+    <tr>
+      <th>Nama</th>
+      <th>Suhu</th>
+      <th>Status</th>
+      <th>Terakhir Terlihat</th>
+    </tr>
   </thead>
-  <tbody>
-    <% devices.forEach(device => { %>
-      <tr id="device-<%= device.id %>" data-device-id="<%= device.id %>">
-        <td class="name"><%= device.name %></td>
-        <td class="temp"><%= device.lastTemperature ?? '-' %>°C</td>
-        <td><span class="badge state-<%= device.state.toLowerCase() %>"><%= device.state %></span></td>
-        <td class="last-seen"><%= device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : '-' %></td>
-      </tr>
-    <% }) %>
-  </tbody>
+  <tbody></tbody>
 </table>
 
 <script src="/js/device-status.js"></script>

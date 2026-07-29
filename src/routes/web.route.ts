@@ -1,14 +1,13 @@
 import { Router } from 'express';
-import homeController from '../controllers/home.controller.js';
-import { NotFoundError } from '../shared/errors/not-found-error.js';
-import { devicesController } from '../container/index.js';
-import { streamDeviceStatus } from '../sse/sse.controller.js';
+import { NotFoundError } from '../shared/errors/not-found-error';
+import { devicesController } from '../container/index';
+import { streamDeviceStatus } from '../sse/sse.controller';
 
 const router = Router();
 
-router.get('/', homeController.index);
-router.get('/status', devicesController.renderStatusPage);
+router.get('/', devicesController.renderStatusPage);
 router.get('/events/device-status', streamDeviceStatus);
+router.get('/device/:deviceId/alerts-partial', devicesController.findDeviceByIdWithAlert);
 
 router.get('/test-error', () => {
   throw new Error('Unexpected error');
