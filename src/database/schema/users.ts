@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   phone: varchar('phone', { length: 13 }),
+  password: varchar('password', { length: 100 }).notNull(),
   role: roleEnum('role').notNull().default('admin'),
   createdAt: timestamp('created_at', {
     mode: 'date',
