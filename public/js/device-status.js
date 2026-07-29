@@ -25,6 +25,10 @@ source.addEventListener('device-update', event => {
   badge.className = `status-badge status-${device.state.toLowerCase()}`;
   badge.textContent = device.state;
 
+  // gauge box
+  const gaugeBox = card.querySelector('.gauge-box');
+  gaugeBox.className = `gauge-box status-${device.state.toLowerCase()}`;
+
   // temperature
   card.querySelector('.temp-value').textContent = `${device.lastTemperature} °C`;
 

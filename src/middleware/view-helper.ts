@@ -1,4 +1,3 @@
-// src/shared/middlewares/view-helpers.middleware.ts
 import type { Request, Response, NextFunction } from 'express';
 
 export function viewHelpers(_req: Request, res: Response, next: NextFunction) {
