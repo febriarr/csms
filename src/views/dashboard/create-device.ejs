@@ -1,0 +1,103 @@
+<form id="form-create-device">
+  <div class="field-group">
+    <div class="field">
+      <label for="name" class="field-label">Nama</label>
+      <input type="text" id="name" name="name" placeholder="Nama Devices" required class="field-input" />
+    </div>
+    <div class="field">
+      <label for="code" class="field-label">Alias</label>
+      <input type="text" id="code" name="code" placeholder="Kode unik device" required class="field-input" />
+    </div>
+    <div class="field">
+      <label for="location" class="field-label">Lokasi</label>
+      <input type="text" id="location" name="location" placeholder="Lokasi device" class="field-input" />
+    </div>
+    <div class="flex-items-center">
+      <div class="field">
+        <label for="normalMinTemperature" class="field-label">Minimal Suhu Normal</label>
+        <input
+          type="number"
+          id="normalMinTemperature"
+          name="normalMinTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+
+      <div class="field">
+        <label for="normalMaxTemperature" class="field-label">Maximal Suhu Normal</label>
+        <input
+          type="number"
+          id="normalMaxTemperature"
+          name="normalMaxTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+    </div>
+    <div class="flex-items-center">
+      <div class="field">
+        <label for="defrostMinTemperature" class="field-label">Minimal Suhu Defrost</label>
+        <input
+          type="number"
+          id="defrostMinTemperature"
+          name="defrostMinTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+
+      <div class="field">
+        <label for="defrostMaxTemperature" class="field-label">Maximal Suhu Defrost</label>
+        <input
+          type="number"
+          id="defrostMaxTemperature"
+          name="defrostMaxTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+    </div>
+    <div class="flex-items-center">
+      <div class="field">
+        <label for="warningMinTemperature" class="field-label">Minimal Suhu Warning</label>
+        <input
+          type="number"
+          id="warningMinTemperature"
+          name="warningMinTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+
+      <div class="field">
+        <label for="warningMaxTemperature" class="field-label">Maximal Suhu Warning</label>
+        <input
+          type="number"
+          id="warningMaxTemperature"
+          name="warningMaxTemperature"
+          placeholder="cth -2,-18,dll"
+          required
+          class="field-input"
+        />
+      </div>
+    </div>
+    <div class="field">
+      <label for="criticalMinTemperature" class="field-label">Minimal Suhu Critical</label>
+      <input
+        type="number"
+        id="criticalMinTemperature"
+        name="criticalMinTemperature"
+        placeholder="cth -2,-18,dll"
+        required
+        class="field-input"
+      />
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+  </div>
+</form>

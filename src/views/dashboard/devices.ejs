@@ -1,0 +1,62 @@
+<div style="width: 100%; display: flex; justify-content: end;">
+  <button class="btn btn-primary"><a href="/dashboard/devices/create" style="text-decoration: none; color: white;">Create Device</a></button>
+</div>
+<div class="wrapper-table">
+  <table class="dashboard-table">
+    <thead class="muted muted-foreground">
+      <tr>
+        <th>Device</th>
+        <th>Location</th>
+        <th>Threshold Normal</th>
+        <th>Threshold Defrost</th>
+        <th>Threshold Warning</th>
+        <th>Threshold Critical</th>
+        <th>Status</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (devices && devices.length > 0) { %>
+        <% devices.forEach(device => { %>
+          <tr>
+            <td>
+              <div class="device-name"><%= device.name %></div>
+              <div class="device-code"><%= device.code %></div>
+            </td>
+            <td><%= device.location || '-' %></td>
+            <td>
+            
+              <%= device.normalMinTemperature %>°C &ndash; <%= device.normalMaxTemperature %>°C
+         
+            </td>
+
+            <td>
+              <%= device.defrostMinTemperature %>°C &ndash; <%= device.defrostMaxTemperature %>°C
+            </td>
+
+            <td>
+              <%= device.warningMinTemperature %>°C &ndash; <%= device.warningMaxTemperature %>°C
+            </td>
+
+            <td>
+              >= <%= device.criticalMinTemperature %>°C
+            </td>
+           
+            <td>
+              <span style="padding: 4px 1rem !important; font-size: small !important; border-radius: 4px;" class="status-<%= device.state.toLowerCase() %>">
+                <%= device.state %>
+              </span>
+            </td>
+            <td>
+              <%= formatDateTime(device.createdAt) %>
+            </td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="empty-state">Belum ada data device.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

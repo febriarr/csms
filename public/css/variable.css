@@ -1,0 +1,22 @@
+:root {
+  --header-height: 3rem;
+  --background: oklch(98.5% 0 none);
+  --foreground: oklch(14.1% 0.005 285.823);
+  --muted-foreground: oklch(55.2% 0.016 285.938);
+  --primary: oklch(48.8% 0.243 264.376);
+  --muted: oklch(92% 0.004 286.32);
+  --state-normal: oklch(62% 0.17 145);
+  --state-normal-bg: oklch(96% 0.03 145);
+  --state-defrost: oklch(58% 0.14 235);
+  --state-defrost-bg: oklch(96% 0.025 235);
+  --state-warning: oklch(72% 0.16 70);
+  --state-warning-bg: oklch(96% 0.045 70);
+  --state-critical: oklch(56% 0.22 25);
+  --state-critical-bg: oklch(96% 0.04 25);
+  --state-offline: oklch(58% 0.006 285);
+  --state-offline-bg: oklch(94% 0.004 285);
+
+  --mono: 'JetBrains Mono', monospace;
+  --card-radius: 10px;
+  --card-border: oklch(89% 0.004 286);
+}

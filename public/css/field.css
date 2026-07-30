@@ -1,0 +1,58 @@
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 16px;
+  max-width: 500px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Styling Label */
+.field-label {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+/* Styling Input */
+.field-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #1f2937;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+}
+
+.field-input::placeholder {
+  color: #9ca3af;
+}
+
+.field-input:hover {
+  border-color: #9ca3af;
+}
+
+.field-input:focus {
+  border-color: #3b82f6;
+}
+
+.field-input:disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

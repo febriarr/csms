@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { DevicesService } from './devices.service';
-import { successResponse } from '../../shared/reponse/success-response';
 
 export class DeviceController {
   constructor(private readonly devicesService: DevicesService) {}

@@ -9,6 +9,10 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
     super(db, devices);
   }
 
+  async findAll(): Promise<SelectDevices[]> {
+    return this.db.query.devices.findMany();
+  }
+
   async findDevicesOnline(): Promise<SelectDevices[]> {
     return this.db.query.devices.findMany({
       where: (d, { lt, and, ne }) =>

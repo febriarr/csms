@@ -32,4 +32,8 @@ export class DevicesService {
   async findDeviceByIdWithAlerts(deviceId: string) {
     return this.deviceRepository.findDeviceByIdWithAlert(deviceId);
   }
+
+  async findAll(): Promise<SelectDevices[]> {
+    return this.deviceRepository.findAll();
+  }
 }
