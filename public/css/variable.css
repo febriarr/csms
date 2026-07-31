@@ -1,5 +1,5 @@
 :root {
-  --header-height: 3rem;
+  --header-height: 3.5rem;
   --background: oklch(98.5% 0 none);
   --foreground: oklch(14.1% 0.005 285.823);
   --muted-foreground: oklch(55.2% 0.016 285.938);
