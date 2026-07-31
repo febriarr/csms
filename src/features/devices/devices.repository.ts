@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { Database, DatabaseTransaction, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
@@ -10,7 +10,9 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
   }
 
   async findAll(): Promise<SelectDevices[]> {
-    return this.db.query.devices.findMany();
+    return this.db.query.devices.findMany({
+      orderBy: desc(devices.createdAt),
+    });
   }
 
   async findDevicesOnline(): Promise<SelectDevices[]> {

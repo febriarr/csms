@@ -1,8 +1,19 @@
 import type { Request, Response } from 'express';
 import { DevicesService } from './devices.service';
+import { TypedRequest } from '../../types/typed-request';
+import { CreateDeviceInput } from './devices.validator';
+import { successResponse } from '../../shared/reponse/success-response';
 
 export class DeviceController {
   constructor(private readonly devicesService: DevicesService) {}
+
+  create = async (req: TypedRequest<CreateDeviceInput>, res: Response) => {
+    const data = await this.devicesService.createrDevices(req.body);
+
+    return successResponse(res, {
+      data,
+    });
+  };
 
   renderStatusPage = async (_req: Request, res: Response) => {
     const devices = await this.devicesService.renderStatusPage();

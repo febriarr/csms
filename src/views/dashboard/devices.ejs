@@ -1,29 +1,36 @@
-<div style="width: 100%; display: flex; justify-content: end;">
-  <button class="btn btn-primary"><a href="/dashboard/devices/create" style="text-decoration: none; color: white;">Create Device</a></button>
+<div class="flex-between">
+
+  <div style="width: 100%; max-width: 500px; display: flex; gap: 0.5rem; align-items: center;">
+    <input type="text" placeholder="cari berdasarkan code atau nama" id="search-input-device" class="field-input" style="max-width: 500px;">
+    <button class="btn btn-outline" id="btn-search-device">Search</button>
+  </div>
+
+  <a href="/dashboard/devices/create" style="text-decoration: none; color: white;">
+    <button class="btn btn-primary">Create Device</button>
+  </a>
 </div>
 <div class="wrapper-table">
   <table class="dashboard-table">
     <thead class="muted muted-foreground">
       <tr>
-        <th>Device</th>
-        <th>Location</th>
+        <th style="width: 350px;">Device</th>
+        <th style="width: 350px;">Location</th>
         <th>Threshold Normal</th>
         <th>Threshold Defrost</th>
         <th>Threshold Warning</th>
         <th>Threshold Critical</th>
         <th>Status</th>
-        <th>Created At</th>
       </tr>
     </thead>
     <tbody>
       <% if (devices && devices.length > 0) { %>
         <% devices.forEach(device => { %>
-          <tr>
+          <tr style="width: 350px;">
             <td>
               <div class="device-name"><%= device.name %></div>
               <div class="device-code"><%= device.code %></div>
             </td>
-            <td><%= device.location || '-' %></td>
+            <td style="width: 350px;"><%= device.location || '-' %></td>
             <td>
             
               <%= device.normalMinTemperature %>°C &ndash; <%= device.normalMaxTemperature %>°C
@@ -47,14 +54,11 @@
                 <%= device.state %>
               </span>
             </td>
-            <td>
-              <%= formatDateTime(device.createdAt) %>
-            </td>
           </tr>
         <% }); %>
       <% } else { %>
         <tr>
-          <td colspan="6" class="empty-state">Belum ada data device.</td>
+          <td colspan="7" class="empty-state">Belum ada data device.</td>
         </tr>
       <% } %>
     </tbody>
