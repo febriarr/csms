@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
 import { devicesService } from '../container';
+import { TypedRequest } from '../types/typed-request';
+import { SearchQuery } from '../features/devices/devices.validator';
 
 class DashboardController {
   private renderDashboard(
@@ -41,8 +43,10 @@ class DashboardController {
     );
   };
 
-  public devices = async (req: Request, res: Response) => {
-    const devices = await devicesService.findAll();
+  public devices = async (req: TypedRequest<unknown, SearchQuery>, res: Response) => {
+    const { search } = req.query;
+    console.log(search);
+    const devices = await devicesService.findAll(search);
 
     res.render('dashboard/devices', {
       title: 'Device Management',
@@ -51,6 +55,7 @@ class DashboardController {
       currentPath: '/dashboard/devices',
       pageDescription: 'Manage devices anda.',
       pageScripts: ['/js/devices.js'],
+      currentSearch: search,
       devices,
     });
   };

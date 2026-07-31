@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, ilike, or } from 'drizzle-orm';
 import { Database, DatabaseTransaction, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
@@ -9,9 +9,16 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
     super(db, devices);
   }
 
-  async findAll(): Promise<SelectDevices[]> {
+  async findAll(search?: string): Promise<SelectDevices[]> {
+    const conditions = [eq(devices.isActive, true)];
+    if (search) {
+      const pattern = `%${search}%`;
+      const filter = or(ilike(devices.name, pattern), ilike(devices.code, pattern));
+      if (filter) conditions.push(filter);
+    }
+
     return this.db.query.devices.findMany({
-      where: eq(devices.isActive, true),
+      where: and(...conditions),
       orderBy: desc(devices.createdAt),
     });
   }

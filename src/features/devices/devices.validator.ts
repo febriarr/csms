@@ -94,5 +94,10 @@ export const updateDeviceSchema = z
     }
   });
 
+export const searchQuerySchema = z.object({
+  search: z.string().trim().optional(),
+});
+
 export type CreateDeviceInput = z.infer<typeof createDeviceSchema>;
 export type UpdateDeviceInput = z.infer<typeof updateDeviceSchema>;
+export type SearchQuery = z.infer<typeof searchQuerySchema>;

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const alertTitle = document.querySelector('[data-slot="alert-title"]');
   const alertList = document.querySelector('[data-slot="alert-list"]');
 
+  // utils
   function hideAlert() {
     if (alertContainer) {
       alertContainer.style.setProperty('display', 'none', 'important');
@@ -35,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     alertContainer.style.setProperty('display', 'block', 'important');
   }
+
+  // Post device
 
   if (form) {
     form.addEventListener('submit', function (event) {
@@ -89,6 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Delete device
+
   const tableBody = document.querySelector('.dashboard-table tbody');
 
   if (tableBody) {
@@ -124,4 +129,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Search device
+  const inputSearch = document.getElementById('search-input-device');
+  const buttonSearch = document.getElementById('search-button-device');
+
+  function searchDevice() {
+    const value = inputSearch.value.trim();
+
+    const url = new URL(window.location.href);
+
+    if (value) {
+      url.searchParams.set('search', value);
+    } else {
+      url.searchParams.delete('search');
+    }
+
+    window.location.href = url.toString();
+  }
+
+  buttonSearch.addEventListener('click', searchDevice);
+
+  inputSearch.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      searchDevice();
+    }
+  });
+
+  const clearSearch = document.getElementById('clear-search');
+
+  clearSearch?.addEventListener('click', () => {
+    const url = new URL(window.location.href);
+
+    url.searchParams.delete('search');
+
+    window.location.href = url.toString();
+  });
 });

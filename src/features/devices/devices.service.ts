@@ -33,8 +33,8 @@ export class DevicesService {
     return this.deviceRepository.findDeviceByIdWithAlert(deviceId);
   }
 
-  async findAll(): Promise<SelectDevices[]> {
-    return this.deviceRepository.findAll();
+  async findAll(search?: string): Promise<SelectDevices[]> {
+    return this.deviceRepository.findAll(search);
   }
 
   async delete(id: string): Promise<SelectDevices> {
