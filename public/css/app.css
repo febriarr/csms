@@ -85,11 +85,11 @@ input[type='number'] {
 }
 
 .btn {
-  padding: 0 1rem;
+  padding: 10px 14px;
   border-radius: 9px;
   border: none;
   outline: none;
-  height: 2.5rem;
+  height: 2.6rem;
   cursor: pointer;
 }
 
@@ -100,7 +100,12 @@ input[type='number'] {
 
 .btn-outline {
   border: solid 1px #ddd;
-  background-color: transparent;
+  background-color: var(--background);
+}
+
+.btn-danger {
+  background: var(--state-critical-bg);
+  color: var(--state-critical);
 }
 
 .app {
@@ -839,6 +844,8 @@ body.dashboard-open {
   z-index: 9999999;
   top: 1.5rem;
   right: 1.5rem;
+  width: 100%;
+  max-width: 500px;
 }
 
 .alert--error {
@@ -888,6 +895,10 @@ body.dashboard-open {
     max-width: 100%;
     max-height: 85vh;
     border-radius: 12px 12px 0 0;
+  }
+
+  .alert {
+    right: 0;
   }
 }
 @media screen and (min-width: 768px) {

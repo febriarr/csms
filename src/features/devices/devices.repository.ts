@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { Database, DatabaseTransaction, devices, DevicesState, InsertDevices, SelectDevices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
@@ -11,6 +11,7 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
 
   async findAll(): Promise<SelectDevices[]> {
     return this.db.query.devices.findMany({
+      where: eq(devices.isActive, true),
       orderBy: desc(devices.createdAt),
     });
   }
@@ -18,13 +19,17 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
   async findDevicesOnline(): Promise<SelectDevices[]> {
     return this.db.query.devices.findMany({
       where: (d, { lt, and, ne }) =>
-        and(lt(d.lastSeenAt, new Date(Date.now() - HEARTBEAT_INTERVAL_MS * 3)), ne(d.state, 'OFFLINE')),
+        and(
+          lt(d.lastSeenAt, new Date(Date.now() - HEARTBEAT_INTERVAL_MS * 3)),
+          ne(d.state, 'OFFLINE'),
+          eq(devices.isActive, true)
+        ),
     });
   }
 
   async findByCode(code: string): Promise<SelectDevices | undefined> {
     const device = await this.db.query.devices.findFirst({
-      where: eq(devices.code, code),
+      where: and(eq(devices.code, code), eq(devices.isActive, true)),
     });
 
     return device ?? undefined;
@@ -60,17 +65,36 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
         },
       },
       orderBy: (d, { desc, asc }) => [desc(d.createdAt), asc(d.id)],
+      where: eq(devices.isActive, true),
     });
   }
 
   async findDeviceByIdWithAlert(deviceId: string) {
     return this.db.query.devices.findFirst({
-      where: eq(devices.id, deviceId),
+      where: and(eq(devices.id, deviceId), eq(devices.isActive, true)),
       with: {
         alerts: {
           orderBy: (alerts, { desc }) => [desc(alerts.createdAt)],
         },
       },
     });
+  }
+
+  async findById(id: string): Promise<SelectDevices | null> {
+    const device = await this.db.query.devices.findFirst({
+      where: eq(devices.id, id),
+    });
+
+    return device ?? null;
+  }
+
+  async deleteDevice(id: string): Promise<SelectDevices | null> {
+    const [device] = await this.db
+      .update(devices)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(devices.id, id))
+      .returning();
+
+    return device ?? null;
   }
 }

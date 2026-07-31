@@ -1,5 +1,5 @@
 import { SelectDevices } from '../../database';
-import { NotFoundError } from '../../shared/errors';
+import { BadRequestError, NotFoundError } from '../../shared/errors';
 import { DevicesRepository } from './devices.repository';
 import { CreateDeviceInput, UpdateDeviceInput } from './devices.validator';
 
@@ -35,5 +35,21 @@ export class DevicesService {
 
   async findAll(): Promise<SelectDevices[]> {
     return this.deviceRepository.findAll();
+  }
+
+  async delete(id: string): Promise<SelectDevices> {
+    const existing = await this.deviceRepository.findById(id);
+
+    if (!existing) {
+      throw new NotFoundError('Device tidak ditemukan.');
+    }
+
+    if (!existing.isActive) {
+      throw new BadRequestError('Device sudah nonaktif.');
+    }
+
+    const device = await this.deviceRepository.deleteDevice(id);
+
+    return device!;
   }
 }

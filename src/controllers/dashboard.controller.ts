@@ -50,6 +50,7 @@ class DashboardController {
       pageTitle: 'Devices',
       currentPath: '/dashboard/devices',
       pageDescription: 'Manage devices anda.',
+      pageScripts: ['/js/devices.js'],
       devices,
     });
   };
@@ -61,7 +62,7 @@ class DashboardController {
       pageTitle: 'Form Create Device',
       currentPath: '/dashboard/devices',
       pageDescription: 'Isi input dibawah ini',
-      pageScripts: ['/js/create-device.js'],
+      pageScripts: ['/js/devices.js'],
     });
   };
 

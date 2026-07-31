@@ -43,4 +43,14 @@ export class DeviceController {
       layout: false,
     });
   };
+
+  deleteDevice = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const data = await this.devicesService.delete(id as string);
+
+    return successResponse(res, {
+      data,
+    });
+  };
 }

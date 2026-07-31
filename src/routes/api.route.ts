@@ -10,5 +10,6 @@ router.post('/telemetry', validateRequest({ body: createTemperatureSchema }), te
 
 // device
 router.post('/devices', validateRequest({ body: createDeviceSchema }), devicesController.create);
+router.delete('/devices/:id', devicesController.deleteDevice);
 
 export default router;

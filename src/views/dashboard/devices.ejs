@@ -1,6 +1,6 @@
 <div class="flex-between">
 
-  <div style="width: 100%; max-width: 500px; display: flex; gap: 0.5rem; align-items: center;">
+  <div style="width: 100%; max-width: 500px; display: flex; gap: 0.5rem;  align-items: center;">
     <input type="text" placeholder="cari berdasarkan code atau nama" id="search-input-device" class="field-input" style="max-width: 500px;">
     <button class="btn btn-outline" id="btn-search-device">Search</button>
   </div>
@@ -20,6 +20,7 @@
         <th>Threshold Warning</th>
         <th>Threshold Critical</th>
         <th>Status</th>
+        <th>Aksi</th>
       </tr>
     </thead>
     <tbody>
@@ -54,6 +55,16 @@
                 <%= device.state %>
               </span>
             </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm btn-delete-device"
+                data-id="<%= device.id %>"
+                data-name="<%= device.name %>"
+              >
+                Hapus
+              </button>
+          </td>
           </tr>
         <% }); %>
       <% } else { %>
