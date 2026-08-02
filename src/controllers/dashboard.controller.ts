@@ -45,7 +45,6 @@ class DashboardController {
 
   public devices = async (req: TypedRequest<unknown, SearchQuery>, res: Response) => {
     const { search } = req.query;
-    console.log(search);
     const devices = await devicesService.findAll(search);
 
     res.render('dashboard/devices', {

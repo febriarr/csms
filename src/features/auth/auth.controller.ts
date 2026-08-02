@@ -55,4 +55,13 @@ export class AuthController {
       data: user,
     });
   };
+
+  loginPage = async (req: Request, res: Response) => {
+    return res.render('login', {
+      title: 'Login Page',
+      layout: 'layouts/app',
+      error: req.query.error ?? null,
+      pageScripts: ['/js/login.js'],
+    });
+  };
 }

@@ -39,7 +39,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
       next();
     } catch {
       CookieHelper.clearAuthCookies(res);
-      next(new AuthenticationError('Session expired, please login again'));
+      return res.redirect(`/pages/login?error=${encodeURIComponent('Unauthenticated. Please log in.')}`);
     }
   }
 };

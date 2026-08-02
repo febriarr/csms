@@ -29,6 +29,14 @@
     <main class="app"><%- body %></main>
 
     <%- include('../partials/footer') %> <%- include('../partials/scripts') %> 
+     <div data-slot="alert" class="alert alert--error" style="display: none;">
+      <span class="alert__title" data-slot="alert-title"></span>
+      <ul class="alert__list" data-slot="alert-list"></ul>
+    </div>
+
+    <div data-slot="loading-overlay" style="display: none;">
+      <div data-slot="loading"></div>
+    </div>
     <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
   <% pageScripts.forEach(src => { %>
     <script src="<%= src %>"></script>

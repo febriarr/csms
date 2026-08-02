@@ -12,8 +12,8 @@ const envSchema = z.object({
 
   DATABASE_URL: z.string().min(1),
 
-  accessTokenSecret: z.string().min(1),
-  refreshTokenSecret: z.string().min(1),
+  ACCESS_TOKEN_SECRET: z.string().min(1),
+  REFRESH_TOKEN_SECRET: z.string().min(1),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -28,6 +28,6 @@ export const env = {
   port: result.data.PORT,
   nodeEnv: result.data.NODE_ENV,
   databaseUrl: result.data.DATABASE_URL,
-  accessTokenSecret: result.data.accessTokenSecret,
-  refreshTokenSecret: result.data.refreshTokenSecret,
+  accessTokenSecret: result.data.ACCESS_TOKEN_SECRET,
+  refreshTokenSecret: result.data.REFRESH_TOKEN_SECRET,
 };
