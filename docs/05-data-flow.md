@@ -107,7 +107,7 @@ Contoh payload:
 Endpoint:
 
 ```
-POST /api/v1/temperature
+POST /api/telemetry
 ```
 
 ---

@@ -22,46 +22,14 @@ API dirancang berdasarkan prinsip berikut:
 Development
 
 ```
-http://localhost:3000/api/v1
+http://localhost:3000/api
 ```
 
 Production
 
 ```
-https://example.com/api/v1
+https://example.com/api
 ```
-
-Seluruh endpoint berada di bawah prefix:
-
-```
-/api/v1
-```
-
-Hal ini memudahkan proses versioning di masa depan.
-
----
-
-# API Versioning
-
-Saat ini menggunakan URL Versioning.
-
-```
-/api/v1
-```
-
-Contoh:
-
-```
-POST /api/v1/temperature
-```
-
-Apabila terdapat perubahan besar di masa depan.
-
-```
-/api/v2
-```
-
-Version sebelumnya tetap dapat dipertahankan tanpa memengaruhi client lama.
 
 ---
 
@@ -78,7 +46,7 @@ application/json
 Contoh:
 
 ```http
-POST /api/v1/temperature
+POST /api/telemetry
 ```
 
 ```json
@@ -152,7 +120,7 @@ Dashboard
 ## Get Devices
 
 ```http
-GET /api/v1/devices
+GET /api/devices
 ```
 
 Response
@@ -176,7 +144,7 @@ Response
 ## Get Device Detail
 
 ```http
-GET /api/v1/devices/:id
+GET /api/devices/:id
 ```
 
 ---
@@ -186,7 +154,7 @@ GET /api/v1/devices/:id
 ## Receive Temperature
 
 ```http
-POST /api/v1/temperature
+POST /api/telemetry
 ```
 
 Request
@@ -243,7 +211,7 @@ Dispatch Notification
 ## Temperature History
 
 ```http
-GET /api/v1/devices/:id/temperature-logs
+GET /api/devices/:id/temperature-logs
 ```
 
 Query Parameters
@@ -271,7 +239,7 @@ GET /devices/{id}/temperature-logs?page=1&limit=50
 ## Get Alerts
 
 ```http
-GET /api/v1/alerts
+GET /api/alerts
 ```
 
 Optional Query
@@ -291,7 +259,7 @@ limit
 ## Alert Detail
 
 ```http
-GET /api/v1/alerts/:id
+GET /api/alerts/:id
 ```
 
 ---
@@ -303,7 +271,7 @@ Dashboard menggunakan endpoint khusus untuk kebutuhan UI.
 ## Summary
 
 ```http
-GET /api/v1/dashboard/summary
+GET /api/dashboard/summary
 ```
 
 Response
@@ -322,7 +290,7 @@ Response
 ## Latest Temperatures
 
 ```http
-GET /api/v1/dashboard/latest-temperatures
+GET /api/dashboard/latest-temperatures
 ```
 
 ---
@@ -330,7 +298,7 @@ GET /api/v1/dashboard/latest-temperatures
 ## Recent Alerts
 
 ```http
-GET /api/v1/dashboard/recent-alerts
+GET /api/dashboard/recent-alerts
 ```
 
 ---
@@ -483,17 +451,17 @@ Database
 # Future Endpoints
 
 ```
-POST /api/v1/auth/login
+POST /api/auth/login
 
-POST /api/v1/auth/logout
+POST /api/auth/logout
 
-GET /api/v1/users
+GET /api/users
 
-GET /api/v1/reports
+GET /api/reports
 
-POST /api/v1/devices
+POST /api/devices
 
-PATCH /api/v1/devices/{id}
+PATCH /api/devices/{id}
 ```
 
 ---

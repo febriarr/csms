@@ -118,7 +118,7 @@ Controller menerima request dari client.
 Contoh:
 
 ```
-POST /api/v1/temperature
+POST /api/telemetry
 ```
 
 Controller hanya bertugas:

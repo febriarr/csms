@@ -153,35 +153,35 @@ npm run db:studio
 ### Database
 
 - [x] Konvensi Database
-- [ ] Schema User
+- [x] Schema User
 - [x] Schema Device
 - [x] Schema Temperature Log
 - [x] Schema Alert
 - [x] Schema Notification
-- [ ] Relasi Antar Tabel
-- [ ] Seeder
+- [x] Relasi Antar Tabel
+- [x] Seeder
 
 ### Backend
 
-- [ ] Repository Pattern
-- [ ] Service Layer
-- [ ] Request Validation
-- [ ] Error Handling
-- [ ] Logging
-- [ ] Authentication
+- [x] Repository Pattern
+- [x] Service Layer
+- [x] Request Validation
+- [x] Error Handling
+- [x] Logging
+- [x] Authentication
 - [ ] Authorization
 
 ### Monitoring
 
-- [ ] CRUD Device
-- [ ] Penerimaan Data Suhu
-- [ ] Riwayat Suhu
-- [ ] Alert Engine
+- [x] CRUD Device
+- [x] Penerimaan Data Suhu
+- [x] Riwayat Suhu
+- [x] Alert Engine
 - [ ] Deteksi Device Offline
 
 ### Realtime
 
-- [ ] Server-Sent Events (SSE)
+- [x] Server-Sent Events (SSE)
 - [ ] Dashboard Real-time
 - [ ] Grafik Monitoring
 
