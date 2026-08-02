@@ -1,6 +1,5 @@
-import { Response, NextFunction } from 'express';
-import { ZodType, z } from 'zod';
-import { TypedRequest } from '../types/typed-request';
+import type { NextFunction, RequestHandler } from 'express';
+import type { ZodType } from 'zod';
 
 interface Schemas<
   TBody extends ZodType = ZodType,
@@ -13,18 +12,27 @@ interface Schemas<
 }
 
 export function validateRequest<
-  TBody extends ZodType = ZodType<unknown>,
-  TQuery extends ZodType = ZodType<unknown>,
-  TParams extends ZodType = ZodType<unknown>,
->(schemas: Schemas<TBody, TQuery, TParams>) {
-  return (req: TypedRequest<z.infer<TBody>, z.infer<TQuery>, z.infer<TParams>>, res: Response, next: NextFunction) => {
+  TBody extends ZodType = ZodType,
+  TQuery extends ZodType = ZodType,
+  TParams extends ZodType = ZodType,
+>(schemas: Schemas<TBody, TQuery, TParams>): RequestHandler {
+  return (req, _res, next: NextFunction) => {
     try {
-      if (schemas.body) req.body = schemas.body.parse(req.body);
-      if (schemas.query) req.query = schemas.query.parse(req.query) as any;
-      if (schemas.params) req.params = schemas.params.parse(req.params) as any;
+      if (schemas.body) {
+        req.body = schemas.body.parse(req.body);
+      }
+
+      if (schemas.query) {
+        schemas.query.parse(req.query);
+      }
+
+      if (schemas.params) {
+        schemas.params.parse(req.params);
+      }
+
       next();
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      next(error);
     }
   };
 }
