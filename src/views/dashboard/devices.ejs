@@ -10,19 +10,14 @@
   </a>
 </div>
 <% if (currentSearch) { %>
-  <div class="filter-chips">
-    <span class="chip">
-      <span>"<%= currentSearch %>"</span>
-      <button
-        type="button"
-        class="chip-remove"
-        id="clear-search"
-        aria-label="Hapus filter"
-      >
-        <i class="ph ph-x" style="color: var(--state-normal); font-weight: bold;"></i>
-      </button>
-    </span>
-  </div>
+<div class="filter-chips">
+  <span class="chip">
+    <span>"<%= currentSearch %>"</span>
+    <button type="button" class="chip-remove" id="clear-search" aria-label="Hapus filter">
+      <i class="ph ph-x" style="color: var(--state-normal); font-weight: bold;"></i>
+    </button>
+  </span>
+</div>
 <% } %>
 <div class="wrapper-table">
   <table class="dashboard-table">
@@ -40,52 +35,47 @@
     </thead>
     <tbody>
       <% if (devices && devices.length > 0) { %>
-        <% devices.forEach(device => { %>
-          <tr style="width: 350px;">
-            <td>
-              <div class="device-name"><%= device.name %></div>
-              <div class="device-code"><%= device.code %></div>
-            </td>
-            <td style="width: 350px;"><%= device.location || '-' %></td>
-            <td>
-            
-              <%= device.normalMinTemperature %>°C &ndash; <%= device.normalMaxTemperature %>°C
-         
-            </td>
+      <% devices.forEach(device => { %>
+      <tr style="width: 350px;">
+        <td>
+          <div class="device-name"><%= device.name %></div>
+          <div class="device-code"><%= device.code %></div>
+        </td>
+        <td style="width: 350px;"><%= device.location || '-' %></td>
+        <td>
 
-            <td>
-              <%= device.defrostMinTemperature %>°C &ndash; <%= device.defrostMaxTemperature %>°C
-            </td>
+          <%= device.normalMinTemperature %>°C &ndash; <%= device.normalMaxTemperature %>°C
 
-            <td>
-              <%= device.warningMinTemperature %>°C &ndash; <%= device.warningMaxTemperature %>°C
-            </td>
+        </td>
 
-            <td>
-              >= <%= device.criticalMinTemperature %>°C
-            </td>
-           
-            <td>
-              <span style="padding: 4px 1rem !important; font-size: small !important; border-radius: 4px;" class="status-<%= device.state.toLowerCase() %>">
-                <%= device.state %>
-              </span>
-            </td>
-            <td>
-              <button
-                type="button"
-                class="btn-icon-sm btn-danger btn-sm btn-delete-device"
-                data-id="<%= device.id %>"
-                data-name="<%= device.name %>"
-              >
-                <i class="ph ph-trash"></i>
-              </button>
-          </td>
-          </tr>
-        <% }); %>
+        <td>
+          <%= device.defrostMinTemperature %>°C &ndash; <%= device.defrostMaxTemperature %>°C
+        </td>
+
+        <td>
+          <%= device.warningMinTemperature %>°C &ndash; <%= device.warningMaxTemperature %>°C
+        </td>
+
+        <td>
+          >= <%= device.criticalMinTemperature %>°C
+        </td>
+
+        <td>
+          <span style="padding: 4px 1rem !important; font-size: small !important; border-radius: 4px;" class="status-<%= device.state.toLowerCase() %>">
+            <%= device.state %>
+          </span>
+        </td>
+        <td>
+          <button type="button" class="btn-icon-sm btn-danger btn-sm btn-delete-device" data-id="<%= device.id %>" data-name="<%= device.name %>">
+            <i class="ph ph-trash"></i>
+          </button>
+        </td>
+      </tr>
+      <% }); %>
       <% } else { %>
-        <tr>
-          <td colspan="7" class="empty-state">Belum ada data device.</td>
-        </tr>
+      <tr>
+        <td colspan="8" class="empty-state">Belum ada data device.</td>
+      </tr>
       <% } %>
     </tbody>
   </table>

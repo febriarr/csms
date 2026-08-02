@@ -1,102 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title ?? 'CI-CMS Dashboard' %></title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
-      rel="stylesheet"
-    />
 
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
-    />
-    
-    <link rel="stylesheet" href="/css/app.css" />
-  </head>
-  <body class="dashboard-shell">
-    <% const isActive = (path) => currentPath === path; %>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title ?? 'CI-CMS Dashboard' %></title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
 
-    <div class="dashboard-layout">
-      <aside class="dashboard-sidebar" id="dashboard-sidebar">
-        <div class="dashboard-sidebar__header">
-          <div>
-            <p class="dashboard-sidebar__eyebrow">CI-CMS</p>
-            <h2>Dashboard</h2>
-          </div>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+
+<body class="dashboard-shell" data-app-version="<%= appVersion %>">
+  <% const isActive = (path) => currentPath === path; %>
+
+  <div class="dashboard-layout">
+    <aside class="dashboard-sidebar" id="dashboard-sidebar">
+      <div class="dashboard-sidebar__header">
+        <div>
+          <p class="dashboard-sidebar__eyebrow">CI-CMS</p>
+          <h2>Dashboard</h2>
         </div>
-
-        <nav class="dashboard-sidebar__nav" aria-label="Dashboard navigation">
-          <a
-            href="/dashboard/users"
-            class="dashboard-sidebar__link <%= isActive('/dashboard/users') ? 'is-active' : '' %>"
-            >Users</a
-          >
-          <a
-            href="/dashboard/devices"
-            class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>"
-            >Devices</a
-          >
-          <a
-            href="/dashboard/notification-logs"
-            class="dashboard-sidebar__link <%= isActive('/dashboard/notification-logs') ? 'is-active' : '' %>"
-            >Notification Logs</a
-          >
-          <a
-            href="/dashboard/notifications-recipients"
-            class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>"
-            >Notification Recipients</a
-          >
-        </nav>
-      </aside>
-
-      <div class="dashboard-backdrop" id="dashboard-backdrop"></div>
-
-      <div class="dashboard-main">
-        <header class="dashboard-topbar">
-          <button type="button" class="dashboard-toggle" id="dashboard-toggle" aria-label="Toggle sidebar">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-
-          <div>
-            <p class="dashboard-topbar__eyebrow">Management</p>
-            <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
-          </div>
-        </header>
-
-        <section class="dashboard-content"><%- body %></section>
       </div>
+
+      <nav class="dashboard-sidebar__nav" aria-label="Dashboard navigation">
+        <a href="/dashboard/users" class="dashboard-sidebar__link <%= isActive('/dashboard/users') ? 'is-active' : '' %>">Users</a>
+        <a href="/dashboard/devices" class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">Devices</a>
+        <a href="/dashboard/notification-logs" class="dashboard-sidebar__link <%= isActive('/dashboard/notification-logs') ? 'is-active' : '' %>">Notification Logs</a>
+        <a href="/dashboard/notifications-recipients" class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">Notification Recipients</a>
+      </nav>
+    </aside>
+
+    <div class="dashboard-backdrop" id="dashboard-backdrop"></div>
+
+    <div class="dashboard-main">
+      <header class="dashboard-topbar">
+        <button type="button" class="dashboard-toggle" id="dashboard-toggle" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div>
+          <p class="dashboard-topbar__eyebrow">Management</p>
+          <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
+        </div>
+      </header>
+
+      <section class="dashboard-content"><%- body %></section>
     </div>
+  </div>
 
-    <script src="/js/dashboard-sidebar.js"></script>
+  <script src="/js/dashboard-sidebar.js"></script>
 
-    <div data-slot="alert" class="alert alert--error" style="display: none;">
-      <span class="alert__title" data-slot="alert-title"></span>
-      <ul class="alert__list" data-slot="alert-list"></ul>
-    </div>
+  <div data-slot="alert" class="alert alert--error" style="display: none;">
+    <span class="alert__title" data-slot="alert-title"></span>
+    <ul class="alert__list" data-slot="alert-list"></ul>
+  </div>
 
-    <div data-slot="loading-overlay" style="display: none;">
-      <div data-slot="loading"></div>
-    </div>
+  <div data-slot="loading-overlay" style="display: none;">
+    <div data-slot="loading"></div>
+  </div>
 
-    <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
-    <% pageScripts.forEach(src => { %>
-      <script src="<%= src %>"></script>
-    <% }) %>
-    <% } %>
-    
-  </body>
+  <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
+  <% pageScripts.forEach(src => { %>
+  <script type="module" src="<%= src %>"></script>
+  <% }) %>
+  <% } %>
+
+</body>
+
 </html>

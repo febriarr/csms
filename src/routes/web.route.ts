@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { NotFoundError } from '../shared/errors/not-found-error';
-import { authController, devicesController } from '../container/index';
+import { authController, devicesController, notificationsRecipientsController } from '../container/index';
 import { streamDeviceStatus } from '../sse/sse.controller';
 import dashboardController from '../controllers/dashboard.controller';
 import { authenticate } from '../middleware/authenticate.middleware';
+import { validateRequest } from '../middleware/validate-request';
+import { notificationRecipientsQuerySchema } from '../features/notifications-recipients/notifications-recipients.validator';
 
 const router = Router();
 
@@ -21,14 +22,12 @@ router.get('/dashboard/users', dashboardController.users);
 router.get('/dashboard/devices', dashboardController.devices);
 router.get('/dashboard/devices/create', dashboardController.createDevice);
 router.get('/dashboard/notification-logs', dashboardController.notificationLogs);
-router.get('/dashboard/notifications-recipients', dashboardController.notificationRecipients);
-
-router.get('/test-error', () => {
-  throw new Error('Unexpected error');
-});
-
-router.get('/test-not-found', () => {
-  throw new NotFoundError('Device not found');
-});
+router.get(
+  '/dashboard/notifications-recipients',
+  validateRequest({ query: notificationRecipientsQuerySchema }),
+  notificationsRecipientsController.findAll
+);
+router.get('/dashboard/notifications-recipients/create', notificationsRecipientsController.pageCreate);
+router.get('/dashboard/notifications-recipients/:id/edit', notificationsRecipientsController.pageUpdate);
 
 export default router;

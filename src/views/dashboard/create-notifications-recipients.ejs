@@ -1,0 +1,39 @@
+<form id="form-create-notification-recipient">
+  <div class="field-group">
+    <div class="field">
+      <label for="name" class="field-label">Name</label>
+      <input type="text" id="name" name="name" class="field-input" placeholder="e.g. Warehouse Supervisor" required />
+    </div>
+
+    <div class="field">
+      <label for="channel" class="field-label">Channel</label>
+      <select id="channel" name="channel" class="field-input" required>
+        <option value="">Select channel</option>
+        <option value="email">Email</option>
+        <option value="whatsapp">WhatsApp</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field">
+      <label id="target-label" for="target" class="field-label"> Target </label>
+
+      <input type="text" id="target" name="target" class="field-input" placeholder="Select a channel first" required />
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="isActive"> Status </label>
+
+      <label class="switch">
+        <input type="checkbox" id="isActive" name="isActive" checked />
+
+        <span>Active</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save Recipient</button>
+  </div>
+</form>

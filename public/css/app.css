@@ -70,6 +70,12 @@ input[type='number'] {
   cursor: pointer;
 }
 
+.dashboard-table .empty-state {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--muted-foreground);
+}
+
 .nav {
   width: 100%;
   height: var(--header-height);

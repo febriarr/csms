@@ -1,41 +1,11 @@
+import { hideAlert, showAlert } from './alert.js';
+import { hideLoading, showLoading } from './loading.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-create-device');
-  const loadingOverlay = document.querySelector('[data-slot="loading-overlay"]');
   const alertContainer = document.querySelector('[data-slot="alert"]');
   const alertTitle = document.querySelector('[data-slot="alert-title"]');
   const alertList = document.querySelector('[data-slot="alert-list"]');
-
-  // utils
-  function hideAlert() {
-    if (alertContainer) {
-      alertContainer.style.setProperty('display', 'none', 'important');
-      alertTitle.textContent = '';
-      alertList.innerHTML = '';
-    }
-  }
-
-  function showAlert(result) {
-    if (!alertContainer) return;
-
-    alertTitle.textContent = result.message || 'Terjadi kesalahan pada sistem.';
-    alertList.innerHTML = '';
-
-    if (result.errors && typeof result.errors === 'object') {
-      const fragment = document.createDocumentFragment();
-
-      Object.entries(result.errors).forEach(([field, messages]) => {
-        messages.forEach(msg => {
-          const li = document.createElement('li');
-          li.textContent = field !== '_root' ? `${field}: ${msg}` : msg;
-          fragment.appendChild(li);
-        });
-      });
-
-      alertList.appendChild(fragment);
-    }
-
-    alertContainer.style.setProperty('display', 'block', 'important');
-  }
 
   // Post device
 
@@ -43,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       hideAlert();
-
-      if (loadingOverlay) {
-        loadingOverlay.style.setProperty('display', 'flex', 'important');
-      }
+      showLoading();
 
       const formData = new FormData(form);
       const data = {};
@@ -85,9 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
           showAlert(err);
         })
         .finally(() => {
-          if (loadingOverlay) {
-            loadingOverlay.style.setProperty('display', 'none', 'important');
-          }
+          hideLoading();
         });
     });
   }
@@ -133,6 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Search device
   const inputSearch = document.getElementById('search-input-device');
   const buttonSearch = document.getElementById('search-button-device');
+
+  if (!inputSearch || !buttonSearch) return;
 
   function searchDevice() {
     const value = inputSearch.value.trim();

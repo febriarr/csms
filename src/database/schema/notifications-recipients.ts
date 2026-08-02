@@ -13,5 +13,5 @@ export const notificationRecipients = pgTable(
   t => [index('notification_receipents_channel_idx').on(t.channel)]
 );
 
-export type InsertNotificationReceipents = typeof notificationRecipients.$inferInsert;
-export type SelectNotificationReceipents = typeof notificationRecipients.$inferSelect;
+export type InsertNotificationRecipients = typeof notificationRecipients.$inferInsert;
+export type SelectNotificationRecipients = typeof notificationRecipients.$inferSelect;

@@ -1,14 +1,11 @@
 <div style="width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1rem">
-  <form
-    id="loginForm"
-    style="
+  <form id="loginForm" style="
       width: 400px;
       padding: 20px;
       border: 1px solid #ccc;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    "
-  >
+    ">
     <div class="field-group">
       <div class="field">
         <label for="name" class="field-label">Name:</label>
@@ -24,10 +21,10 @@
 </div>
 
 <% if (error) { %>
- <div data-slot="alert" class="alert alert--error" style="display: block;">
-      <span class="alert__title" data-slot="alert-title">Authentication Error</span>
-      <ul class="alert__list" data-slot="alert-list">
-        <li><%= error %></li>
-      </ul>
-    </div>
+<div data-slot="alert" class="alert alert--error" style="display: block;">
+  <span class="alert__title" data-slot="alert-title">Authentication Error</span>
+  <ul class="alert__list" data-slot="alert-list">
+    <li><%= error %></li>
+  </ul>
+</div>
 <% } %>
