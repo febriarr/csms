@@ -11,6 +11,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
   DATABASE_URL: z.string().min(1),
+
+  accessTokenSecret: z.string().min(1),
+  refreshTokenSecret: z.string().min(1),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -25,4 +28,6 @@ export const env = {
   port: result.data.PORT,
   nodeEnv: result.data.NODE_ENV,
   databaseUrl: result.data.DATABASE_URL,
+  accessTokenSecret: result.data.accessTokenSecret,
+  refreshTokenSecret: result.data.refreshTokenSecret,
 };

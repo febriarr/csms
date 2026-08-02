@@ -9,6 +9,7 @@ import { notFoundHandler } from './middleware/not-found-handler';
 import { appVersion } from './config/app-info';
 import { formatLastSeen, stateLabelMap } from './shared/utils/view-helper';
 import { viewHelpers } from './middleware/view-helper';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.locals.appVersion = appVersion;
 
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 
 // Gunnakan views engine dari ejs
 app.set('view engine', 'ejs');

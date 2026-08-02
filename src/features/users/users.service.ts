@@ -26,8 +26,8 @@ export class UsersService {
     return this.toResponse(user);
   }
 
-  async validateUser(email: string, password: string): Promise<ResponseUserDto> {
-    const user = await this.usersRepository.findByEmail(email);
+  async validateUser(name: string, password: string): Promise<ResponseUserDto> {
+    const user = await this.usersRepository.findByName(name);
     if (!user) {
       throw new NotFoundError('User Not found.');
     }

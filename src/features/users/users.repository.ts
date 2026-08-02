@@ -22,4 +22,12 @@ export class UsersRepository extends BaseRepository<typeof users> {
   async updateById(id: string, input: Partial<InsertUsers>): Promise<SelectUsers | undefined> {
     return this.update(eq(users.id, id), input);
   }
+
+  async findByName(name: string): Promise<SelectUsers | null> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.name, name),
+    });
+
+    return user ?? null;
+  }
 }
