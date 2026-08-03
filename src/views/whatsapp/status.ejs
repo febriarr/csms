@@ -1,0 +1,15 @@
+<h1>Status WhatsApp Gateway</h1>
+<% if (connected) { %>
+<p style="color: green;">✅ Terhubung</p>
+<% } else if (qrImage) { %>
+<p>Scan QR ini pakai WhatsApp:</p>
+<img src="<%= qrImage %>" alt="QR Code" />
+<script>
+  setTimeout(() => location.reload(), 5000);
+</script>
+<% } else { %>
+<p>Menunggu QR code...</p>
+<script>
+  setTimeout(() => location.reload(), 3000);
+</script>
+<% } %>

@@ -2,9 +2,12 @@ import app from './app';
 import { env } from './config/env';
 import { connectWithRetry, pool } from './database/client';
 import { logger } from './shared/logger/logger';
+import { whatsappService } from './shared/whatsapp/whatsapp.service';
+import './shared/whatsapp/whatsapp.worker';
 
 async function main() {
   await connectWithRetry();
+  await whatsappService.connect();
 
   const server = app.listen(env.port, () => {
     logger.info(`Server running on port ${env.port}`);

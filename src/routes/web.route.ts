@@ -5,6 +5,7 @@ import dashboardController from '../controllers/dashboard.controller';
 import { authenticate } from '../middleware/authenticate.middleware';
 import { validateRequest } from '../middleware/validate-request';
 import { notificationRecipientsQuerySchema } from '../features/notifications-recipients/notifications-recipients.validator';
+import whatsappRoute from '../shared/whatsapp/whatsapp.controller';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.get('/pages/login', authController.loginPage);
 
 router.get('/events/device-status', streamDeviceStatus);
 router.get('/device/:deviceId/alerts-partial', devicesController.findDeviceByIdWithAlert);
+router.use(whatsappRoute);
 
 router.use(authenticate); // Apply authentication middleware to all routes below
 router.get('/dashboard', dashboardController.index);

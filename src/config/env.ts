@@ -14,6 +14,8 @@ const envSchema = z.object({
 
   ACCESS_TOKEN_SECRET: z.string().min(1),
   REFRESH_TOKEN_SECRET: z.string().min(1),
+
+  UPSTASH_REDIS_URL: z.string().url().min(1),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -30,4 +32,5 @@ export const env = {
   databaseUrl: result.data.DATABASE_URL,
   accessTokenSecret: result.data.ACCESS_TOKEN_SECRET,
   refreshTokenSecret: result.data.REFRESH_TOKEN_SECRET,
+  upstashRedisUrl: result.data.UPSTASH_REDIS_URL,
 };
