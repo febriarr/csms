@@ -137,6 +137,18 @@ Membuka Drizzle Studio
 npm run db:studio
 ```
 
+Seed Device
+
+```bash
+npm run db:seed
+```
+
+Seed Super Admin
+
+```bash
+npm run seed:db:users
+```
+
 ---
 
 ## 📌 Roadmap
@@ -157,7 +169,7 @@ npm run db:studio
 - [x] Schema Device
 - [x] Schema Temperature Log
 - [x] Schema Alert
-- [x] Schema Notification
+- [x] Schema Notification and Notification Recipients
 - [x] Relasi Antar Tabel
 - [x] Seeder
 
@@ -169,7 +181,7 @@ npm run db:studio
 - [x] Error Handling
 - [x] Logging
 - [x] Authentication
-- [ ] Authorization
+- [x] Authorization
 
 ### Monitoring
 
@@ -177,18 +189,18 @@ npm run db:studio
 - [x] Penerimaan Data Suhu
 - [x] Riwayat Suhu
 - [x] Alert Engine
-- [ ] Deteksi Device Offline
+- [x] Deteksi Device Offline
 
 ### Realtime
 
 - [x] Server-Sent Events (SSE)
-- [ ] Dashboard Real-time
+- [x] Dashboard Real-time
 - [ ] Grafik Monitoring
 
 ### Notifikasi
 
 - [ ] Email Notification
-- [ ] WhatsApp Notification
+- [x] WhatsApp Notification
 
 ### Deployment
 
