@@ -1,25 +1,35 @@
 import { SelectTemperature } from '../../database';
 import { NotFoundError } from '../../shared/errors';
+import { logger } from '../../shared/logger';
 import { buildAlertReason } from '../../shared/utils/buildReason';
 import { getAlertReason } from '../../shared/utils/getAlertReason';
+import { whatsappQueue } from '../../shared/whatsapp/whatsapp.queue';
+import { toWhatsAppJid } from '../../shared/whatsapp/whatsapp.utils';
 import { deviceEventBus } from '../../sse/device-events';
 import { AlertsRepository } from '../alerts/alerts.repository';
 import { DevicesRepository } from '../devices/devices.repository';
+import { NotificationsRecipientsRepository } from '../notifications-recipients/notifications-recipients.repository';
 import { getTemperatureState } from './rules/get-temperature-state';
 import { TemperatureRepository } from './temperature.repository';
 import { ResponseTemperatureDTO } from './temperature.response.dto';
 import { CreateTemperatureDto } from './temperature.validator';
 
+type PendingWhatsAppAlert = {
+  message: string;
+  severity: 'WARNING' | 'CRITICAL';
+  recipients: string[];
+};
 export class TemperatureService {
   constructor(
     private readonly repo: TemperatureRepository,
     private readonly deviceRepository: DevicesRepository,
-    private readonly alertRepository: AlertsRepository
+    private readonly alertRepository: AlertsRepository,
+    private readonly notificationRecipientsRepository: NotificationsRecipientsRepository
   ) {}
 
   // testing doang
   async create(input: CreateTemperatureDto): Promise<ResponseTemperatureDTO> {
-    return this.repo.withTransaction(async tx => {
+    const { responseData, pendingAlert } = await this.repo.withTransaction(async tx => {
       const device = await this.deviceRepository.findByCode(input.deviceCode);
       if (!device) {
         throw new NotFoundError(`Device with code ${input.deviceCode} not found.`);
@@ -40,6 +50,7 @@ export class TemperatureService {
       const newState = getTemperatureState(device, input.temperature);
 
       let finalDevice = updatedDevice;
+      let alert: PendingWhatsAppAlert | null = null;
 
       if (newState !== device.state) {
         const reasonCode = getAlertReason(device.state, newState);
@@ -63,8 +74,17 @@ export class TemperatureService {
         );
 
         if (newState === 'WARNING' || newState === 'CRITICAL') {
-          // TODO: kirim ke notification channel beneran + insert ke notification_logs
-          console.log(`Temperature entered ${newState}: ${reason}`);
+          const recipients = await this.notificationRecipientsRepository.findActiveByChannel('whatsapp', tx);
+
+          if (recipients.length > 0) {
+            alert = {
+              message: this.buildAlertMessage(device.name, device.code, newState, input.temperature, reason),
+              severity: newState,
+              recipients: recipients.map(r => toWhatsAppJid(r.target)),
+            };
+          } else {
+            logger.warn('Tidak ada recipient WhatsApp aktif terdaftar');
+          }
         }
       }
 
@@ -80,8 +100,28 @@ export class TemperatureService {
         stateChangedAt: finalDevice?.stateChangedAt,
       });
 
-      return this.toResponse(data);
+      return { responseData: this.toResponse(data), pendingAlert: alert };
     });
+
+    // transaksi sudah commit sukses di titik ini -> baru aman untuk enqueue
+    if (pendingAlert) {
+      await whatsappQueue.add('bulk-alert', pendingAlert, {
+        priority: pendingAlert.severity === 'CRITICAL' ? 1 : 5, // critical diproses lebih dulu
+      });
+    }
+
+    return responseData;
+  }
+
+  private buildAlertMessage(
+    deviceName: string,
+    deviceCode: string,
+    state: 'WARNING' | 'CRITICAL',
+    temp: number,
+    reason: string
+  ): string {
+    const emoji = state === 'CRITICAL' ? '🚨' : '⚠️';
+    return `${emoji} *${state}*\nDevice: *${deviceName}*\nCode: *${deviceCode}*\nTemperature: *${temp}°C*\nReason: ${reason}\nTimestamp: ${new Date().toLocaleString('id-ID')}`;
   }
 
   private toResponse(data: SelectTemperature): ResponseTemperatureDTO {

@@ -1,6 +1,7 @@
 import { and, desc, eq, ilike } from 'drizzle-orm';
 import {
   type Database,
+  DatabaseTransaction,
   InsertNotificationRecipients,
   notificationRecipients,
   type SelectNotificationRecipients,
@@ -47,5 +48,12 @@ export class NotificationsRecipientsRepository extends BaseRepository<typeof not
   async deleteById(id: string): Promise<SelectNotificationRecipients | undefined> {
     const [result] = await this.db.delete(notificationRecipients).where(eq(notificationRecipients.id, id)).returning();
     return result || undefined;
+  }
+
+  async findActiveByChannel(channel: string, tx?: DatabaseTransaction): Promise<SelectNotificationRecipients[]> {
+    const db = tx ?? this.db;
+    return db.query.notificationRecipients.findMany({
+      where: and(eq(notificationRecipients.channel, channel), eq(notificationRecipients.isActive, true)),
+    });
   }
 }

@@ -21,7 +21,12 @@ const usersRepository = new UsersRepository(db);
 const notificationsRecipientsRepository = new NotificationsRecipientsRepository(db);
 
 // Services
-const temperatureService = new TemperatureService(temperatureRepository, devicesRepository, alertsRepository);
+const temperatureService = new TemperatureService(
+  temperatureRepository,
+  devicesRepository,
+  alertsRepository,
+  notificationsRecipientsRepository
+);
 const devicesService = new DevicesService(devicesRepository);
 const usersService = new UsersService(usersRepository);
 const authService = new AuthService(usersService);
