@@ -1,4 +1,5 @@
 import { SelectTemperature } from '../../database';
+import { NOTIFICATION_RECIPIENTS_CHANNEL } from '../../shared/constants';
 import { NotFoundError } from '../../shared/errors';
 import { logger } from '../../shared/logger';
 import { buildAlertReason } from '../../shared/utils/buildReason';
@@ -74,7 +75,10 @@ export class TemperatureService {
         );
 
         if (newState === 'WARNING' || newState === 'CRITICAL') {
-          const recipients = await this.notificationRecipientsRepository.findActiveByChannel('whatsapp', tx);
+          const recipients = await this.notificationRecipientsRepository.findActiveByChannel(
+            NOTIFICATION_RECIPIENTS_CHANNEL.WHATSAPP,
+            tx
+          );
 
           if (recipients.length > 0) {
             alert = {
@@ -103,7 +107,6 @@ export class TemperatureService {
       return { responseData: this.toResponse(data), pendingAlert: alert };
     });
 
-    // transaksi sudah commit sukses di titik ini -> baru aman untuk enqueue
     if (pendingAlert) {
       await whatsappQueue.add('bulk-alert', pendingAlert, {
         priority: pendingAlert.severity === 'CRITICAL' ? 1 : 5, // critical diproses lebih dulu

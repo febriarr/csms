@@ -16,9 +16,9 @@ router.get('/pages/login', authController.loginPage);
 
 router.get('/events/device-status', streamDeviceStatus);
 router.get('/device/:deviceId/alerts-partial', devicesController.findDeviceByIdWithAlert);
-router.use(whatsappRoute);
 
 router.use(authenticate); // Apply authentication middleware to all routes below
+router.use(whatsappRoute);
 router.get('/dashboard', dashboardController.index);
 router.get('/dashboard/users', dashboardController.users);
 router.get('/dashboard/devices', dashboardController.devices);
