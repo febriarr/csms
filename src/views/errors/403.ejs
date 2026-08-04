@@ -1,0 +1,29 @@
+<div
+  style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 180px); padding: 2rem"
+>
+  <div style="max-width: 600px; width: 100%; text-align: center">
+    <div style="font-size: 5rem; color: var(--primary); margin-bottom: 1rem">
+      <i class="ph ph-warning-circle"></i>
+    </div>
+
+    <h1 style="margin-bottom: 0.75rem"><%= pageTitle || '403 - Unauthorized' %></h1>
+
+    <p class="muted muted-foreground" style="margin-bottom: 2rem">
+      <%= pageDescription || "You don't have permission to access this page." %>
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 0.75rem">
+      <a href="<%= currentPath || '/dashboard' %>" class="btn btn-outline" style="text-decoration: none">
+        <i class="ph ph-arrow-left"></i>
+        Go Back
+      </a>
+
+      <a href="/dashboard" style="text-decoration: none">
+        <button type="button" class="btn btn-primary">
+          <i class="ph ph-house"></i>
+          Dashboard
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
