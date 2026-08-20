@@ -7,7 +7,7 @@ import {
   notificationsRecipientsController,
   temperatureController,
 } from '../container';
-import { createDeviceSchema } from '../features/devices/devices.validator';
+import { createDeviceSchema, updateDeviceSchema } from '../features/devices/devices.validator';
 import { authenticate } from '../middleware/authenticate.middleware';
 
 const router = Router();
@@ -23,6 +23,7 @@ router.get('/auth/me', authController.me);
 router.use(authenticate); // Apply authentication middleware to all routes below
 // device
 router.post('/devices', validateRequest({ body: createDeviceSchema }), devicesController.create);
+router.put('/devices/:id', validateRequest({ body: updateDeviceSchema }), devicesController.update);
 router.delete('/devices/:id', devicesController.deleteDevice);
 
 // notifications recipients

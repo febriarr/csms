@@ -70,6 +70,21 @@ class DashboardController {
     });
   };
 
+  public updateDevice = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const data = await devicesService.findById(id as string);
+
+    res.render('dashboard/update-device', {
+      title: 'Form Update Device',
+      layout: 'layouts/dashboard',
+      pageTitle: 'Form Update Device',
+      currentPath: '/dashboard/devices',
+      pageDescription: 'Isi input dibawah ini',
+      data: data,
+      pageScripts: ['/js/update-device.js'],
+    });
+  };
+
   public notificationLogs = (req: Request, res: Response): void => {
     this.renderDashboard(
       req,

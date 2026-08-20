@@ -65,7 +65,19 @@
             <%= device.state %>
           </span>
         </td>
-        <td>
+        <td style="display: flex; gap: 1rem;">
+
+          <a
+              href="/dashboard/devices/<%= device.id %>/update"
+            >
+              <button
+                type="button"
+                class="btn-icon-sm btn-primary btn-sm"
+              >
+                <i class="ph ph-pencil-simple"></i>
+              </button>
+            </a>
+
           <button type="button" class="btn-icon-sm btn-danger btn-sm btn-delete-device" data-id="<%= device.id %>" data-name="<%= device.name %>">
             <i class="ph ph-trash"></i>
           </button>

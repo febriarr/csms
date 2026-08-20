@@ -37,6 +37,14 @@ export class DevicesService {
     return this.deviceRepository.findAll(search);
   }
 
+  async findById(id: string) {
+    const device = await this.deviceRepository.findById(id);
+    if (!device) {
+      throw new NotFoundError('device tidak ditemukan');
+    }
+    return device;
+  }
+
   async delete(id: string): Promise<SelectDevices> {
     const existing = await this.deviceRepository.findById(id);
 

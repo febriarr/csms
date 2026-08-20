@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { DevicesService } from './devices.service';
 import { TypedRequest } from '../../types/typed-request';
-import { CreateDeviceInput } from './devices.validator';
+import { CreateDeviceInput, UpdateDeviceInput } from './devices.validator';
 import { successResponse } from '../../shared/reponse/success-response';
 
 export class DeviceController {
@@ -9,6 +9,15 @@ export class DeviceController {
 
   create = async (req: TypedRequest<CreateDeviceInput>, res: Response) => {
     const data = await this.devicesService.createrDevices(req.body);
+
+    return successResponse(res, {
+      data,
+    });
+  };
+
+  update = async (req: TypedRequest<UpdateDeviceInput, unknown, { id: string }>, res: Response) => {
+    const { id } = req.params;
+    const data = await this.devicesService.updateDevices(id, req.body);
 
     return successResponse(res, {
       data,

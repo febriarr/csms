@@ -23,6 +23,7 @@ router.get('/dashboard', dashboardController.index);
 router.get('/dashboard/users', dashboardController.users);
 router.get('/dashboard/devices', dashboardController.devices);
 router.get('/dashboard/devices/create', dashboardController.createDevice);
+router.get('/dashboard/devices/:id/update', dashboardController.updateDevice);
 router.get('/dashboard/notification-logs', dashboardController.notificationLogs);
 router.get(
   '/dashboard/notifications-recipients',

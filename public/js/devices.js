@@ -3,9 +3,6 @@ import { hideLoading, showLoading } from './loading.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-create-device');
-  const alertContainer = document.querySelector('[data-slot="alert"]');
-  const alertTitle = document.querySelector('[data-slot="alert-title"]');
-  const alertList = document.querySelector('[data-slot="alert-list"]');
 
   // Post device
 
