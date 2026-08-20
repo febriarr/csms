@@ -50,6 +50,10 @@
           <p class="dashboard-topbar__eyebrow">Management</p>
           <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
         </div>
+        <button type="button" id="logout-button" class="btn btn-outline">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </button>
       </header>
 
       <section class="dashboard-content"><%- body %></section>

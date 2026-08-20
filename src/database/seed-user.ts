@@ -10,7 +10,7 @@ export async function seedUsers() {
   await db.insert(users).values([
     {
       name: 'febri',
-      email: 'superadmin@example.com',
+      email: 'superadmin@mail.com',
       phone: '081234567890',
       password: hashedPassword,
       role: 'super_admin',

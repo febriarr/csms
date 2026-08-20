@@ -44,6 +44,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+const logoutButton = document.getElementById('logout-button');
+
+logoutButton?.addEventListener('click', async () => {
+  logoutButton.disabled = true;
+
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Logout failed');
+    }
+
+    window.location.href = '/';
+  } catch (error) {
+    console.error(error);
+
+    logoutButton.disabled = false;
+    alert('Gagal melakukan logout');
+  }
+});
+
 console.log('Trial version of Cold Storage Monitoring System (CSMS) is running.');
 console.log('if you see bugs or issues, please report to https://github.com/febriarr/csms/issues');
 console.log('Or contact the developer at hello.febriar@gmail.com');
