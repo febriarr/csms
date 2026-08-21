@@ -15,7 +15,7 @@ export class NotificationsRecipientsRepository extends BaseRepository<typeof not
   }
 
   async findAll(query?: NotificationsRecipientsQuery): Promise<SelectNotificationRecipients[]> {
-    const conditions = [eq(notificationRecipients.isActive, true)];
+    const conditions = [];
     if (query?.name) {
       const pattern = `%${query.name}%`;
       conditions.push(ilike(notificationRecipients.name, pattern));
@@ -32,7 +32,7 @@ export class NotificationsRecipientsRepository extends BaseRepository<typeof not
 
   async findById(id: string): Promise<SelectNotificationRecipients | undefined> {
     const result = await this.db.query.notificationRecipients.findFirst({
-      where: and(eq(notificationRecipients.id, id), eq(notificationRecipients.isActive, true)),
+      where: and(eq(notificationRecipients.id, id)),
     });
     return result || undefined;
   }
