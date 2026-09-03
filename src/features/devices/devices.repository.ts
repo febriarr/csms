@@ -23,11 +23,15 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
     });
   }
 
-  async findDevicesOnline(): Promise<SelectDevices[]> {
+  /**
+   * Devices whose last reading is older than the heartbeat tolerance and
+   * are not already marked OFFLINE. Consumed by the offline-detection job.
+   */
+  async findStaleDevices(): Promise<SelectDevices[]> {
     return this.db.query.devices.findMany({
       where: (d, { lt, and, ne }) =>
         and(
-          lt(d.lastSeenAt, new Date(Date.now() - HEARTBEAT_INTERVAL_MS * 3)),
+          lt(d.lastSeenAt, new Date(Date.now() - HEARTBEAT_INTERVAL_MS * 5)),
           ne(d.state, 'OFFLINE'),
           eq(devices.isActive, true)
         ),

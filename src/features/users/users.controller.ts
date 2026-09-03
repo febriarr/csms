@@ -2,7 +2,7 @@ import { TypedRequest } from '../../types/typed-request';
 import { UsersService } from './users.service';
 import type { Response, Request } from 'express';
 import { CreateUserInput } from './users.validator';
-import { successResponse } from '../../shared/reponse/success-response';
+import { successResponse } from '../../shared/response/success-response';
 import { HTTP_STATUS } from '../../shared/constants';
 
 export class UsersController {

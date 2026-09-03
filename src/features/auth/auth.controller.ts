@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { LoginPayload } from './auth.validator';
 import { CookieHelper } from '../../shared/utils/cookie.helper';
-import { successResponse } from '../../shared/reponse/success-response';
+import { successResponse } from '../../shared/response/success-response';
 import { AUTH_CONSTANT } from '../../shared/constants';
 import { AuthenticationError } from '../../shared/errors/authentication-error';
 

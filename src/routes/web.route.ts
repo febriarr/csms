@@ -1,7 +1,11 @@
 import { Router } from 'express';
-import { authController, devicesController, notificationsRecipientsController } from '../container/index';
+import {
+  authController,
+  dashboardController,
+  devicesController,
+  notificationsRecipientsController,
+} from '../container/index';
 import { streamDeviceStatus } from '../sse/sse.controller';
-import dashboardController from '../controllers/dashboard.controller';
 import { authenticate } from '../middleware/authenticate.middleware';
 import { validateRequest } from '../middleware/validate-request';
 import { notificationRecipientsQuerySchema } from '../features/notifications-recipients/notifications-recipients.validator';

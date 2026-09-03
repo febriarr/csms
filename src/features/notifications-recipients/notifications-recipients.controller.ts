@@ -6,7 +6,7 @@ import {
   NotificationRecipientsUpdateInput,
   NotificationsRecipientsQuery,
 } from './notifications-recipients.validator';
-import { successResponse } from '../../shared/reponse/success-response';
+import { successResponse } from '../../shared/response/success-response';
 import { HTTP_STATUS } from '../../shared/constants';
 
 export class NotificationsRecipientsController {

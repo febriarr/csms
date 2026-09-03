@@ -4,10 +4,12 @@ import { connectWithRetry, pool } from './database/client';
 import { logger } from './shared/logger/logger';
 import { whatsappService } from './shared/whatsapp/whatsapp.service';
 import './shared/whatsapp/whatsapp.worker';
+import { startOfflineDetectionJob } from './jobs/offline-detection.job';
 
 async function main() {
   await connectWithRetry();
   await whatsappService.connect();
+  startOfflineDetectionJob();
 
   const server = app.listen(env.port, () => {
     logger.info(`Server running on port ${env.port}`);

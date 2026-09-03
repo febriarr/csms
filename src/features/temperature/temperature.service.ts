@@ -28,7 +28,6 @@ export class TemperatureService {
     private readonly notificationRecipientsRepository: NotificationsRecipientsRepository
   ) {}
 
-  // testing doang
   async create(input: CreateTemperatureDto): Promise<ResponseTemperatureDTO> {
     const { responseData, pendingAlert } = await this.repo.withTransaction(async tx => {
       const device = await this.deviceRepository.findByCode(input.deviceCode);

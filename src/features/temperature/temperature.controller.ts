@@ -1,7 +1,7 @@
-import { TemperatureService } from './temperature.services';
+import { TemperatureService } from './temperature.service';
 import type { Response } from 'express';
 import { CreateTemperatureDto } from './temperature.validator';
-import { successResponse } from '../../shared/reponse/success-response';
+import { successResponse } from '../../shared/response/success-response';
 import { HTTP_STATUS } from '../../shared/constants';
 import { TypedRequest } from '../../types/typed-request';
 

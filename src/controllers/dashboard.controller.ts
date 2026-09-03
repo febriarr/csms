@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
-import { devicesService } from '../container';
 import { TypedRequest } from '../types/typed-request';
 import { SearchQuery } from '../features/devices/devices.validator';
+import { DevicesService } from '../features/devices/devices.service';
 
-class DashboardController {
+export class DashboardController {
+  constructor(private readonly devicesService: DevicesService) {}
+
   private renderDashboard(
     req: Request,
     res: Response,
@@ -45,7 +47,7 @@ class DashboardController {
 
   public devices = async (req: TypedRequest<unknown, SearchQuery>, res: Response) => {
     const { search } = req.query;
-    const devices = await devicesService.findAll(search);
+    const devices = await this.devicesService.findAll(search);
 
     res.render('dashboard/devices', {
       title: 'Device Management',
@@ -72,7 +74,7 @@ class DashboardController {
 
   public updateDevice = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const data = await devicesService.findById(id as string);
+    const data = await this.devicesService.findById(id as string);
 
     res.render('dashboard/update-device', {
       title: 'Form Update Device',
@@ -108,4 +110,3 @@ class DashboardController {
   };
 }
 
-export default new DashboardController();

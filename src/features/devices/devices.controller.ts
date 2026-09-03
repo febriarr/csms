@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { DevicesService } from './devices.service';
 import { TypedRequest } from '../../types/typed-request';
 import { CreateDeviceInput, UpdateDeviceInput } from './devices.validator';
-import { successResponse } from '../../shared/reponse/success-response';
+import { successResponse } from '../../shared/response/success-response';
 
 export class DeviceController {
   constructor(private readonly devicesService: DevicesService) {}

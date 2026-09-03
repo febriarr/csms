@@ -6,7 +6,31 @@ import { HTTP_STATUS } from '../shared/constants/index';
 import { AppError } from '../shared/errors/index';
 import { logger } from '../shared/logger/index';
 
-export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
+function isApiRequest(req: { originalUrl: string }): boolean {
+  return req.originalUrl.startsWith('/api');
+}
+
+/**
+ * Renders one of the two existing error views for browser navigation.
+ * There's no dedicated template per status code — 404.ejs is used for
+ * "not found", everything else reuses 403.ejs's generic layout with the
+ * real status/message swapped in, rather than inventing more templates.
+ */
+function renderWebError(res: Parameters<ErrorRequestHandler>[2], statusCode: number, message: string): void {
+  const view = statusCode === HTTP_STATUS.NOT_FOUND ? 'errors/404' : 'errors/403';
+
+  res.status(statusCode).render(view, {
+    title: 'Error',
+    layout: 'layouts/dashboard',
+    pageTitle: `${statusCode} - Error`,
+    pageDescription: message,
+    currentPath: '/dashboard',
+  });
+}
+
+export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
+  const wantsJson = isApiRequest(req);
+
   // Business Error
   if (error instanceof AppError) {
     logger.warn(
@@ -16,10 +40,14 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
       error.message
     );
 
-    res.status(error.statusCode).json({
-      success: false,
-      message: error.message,
-    });
+    if (wantsJson) {
+      res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    } else {
+      renderWebError(res, error.statusCode, error.message);
+    }
 
     return;
   }
@@ -33,11 +61,15 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
       'Validation failed'
     );
 
-    res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: 'Validation failed',
-      errors: formatZodError(error),
-    });
+    if (wantsJson) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: 'Validation failed',
+        errors: formatZodError(error),
+      });
+    } else {
+      renderWebError(res, HTTP_STATUS.BAD_REQUEST, 'Validation failed. Please check your input.');
+    }
 
     return;
   }
@@ -50,20 +82,17 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     'Unhandled error'
   );
 
-  res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-    success: false,
-    message:
-      env.nodeEnv === 'development'
-        ? error instanceof Error
-          ? error.message
-          : 'Unknown error'
-        : 'Internal server error',
+  const devMessage = env.nodeEnv === 'development' && error instanceof Error ? error.message : undefined;
 
-    ...(env.nodeEnv === 'development' &&
-      error instanceof Error && {
-        stack: error.stack,
-      }),
-  });
+  if (wantsJson) {
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: devMessage ?? 'Internal server error',
+      ...(env.nodeEnv === 'development' && error instanceof Error && { stack: error.stack }),
+    });
+  } else {
+    renderWebError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, devMessage ?? 'Something went wrong on our end.');
+  }
 };
 
 function formatZodError(error: ZodError) {

@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
 import { appVersion } from './config/app-info';
-import { formatLastSeen, stateLabelMap } from './shared/utils/view-helper';
 import { viewHelpers } from './middleware/view-helper';
 import cookieParser from 'cookie-parser';
 
@@ -32,11 +31,6 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.use(viewHelpers);
 app.use('/api', apiRouter);
-app.use((req, res, next) => {
-  res.locals.formatLastSeen = formatLastSeen;
-  res.locals.stateLabelMap = stateLabelMap;
-  next();
-});
 app.use(webRouter);
 
 app.use(notFoundHandler);

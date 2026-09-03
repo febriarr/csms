@@ -1,5 +1,6 @@
 const source = new EventSource('/events/device-status');
 
+// Mirrors src/middleware/view-helper.ts — keep both in sync.
 const stateLabelMap = {
   NORMAL: 'Active Stable',
   DEFROST: 'Defrost Cycle',
@@ -9,10 +10,17 @@ const stateLabelMap = {
 };
 
 function formatLastSeen(dateStr) {
-  const diffMin = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
-  if (diffMin < 1) return 'Baru saja';
-  if (diffMin < 60) return `${diffMin} mnt lalu`;
-  return `${Math.floor(diffMin / 60)} jam lalu`;
+  if (!dateStr) return 'Never seen';
+
+  const diffMinutes = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hr ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
 source.addEventListener('device-update', event => {
@@ -29,8 +37,10 @@ source.addEventListener('device-update', event => {
   const gaugeBox = card.querySelector('.gauge-box');
   gaugeBox.className = `gauge-box status-${device.state.toLowerCase()}`;
 
-  // temperature
-  card.querySelector('.temp-value').textContent = `${device.lastTemperature} °C`;
+  // temperature — omitted on events that don't carry a fresh reading (e.g. offline detection)
+  if (device.lastTemperature !== undefined && device.lastTemperature !== null) {
+    card.querySelector('.temp-value').textContent = `${device.lastTemperature} °C`;
+  }
 
   // state label
   card.querySelector('.state-label').textContent = stateLabelMap[device.state] ?? '-';
@@ -39,4 +49,4 @@ source.addEventListener('device-update', event => {
   card.querySelector('.last-seen-label').textContent = formatLastSeen(device.lastSeenAt);
 });
 
-source.onerror = () => console.warn('SSE terputus, browser akan reconnect otomatis...');
+source.onerror = () => console.warn('SSE disconnected, browser will reconnect automatically...');
