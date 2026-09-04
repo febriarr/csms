@@ -8,6 +8,7 @@ import { whatsappQueue } from '../../shared/whatsapp/whatsapp.queue';
 import { toWhatsAppJid } from '../../shared/whatsapp/whatsapp.utils';
 import { deviceEventBus } from '../../sse/device-events';
 import { AlertsRepository } from '../alerts/alerts.repository';
+import { DeviceDiagnosticLogsRepository } from '../device-diagnostic-logs/device-diagnostic-logs.repository';
 import { DevicesRepository } from '../devices/devices.repository';
 import { NotificationsRecipientsRepository } from '../notifications-recipients/notifications-recipients.repository';
 import { getTemperatureState } from './rules/get-temperature-state';
@@ -25,7 +26,8 @@ export class TemperatureService {
     private readonly repo: TemperatureRepository,
     private readonly deviceRepository: DevicesRepository,
     private readonly alertRepository: AlertsRepository,
-    private readonly notificationRecipientsRepository: NotificationsRecipientsRepository
+    private readonly notificationRecipientsRepository: NotificationsRecipientsRepository,
+    private readonly diagnosticsRepository: DeviceDiagnosticLogsRepository
   ) {}
 
   async create(input: CreateTemperatureDto): Promise<ResponseTemperatureDTO> {
@@ -44,6 +46,22 @@ export class TemperatureService {
         },
         tx
       );
+
+      const hasDiagnosticIssue = input.sensorFailCount > 0 || input.wifiFailCount > 0 || input.httpFailCount > 0;
+
+      if (hasDiagnosticIssue) {
+        await this.diagnosticsRepository.create(
+          {
+            deviceId: device.id,
+            sensorFailCount: input.sensorFailCount,
+            wifiFailCount: input.wifiFailCount,
+            httpFailCount: input.httpFailCount,
+            recordedAt: data.recordedAt,
+            receivedAt: data.receivedAt,
+          },
+          tx
+        );
+      }
 
       const updatedDevice = await this.deviceRepository.updateLastSeen(device.id, tx);
 

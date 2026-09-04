@@ -5,3 +5,4 @@ export * from './temperature-logs';
 export * from './relations';
 export * from './users';
 export * from './notifications-recipients';
+export * from './device-diagnostics-logs';

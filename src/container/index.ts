@@ -15,25 +15,32 @@ import { TemperatureService } from '../features/temperature/temperature.service'
 import { UsersRepository } from '../features/users/users.repository';
 import { UsersService } from '../features/users/users.service';
 import { DashboardController } from '../controllers/dashboard.controller';
+import { DeviceDiagnosticLogsRepository } from '../features/device-diagnostic-logs/device-diagnostic-logs.repository';
 
 const temperatureRepository = new TemperatureRepository(db);
 const devicesRepository = new DevicesRepository(db);
 const alertsRepository = new AlertsRepository(db);
 const usersRepository = new UsersRepository(db);
 const notificationsRecipientsRepository = new NotificationsRecipientsRepository(db);
+const deviceDiagnosticLogsRepository = new DeviceDiagnosticLogsRepository(db);
 
 // Services
 const temperatureService = new TemperatureService(
   temperatureRepository,
   devicesRepository,
   alertsRepository,
-  notificationsRecipientsRepository
+  notificationsRecipientsRepository,
+  deviceDiagnosticLogsRepository
 );
 const devicesService = new DevicesService(devicesRepository);
 const usersService = new UsersService(usersRepository);
 const authService = new AuthService(usersService);
 const notificationsRecipientsService = new NotificationsRecipientsService(notificationsRecipientsRepository);
-const offlineDetectionService = new OfflineDetectionService(devicesRepository, alertsRepository, notificationsRecipientsRepository);
+const offlineDetectionService = new OfflineDetectionService(
+  devicesRepository,
+  alertsRepository,
+  notificationsRecipientsRepository
+);
 
 // Controller
 const temperatureController = new TemperatureController(temperatureService);

@@ -2,7 +2,7 @@ import { logger } from '../shared/logger';
 import { env } from './env';
 import IORedis from 'ioredis';
 
-export const redisConnection = new IORedis(env.upstashRedisUrl, {
+export const redisConnection = new IORedis(env.redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   tls: {},
