@@ -16,7 +16,7 @@ export function buildAlertReason(
     case 'TEMPERATURE_RECOVERED':
       return `Temperature ${temperature}°C returned to normal range (${device.normalMinTemperature}°C to ${device.normalMaxTemperature}°C).`;
     case 'DEVICE_OFFLINE':
-      return `Device stopped sending data. Last seen at ${device.lastSeenAt?.toISOString() ?? 'unknown'}.`;
+      return `Device stopped sending data. Last seen at ${device.lastSeenAt?.toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) ?? 'unknown'}.`;
     case 'DEVICE_RECOVERED':
       return `Device resumed sending data.`;
   }
