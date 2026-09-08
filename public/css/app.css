@@ -984,6 +984,10 @@ body.dashboard-open {
   .alert {
     right: 0;
   }
+
+  .dashboard-header {
+    display: none;
+  }
 }
 @media screen and (min-width: 768px) {
   .app {

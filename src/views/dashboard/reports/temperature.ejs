@@ -1,0 +1,87 @@
+<%
+  function buildPageUrl(page) {
+    const params = new URLSearchParams({
+      deviceId: filters.deviceId || '',
+      from: filters.from || '',
+      to: filters.to || '',
+      page: String(page),
+    });
+    return '/dashboard/reports/temperature?' + params.toString();
+  }
+%>
+
+<form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form">
+  <div class="field-group">
+    <div class="field-filters">
+      <div class="field">
+        <label for="deviceId" class="field-label">Device</label>
+        <select id="deviceId" name="deviceId" required class="field-input">
+          <option value="" disabled <%= !filters.deviceId ? 'selected' : '' %>>Pilih device</option>
+          <% devices.forEach(device => { %>
+          <option value="<%= device.id %>" <%= filters.deviceId === device.id ? 'selected' : '' %>>
+            <%= device.name %> (<%= device.code %>)
+          </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="from" class="field-label">Dari Tanggal</label>
+        <input type="date" id="from" name="from" required class="field-input" value="<%= filters.from || '' %>" />
+      </div>
+
+      <div class="field">
+        <label for="to" class="field-label">Sampai Tanggal</label>
+        <input type="date" id="to" name="to" required class="field-input" value="<%= filters.to || '' %>" />
+      </div>
+
+      <div class="field" style="align-self: flex-end;">
+        <button type="submit" id="temperature-report-submit" class="btn btn-primary">Lihat Laporan</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="wrapper-table" >
+  <% if (!report) { %>
+  <p class="muted-foreground">Pilih device dan rentang tanggal, lalu klik "Lihat Laporan" untuk melihat histori suhu.</p>
+  <% } else if (report.items.length === 0) { %>
+  <p class="muted-foreground">Tidak ada data suhu pada rentang tanggal yang dipilih.</p>
+  <% } else { %>
+  <p class="muted-foreground" style="margin-bottom: 0.75rem;">
+    Menampilkan <%= (report.page - 1) * report.pageSize + 1 %>-<%= Math.min(report.page * report.pageSize, report.totalItems) %>
+    dari <%= report.totalItems %> data
+  </p>
+
+  <table class="dashboard-table">
+    <thead class="muted muted-foreground">
+      <tr>
+        <th style="width: 60px;">No</th>
+        <th>Waktu Rekam</th>
+        <th>Suhu</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% report.items.forEach((log, i) => { %>
+      <tr>
+        <td><%= (report.page - 1) * report.pageSize + i + 1 %></td>
+        <td><%= formatDateTime(log.recordedAt) %></td>
+        <td><%= log.temperature %>°C</td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <% if (report.totalPages > 1) { %>
+  <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+    <% if (report.page > 1) { %>
+    <a href="<%= buildPageUrl(report.page - 1) %>" class="btn btn-outline foreground" style="text-decoration: none;">Sebelumnya</a>
+    <% } %>
+    <span class="muted-foreground" style="align-self: center;">Halaman <%= report.page %> dari <%= report.totalPages %></span>
+    <% if (report.page < report.totalPages) { %>
+    <a href="<%= buildPageUrl(report.page + 1) %>" class="btn btn-outline foreground" style="text-decoration: none;">Berikutnya</a>
+    <% } %>
+  </div>
+  <% } %>
+  <% } %>
+</div>

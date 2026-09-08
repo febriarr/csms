@@ -1,6 +1,5 @@
 const source = new EventSource('/events/device-status');
 
-// Mirrors src/middleware/view-helper.ts — keep both in sync.
 const stateLabelMap = {
   NORMAL: 'Active Stable',
   DEFROST: 'Defrost Cycle',

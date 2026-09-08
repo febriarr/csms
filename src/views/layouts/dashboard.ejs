@@ -33,6 +33,7 @@
         <a href="/dashboard/devices" class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">Devices</a>
         <!-- <a href="/dashboard/notification-logs" class="dashboard-sidebar__link <%= isActive('/dashboard/notification-logs') ? 'is-active' : '' %>">Notification Logs</a> -->
         <a href="/dashboard/notifications-recipients" class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">Notification Recipients</a>
+        <a href="/dashboard/reports/temperature" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">Reports</a>
       </nav>
     </aside>
 
@@ -46,7 +47,7 @@
           <span></span>
         </button>
 
-        <div>
+        <div class="dashboard-header">
           <p class="dashboard-topbar__eyebrow">Management</p>
           <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
         </div>

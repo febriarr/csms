@@ -16,6 +16,9 @@ import { UsersRepository } from '../features/users/users.repository';
 import { UsersService } from '../features/users/users.service';
 import { DashboardController } from '../controllers/dashboard.controller';
 import { DeviceDiagnosticLogsRepository } from '../features/device-diagnostic-logs/device-diagnostic-logs.repository';
+import { ReportsRepository } from '../features/reports/reports.repository';
+import { ReportsService } from '../features/reports/reports.service';
+import { ReportsController } from '../features/reports/reports.controller';
 
 const temperatureRepository = new TemperatureRepository(db);
 const devicesRepository = new DevicesRepository(db);
@@ -23,6 +26,7 @@ const alertsRepository = new AlertsRepository(db);
 const usersRepository = new UsersRepository(db);
 const notificationsRecipientsRepository = new NotificationsRecipientsRepository(db);
 const deviceDiagnosticLogsRepository = new DeviceDiagnosticLogsRepository(db);
+const reportsRepository = new ReportsRepository(db);
 
 // Services
 const temperatureService = new TemperatureService(
@@ -36,6 +40,7 @@ const devicesService = new DevicesService(devicesRepository);
 const usersService = new UsersService(usersRepository);
 const authService = new AuthService(usersService);
 const notificationsRecipientsService = new NotificationsRecipientsService(notificationsRecipientsRepository);
+const reportsService = new ReportsService(reportsRepository);
 const offlineDetectionService = new OfflineDetectionService(
   devicesRepository,
   alertsRepository,
@@ -48,6 +53,7 @@ const devicesController = new DeviceController(devicesService);
 const authController = new AuthController(authService);
 const notificationsRecipientsController = new NotificationsRecipientsController(notificationsRecipientsService);
 const dashboardController = new DashboardController(devicesService);
+const reportsController = new ReportsController(reportsService, devicesService);
 
 export {
   temperatureRepository,
@@ -61,4 +67,5 @@ export {
   authController,
   notificationsRecipientsController,
   dashboardController,
+  reportsController,
 };

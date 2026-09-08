@@ -4,12 +4,14 @@ import {
   dashboardController,
   devicesController,
   notificationsRecipientsController,
+  reportsController,
 } from '../container/index';
 import { streamDeviceStatus } from '../sse/sse.controller';
 import { authenticate } from '../middleware/authenticate.middleware';
 import { validateRequest } from '../middleware/validate-request';
 import { notificationRecipientsQuerySchema } from '../features/notifications-recipients/notifications-recipients.validator';
 import whatsappRoute from '../shared/whatsapp/whatsapp.controller';
+import { temperatureReportQuerySchema } from '../features/reports/reports.validator';
 
 const router = Router();
 
@@ -36,5 +38,10 @@ router.get(
 );
 router.get('/dashboard/notifications-recipients/create', notificationsRecipientsController.pageCreate);
 router.get('/dashboard/notifications-recipients/:id/edit', notificationsRecipientsController.pageUpdate);
+router.get(
+  '/dashboard/reports/temperature',
+  validateRequest({ query: temperatureReportQuerySchema }),
+  reportsController.temperatureReport
+);
 
 export default router;
