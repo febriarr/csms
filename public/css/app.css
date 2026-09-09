@@ -180,13 +180,25 @@ a.btn {
   color: white;
 }
 
+a.btn-primary {
+  color: white;
+}
+
 .btn-outline {
   border: solid 1px #ddd;
   background-color: var(--background);
 }
 
+a.btn-outline {
+  color: var(--foreground);
+}
+
 .btn-danger {
   background: var(--state-critical-bg);
+  color: var(--state-critical);
+}
+
+a.btn-danger {
   color: var(--state-critical);
 }
 
@@ -207,8 +219,6 @@ a.btn-success {
 footer {
   padding: 1rem;
 }
-
-/* ---------- Page shell ---------- */
 
 .device-dashboard-header {
   display: flex;
