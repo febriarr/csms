@@ -8,6 +8,16 @@
     });
     return '/dashboard/reports/temperature?' + params.toString();
   }
+
+  function buildExportUrl(format) {
+    const params = new URLSearchParams({
+      deviceId: filters.deviceId || '',
+      from: filters.from || '',
+      to: filters.to || '',
+      format,
+    });
+    return '/dashboard/reports/temperature/export?' + params.toString();
+  }
 %>
 
 <form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form">
@@ -42,15 +52,26 @@
   </div>
 </form>
 
-<div class="wrapper-table" >
+<div class="wrapper-table">
   <% if (!report) { %>
   <p class="muted-foreground">Pilih device dan rentang tanggal, lalu klik "Lihat Laporan" untuk melihat histori suhu.</p>
   <% } else if (report.items.length === 0) { %>
   <p class="muted-foreground">Tidak ada data suhu pada rentang tanggal yang dipilih.</p>
   <% } else { %>
-  <p class="muted-foreground" style="margin-bottom: 0.75rem;">
-    Menampilkan <%= (report.page - 1) * report.pageSize + 1 %>-<%= Math.min(report.page * report.pageSize, report.totalItems) %>
-    dari <%= report.totalItems %> data
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+    <p class="muted-foreground" style="margin: 0;">
+      Menampilkan <%= (report.page - 1) * report.pageSize + 1 %>-<%= Math.min(report.page * report.pageSize, report.totalItems) %>
+      dari <%= report.totalItems %> data
+    </p>
+
+    <div id="export-actions" style="display: flex; gap: 0.5rem;">
+      <a href="<%= buildExportUrl('xlsx') %>" id="export-xlsx-btn" class="btn btn-success" style="text-decoration: none;">Export Excel</a>
+      <a href="<%= buildExportUrl('csv') %>" id="export-csv-btn" class="btn btn-outline" style="text-decoration: none;">Export CSV</a>
+    </div>
+  </div>
+
+  <p id="export-range-warning" class="muted-foreground" style="display: none; color: #dc2626; margin-top: -0.5rem; margin-bottom: 0.75rem;">
+    Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.
   </p>
 
   <table class="dashboard-table">

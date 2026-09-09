@@ -17,6 +17,12 @@ export type PaginatedResult<T> = {
   totalPages: number;
 };
 
+export type TemperatureExportFilter = {
+  deviceId: string;
+  from: Date;
+  to: Date;
+};
+
 export class ReportsRepository {
   constructor(private readonly db: Database) {}
 
@@ -40,5 +46,16 @@ export class ReportsRepository {
     const totalPages = Math.max(1, Math.ceil(totalItems / filter.pageSize));
 
     return { items, page: filter.page, pageSize: filter.pageSize, totalItems, totalPages };
+  }
+
+  async findTemperatureHistoryForExport(filter: TemperatureExportFilter): Promise<SelectTemperature[]> {
+    return this.db.query.temperatureLogs.findMany({
+      where: and(
+        eq(temperatureLogs.deviceId, filter.deviceId),
+        gte(temperatureLogs.recordedAt, filter.from),
+        lte(temperatureLogs.recordedAt, filter.to)
+      ),
+      orderBy: temperatureLogs.recordedAt,
+    });
   }
 }

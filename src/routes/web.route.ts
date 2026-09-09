@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   authController,
   dashboardController,
+  deviceDiagnosticsLogsController,
   devicesController,
   notificationsRecipientsController,
   reportsController,
@@ -11,7 +12,8 @@ import { authenticate } from '../middleware/authenticate.middleware';
 import { validateRequest } from '../middleware/validate-request';
 import { notificationRecipientsQuerySchema } from '../features/notifications-recipients/notifications-recipients.validator';
 import whatsappRoute from '../shared/whatsapp/whatsapp.controller';
-import { temperatureReportQuerySchema } from '../features/reports/reports.validator';
+import { temperatureExportQuerySchema, temperatureReportQuerySchema } from '../features/reports/reports.validator';
+import { diagnosticsReportQuerySchema } from '../features/device-diagnostic-logs/device-diagnostics-logs.validator';
 
 const router = Router();
 
@@ -42,6 +44,16 @@ router.get(
   '/dashboard/reports/temperature',
   validateRequest({ query: temperatureReportQuerySchema }),
   reportsController.temperatureReport
+);
+router.get(
+  '/dashboard/reports/temperature/export',
+  validateRequest({ query: temperatureExportQuerySchema }),
+  reportsController.exportTemperatureReport
+);
+router.get(
+  '/dashboard/reports/diagnostics',
+  validateRequest({ query: diagnosticsReportQuerySchema }),
+  deviceDiagnosticsLogsController.diagnosticsReport
 );
 
 export default router;

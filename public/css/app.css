@@ -139,6 +139,11 @@ input[type='number'] {
   white-space: nowrap;
 }
 
+a.btn {
+  text-decoration: none;
+  color: inherit;
+}
+
 .btn-icon-sm {
   width: 2rem;
   height: 2rem;
@@ -183,6 +188,15 @@ input[type='number'] {
 .btn-danger {
   background: var(--state-critical-bg);
   color: var(--state-critical);
+}
+
+.btn-success {
+  background: var(--state-normal);
+  color: var(--state-normal-bg);
+}
+
+a.btn-success {
+  color: var(--state-normal-bg);
 }
 
 .app {
@@ -593,9 +607,9 @@ footer {
 .dashboard-empty-state {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 1rem;
+  border-radius: 0.2rem;
   padding: 1rem 1.125rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
 .dashboard-page-card h3,
@@ -619,7 +633,7 @@ footer {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 0.5rem;
+  border-radius: 0.2rem;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }

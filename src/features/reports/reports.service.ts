@@ -19,4 +19,11 @@ export class ReportsService {
       pageSize: PAGE_SIZE,
     });
   }
+
+  async getTemperatureHistoryForExport(query: { deviceId: string; from: string; to: string }) {
+    const from = new Date(`${query.from}T00:00:00.000+07:00`);
+    const to = new Date(`${query.to}T23:59:59.999+07:00`);
+
+    return this.repo.findTemperatureHistoryForExport({ deviceId: query.deviceId, from, to });
+  }
 }
