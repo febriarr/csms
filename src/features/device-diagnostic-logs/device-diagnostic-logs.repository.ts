@@ -1,7 +1,6 @@
-import { and, desc, eq, gte, lt, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lt, sql } from 'drizzle-orm';
 import { Database, deviceDiagnosticsLogs, devices } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
-import { APP_TIMEZONE } from '../../shared/constants/timezone';
 
 export type TemperatureReportFilter = {
   deviceId: string;
@@ -65,7 +64,7 @@ export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof device
       })
       .from(deviceDiagnosticsLogs)
       .innerJoin(devices, eq(deviceDiagnosticsLogs.deviceId, devices.id))
-      .where(and(gte(deviceDiagnosticsLogs.recordedAt, from), lte(deviceDiagnosticsLogs.recordedAt, to)))
+      .where(and(gte(deviceDiagnosticsLogs.recordedAt, from), lt(deviceDiagnosticsLogs.recordedAt, to)))
       .groupBy(deviceDiagnosticsLogs.deviceId, devices.name, devices.code)
       .orderBy(
         desc(

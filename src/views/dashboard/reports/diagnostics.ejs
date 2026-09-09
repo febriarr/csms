@@ -39,11 +39,13 @@
           />
         </div>
 
-        <input
-          type="hidden"
-          name="deviceId"
-          value="<%= filters.deviceId || '' %>"
-        />
+        <% if (filters.deviceId) { %>
+          <input
+            type="hidden"
+            name="deviceId"
+            value="<%= filters.deviceId %>"
+          />
+        <% } %>
 
         <div class="field" style="align-self: flex-end;">
           <button type="submit" class="btn btn-primary">

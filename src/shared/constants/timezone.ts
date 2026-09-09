@@ -19,8 +19,9 @@ export function getTodayDateStringInAppTimezone(): string {
 export function getTodayRangeInAppTimezone(): { from: Date; to: Date } {
   const dateStr = getTodayDateStringInAppTimezone();
 
-  return {
-    from: new Date(`${dateStr}T00:00:00.000${APP_UTC_OFFSET}`),
-    to: new Date(`${dateStr}T23:59:59.999${APP_UTC_OFFSET}`),
-  };
+  const from = new Date(`${dateStr}T00:00:00.000${APP_UTC_OFFSET}`);
+  const to = new Date(from);
+  to.setUTCDate(to.getUTCDate() + 1);
+
+  return { from, to };
 }
