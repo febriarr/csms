@@ -1,4 +1,5 @@
 import { AlertReason, SelectDevices } from '../../database';
+import { formatDateTime } from '../../middleware/view-helper';
 
 export function buildAlertReason(
   reasonCode: AlertReason,
@@ -16,7 +17,7 @@ export function buildAlertReason(
     case 'TEMPERATURE_RECOVERED':
       return `Temperature ${temperature}°C returned to normal range (${device.normalMinTemperature}°C to ${device.normalMaxTemperature}°C).`;
     case 'DEVICE_OFFLINE':
-      return `Device stopped sending data. Last seen at ${device.lastSeenAt?.toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) ?? 'unknown'}.`;
+      return `Device stopped sending data. Last seen at ${formatDateTime(device.lastSeenAt)}.`;
     case 'DEVICE_RECOVERED':
       return `Device resumed sending data.`;
   }

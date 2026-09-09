@@ -1,0 +1,49 @@
+<div class="dashboard-page-header">
+  <div>
+    <p class="dashboard-page-eyebrow">Panel</p>
+    <h2><%= pageTitle %></h2>
+  </div>
+</div>
+
+<div class="dashboard-page-card">
+  <div class="flex-between" style="margin-bottom: 1rem;">
+    <h3 style="margin: 0;">Diagnostics Hari Ini</h3>
+    <a href="/dashboard/reports/diagnostics" class="btn btn-outline">Lihat Detail &amp; Rentang Tanggal</a>
+  </div>
+
+  <% if (diagnosticsToday.length === 0) { %>
+  <p class="muted">Belum ada kejadian sensor/WiFi/HTTP gagal hari ini. 👍</p>
+  <% } else { %>
+  <table class="dashboard-table">
+    <thead class="muted muted-foreground">
+      <tr>
+        <th>Device</th>
+        <th>Sensor Fail</th>
+        <th>WiFi Fail</th>
+        <th>HTTP Fail</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% diagnosticsToday.slice(0, 5).forEach(row => { %>
+      <tr>
+        <td>
+          <div class="device-name"><%= row.deviceName %></div>
+          <div class="device-code"><%= row.deviceCode %></div>
+        </td>
+        <td><%= row.sensorFailTotal %></td>
+        <td><%= row.wifiFailTotal %></td>
+        <td><%= row.httpFailTotal %></td>
+        <td><strong><%= row.total %></strong></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% if (diagnosticsToday.length > 5) { %>
+  <p class="muted-foreground" style="margin-top: 0.75rem;">
+    +<%= diagnosticsToday.length - 5 %> device lain punya kejadian hari ini —
+    <a href="/dashboard/reports/diagnostics">lihat semua</a>.
+  </p>
+  <% } %>
+  <% } %>
+</div>

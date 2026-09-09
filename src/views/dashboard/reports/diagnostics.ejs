@@ -1,0 +1,158 @@
+<%
+  function buildDeviceUrl(deviceId) {
+    const params = new URLSearchParams({
+      from: filters.from || '',
+      to: filters.to || '',
+      deviceId: deviceId,
+    });
+
+    return '/dashboard/reports/diagnostics?' + params.toString();
+  }
+%>
+
+<form method="GET" action="/dashboard/reports/diagnostics" id="diagnostics-report-form">
+  <div style="display:flex; justify-content:end">
+    <div class="field-group" style="max-width: 600px;">
+      <div class="flex-items-center">
+
+        <div class="field">
+          <label for="from" class="field-label">Dari Tanggal</label>
+          <input
+            type="date"
+            id="from"
+            name="from"
+            required
+            class="field-input"
+            value="<%= filters.from %>"
+          />
+        </div>
+
+        <div class="field">
+          <label for="to" class="field-label">Sampai Tanggal</label>
+          <input
+            type="date"
+            id="to"
+            name="to"
+            required
+            class="field-input"
+            value="<%= filters.to %>"
+          />
+        </div>
+
+        <input
+          type="hidden"
+          name="deviceId"
+          value="<%= filters.deviceId || '' %>"
+        />
+
+        <div class="field" style="align-self: flex-end;">
+          <button type="submit" class="btn btn-primary">
+            Terapkan
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="wrapper-table" style="margin-top: 1.5rem;">
+
+  <h3 style="margin-top: 0; margin-bottom: 1rem;">Ranking Device</h3>
+
+  <% if (summary.length === 0) { %>
+
+    <p class="muted-foreground">
+      Tidak ada kejadian sensor/WiFi/HTTP gagal pada rentang tanggal ini.
+    </p>
+
+  <% } else { %>
+
+    <table class="dashboard-table">
+
+      <thead class="muted muted-foreground">
+        <tr>
+          <th>Device</th>
+          <th>Sensor Fail</th>
+          <th>WiFi Fail</th>
+          <th>HTTP Fail</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% summary.forEach(row => { %>
+
+          <tr
+            <% if (filters.deviceId === row.deviceId) { %>
+              style="background: #f3f4f6;"
+            <% } %>
+          >
+            <td>
+              <div class="device-name">
+                <%= row.deviceName %>
+              </div>
+
+              <div class="device-code">
+                <%= row.deviceCode %>
+              </div>
+            </td>
+
+            <td><%= row.sensorFailTotal %></td>
+            <td><%= row.wifiFailTotal %></td>
+            <td><%= row.httpFailTotal %></td>
+            <td><strong><%= row.total %></strong></td>
+
+            <td>
+              <a
+                href="<%= buildDeviceUrl(row.deviceId) %>"
+                class="btn btn-outline"
+              >
+                Lihat Tren
+              </a>
+            </td>
+          </tr>
+
+        <% }) %>
+      </tbody>
+
+    </table>
+
+  <% } %>
+
+</div>
+
+<% if (selectedDevice && trend) { %>
+
+  <div class="wrapper-table" style="margin-top: 1.5rem;">
+
+    <h3 style="margin-top: 0;">
+      Tren Harian —
+      <%= selectedDevice.deviceName %>
+      (<%= selectedDevice.deviceCode %>)
+    </h3>
+
+    <% if (trend.length === 0) { %>
+
+      <p class="muted">
+        Tidak ada data tren untuk device ini pada rentang tanggal ini.
+      </p>
+
+    <% } else { %>
+
+      <div
+        id="diagnostics-trend-chart"
+        data-chart='<%- JSON.stringify({
+          days: trend.map(t => t.day),
+          sensor: trend.map(t => t.sensorFailTotal),
+          wifi: trend.map(t => t.wifiFailTotal),
+          http: trend.map(t => t.httpFailTotal),
+        }) %>'
+      ></div>
+
+    <% } %>
+
+  </div>
+
+<% } %>

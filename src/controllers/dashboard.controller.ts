@@ -2,9 +2,13 @@ import type { Request, Response } from 'express';
 import { TypedRequest } from '../types/typed-request';
 import { SearchQuery } from '../features/devices/devices.validator';
 import { DevicesService } from '../features/devices/devices.service';
+import { DeviceDiagnosticsLogsService } from '../features/device-diagnostic-logs/device-diagnostics-logs.service';
 
 export class DashboardController {
-  constructor(private readonly devicesService: DevicesService) {}
+  constructor(
+    private readonly devicesService: DevicesService,
+    private readonly diagnosticsService: DeviceDiagnosticsLogsService
+  ) {}
 
   private renderDashboard(
     req: Request,
@@ -23,15 +27,17 @@ export class DashboardController {
     });
   }
 
-  public index = (req: Request, res: Response): void => {
-    this.renderDashboard(
-      req,
-      res,
-      'dashboard/index',
-      '/dashboard',
-      'Dashboard',
-      'Ringkasan panel administrasi yang responsif.'
-    );
+  public index = async (req: Request, res: Response): Promise<void> => {
+    const diagnosticsToday = await this.diagnosticsService.getDiagnosticsSummaryToday();
+
+    res.render('dashboard/overview', {
+      title: 'Overview',
+      layout: 'layouts/dashboard',
+      currentPath: '/dashboard',
+      pageTitle: 'Overview',
+      pageDescription: 'Ringkasan panel administrasi yang responsif.',
+      diagnosticsToday,
+    });
   };
 
   public users = (req: Request, res: Response): void => {
@@ -109,4 +115,3 @@ export class DashboardController {
     );
   };
 }
-

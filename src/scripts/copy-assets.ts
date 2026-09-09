@@ -10,6 +10,14 @@ const copies = [
     from: 'node_modules/@alpinejs/csp/dist/cdn.min.js',
     to: 'public/vendor/alpine.min.js',
   },
+  {
+    from: 'node_modules/apexcharts/dist/apexcharts.min.js',
+    to: 'public/vendor/apexcharts.min.js',
+  },
+  {
+    from: 'node_modules/apexcharts/dist/apexcharts.css',
+    to: 'public/vendor/apexcharts.css',
+  },
 ];
 
 for (const { from, to } of copies) {

@@ -19,6 +19,8 @@ import { DeviceDiagnosticLogsRepository } from '../features/device-diagnostic-lo
 import { ReportsRepository } from '../features/reports/reports.repository';
 import { ReportsService } from '../features/reports/reports.service';
 import { ReportsController } from '../features/reports/reports.controller';
+import { DeviceDiagnosticsLogsService } from '../features/device-diagnostic-logs/device-diagnostics-logs.service';
+import { DeviceDiagnosticsLogsController } from '../features/device-diagnostic-logs/device-diagnostics-logs.controller';
 
 const temperatureRepository = new TemperatureRepository(db);
 const devicesRepository = new DevicesRepository(db);
@@ -46,14 +48,16 @@ const offlineDetectionService = new OfflineDetectionService(
   alertsRepository,
   notificationsRecipientsRepository
 );
+const deviceDiagnosticLogsService = new DeviceDiagnosticsLogsService(deviceDiagnosticLogsRepository);
 
 // Controller
 const temperatureController = new TemperatureController(temperatureService);
 const devicesController = new DeviceController(devicesService);
 const authController = new AuthController(authService);
 const notificationsRecipientsController = new NotificationsRecipientsController(notificationsRecipientsService);
-const dashboardController = new DashboardController(devicesService);
+const dashboardController = new DashboardController(devicesService, deviceDiagnosticLogsService);
 const reportsController = new ReportsController(reportsService, devicesService);
+const deviceDiagnosticsLogsController = new DeviceDiagnosticsLogsController(deviceDiagnosticLogsService);
 
 export {
   temperatureRepository,
@@ -68,4 +72,5 @@ export {
   notificationsRecipientsController,
   dashboardController,
   reportsController,
+  deviceDiagnosticsLogsController,
 };

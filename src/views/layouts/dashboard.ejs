@@ -14,6 +14,13 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 
   <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <% if (typeof pageStyles !== 'undefined') { %>
+  <% pageStyles.forEach(href => { %>
+  <link rel="stylesheet" href="<%= href %>" />
+  <% }) %>
+  <% } %>
+</head>
 </head>
 
 <body class="dashboard-shell" data-app-version="<%= appVersion %>">
@@ -23,17 +30,41 @@
     <aside class="dashboard-sidebar" id="dashboard-sidebar">
       <div class="dashboard-sidebar__header">
         <div>
-          <p class="dashboard-sidebar__eyebrow">CI-CMS</p>
+          <p class="dashboard-sidebar__eyebrow">CI-CSMS</p>
           <h2>Dashboard</h2>
         </div>
       </div>
 
       <nav class="dashboard-sidebar__nav" aria-label="Dashboard navigation">
-        <!-- <a href="/dashboard/users" class="dashboard-sidebar__link <%= isActive('/dashboard/users') ? 'is-active' : '' %>">Users</a> -->
-        <a href="/dashboard/devices" class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">Devices</a>
-        <!-- <a href="/dashboard/notification-logs" class="dashboard-sidebar__link <%= isActive('/dashboard/notification-logs') ? 'is-active' : '' %>">Notification Logs</a> -->
-        <a href="/dashboard/notifications-recipients" class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">Notification Recipients</a>
-        <a href="/dashboard/reports/temperature" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">Reports</a>
+        <a href="/dashboard"
+          class="dashboard-sidebar__link <%= isActive('/dashboard') ? 'is-active' : '' %>">
+          <i class="ph ph-squares-four"></i>
+          <span>Overview</span>
+        </a>
+
+        <a href="/dashboard/devices"
+          class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">
+          <i class="ph ph-cpu"></i>
+          <span>Devices</span>
+        </a>
+
+        <a href="/dashboard/notifications-recipients"
+          class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">
+          <i class="ph ph-bell"></i>
+          <span>Notification Recipients</span>
+        </a>
+
+        <a href="/dashboard/reports/temperature"
+          class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">
+          <i class="ph ph-chart-line-up"></i>
+          <span>Reports</span>
+        </a>
+
+        <a href="/dashboard/reports/diagnostics"
+          class="dashboard-sidebar__link <%= isActive('/dashboard/reports/diagnostics') ? 'is-active' : '' %>">
+          <i class="ph ph-stethoscope"></i>
+          <span>Diagnostics</span>
+        </a>
       </nav>
     </aside>
 
@@ -48,7 +79,6 @@
         </button>
 
         <div class="dashboard-header">
-          <p class="dashboard-topbar__eyebrow">Management</p>
           <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
         </div>
         <button type="button" id="logout-button" class="btn btn-outline">
@@ -71,6 +101,12 @@
   <div data-slot="loading-overlay" style="display: none;">
     <div data-slot="loading"></div>
   </div>
+
+  <% if (typeof pageVendor !== 'undefined') { %>
+  <% pageVendor.forEach(src => { %>
+  <script src="<%= src %>"></script>
+  <% }) %>
+  <% } %>
 
   <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
   <% pageScripts.forEach(src => { %>
