@@ -76,6 +76,7 @@
           <th>Sensor Fail</th>
           <th>WiFi Fail</th>
           <th>HTTP Fail</th>
+          <th>Avg RSSI</th>
           <th>Total</th>
           <th></th>
         </tr>
@@ -102,10 +103,11 @@
             <td><%= row.sensorFailTotal %></td>
             <td><%= row.wifiFailTotal %></td>
             <td><%= row.httpFailTotal %></td>
+            <td><%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %></td>
             <td><strong><%= row.total %></strong></td>
 
             <td>
-              <a
+              
                 href="<%= buildDeviceUrl(row.deviceId) %>"
                 class="btn btn-outline"
               >
@@ -148,6 +150,7 @@
           sensor: trend.map(t => t.sensorFailTotal),
           wifi: trend.map(t => t.wifiFailTotal),
           http: trend.map(t => t.httpFailTotal),
+          rssi: trend.map(t => t.avgRssi),
         }) %>'
       ></div>
 

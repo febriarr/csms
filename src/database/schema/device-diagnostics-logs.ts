@@ -17,6 +17,7 @@ export const deviceDiagnosticsLogs = pgTable(
     sensorFailCount: integer('sensor_fail_count').notNull(),
     wifiFailCount: integer('wifi_fail_count').notNull(),
     httpFailCount: integer('http_fail_count').notNull(),
+    rssi: integer('rssi'),
 
     recordedAt: timestamp('recorded_at', { mode: 'date', withTimezone: true }).notNull(),
     receivedAt: timestamp('received_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),

@@ -43,6 +43,13 @@
       "when": 1788490104759,
       "tag": "0005_opposite_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788934167952,
+      "tag": "0006_silent_typhoid_mary",
+      "breakpoints": true
     }
   ]
 }

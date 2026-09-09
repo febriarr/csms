@@ -14,6 +14,7 @@ export const createTemperatureSchema = z.object({
   sensorFailCount: z.number().int().nonnegative().default(0),
   wifiFailCount: z.number().int().nonnegative().default(0),
   httpFailCount: z.number().int().nonnegative().default(0),
+  rssi: z.number().int().nullable().default(null),
 });
 
 export type CreateTemperatureDto = z.infer<typeof createTemperatureSchema>;

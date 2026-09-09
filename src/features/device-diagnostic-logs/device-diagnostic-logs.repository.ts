@@ -26,6 +26,7 @@ export type DiagnosticsSummaryRow = {
   sensorFailTotal: number;
   wifiFailTotal: number;
   httpFailTotal: number;
+  avgRssi: number | null;
   total: number;
 };
 
@@ -34,6 +35,7 @@ export type DiagnosticsTrendRow = {
   sensorFailTotal: number;
   wifiFailTotal: number;
   httpFailTotal: number;
+  avgRssi: number | null;
 };
 
 export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof deviceDiagnosticsLogs> {
@@ -55,6 +57,11 @@ export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof device
         sensorFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.sensorFailCount})`.mapWith(Number),
         wifiFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.wifiFailCount})`.mapWith(Number),
         httpFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.httpFailCount})`.mapWith(Number),
+        // avg() otomatis skip baris dengan rssi null (device
+        // disconnected saat payload dibuat). Dibulatkan 1 desimal.
+        avgRssi: sql<number | null>`round(avg(${deviceDiagnosticsLogs.rssi})::numeric, 1)`.mapWith(v =>
+          v === null ? null : Number(v)
+        ),
       })
       .from(deviceDiagnosticsLogs)
       .innerJoin(devices, eq(deviceDiagnosticsLogs.deviceId, devices.id))
@@ -89,6 +96,9 @@ export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof device
         httpFailTotal: sql<number>`
         sum(${deviceDiagnosticsLogs.httpFailCount})
       `.mapWith(Number),
+        avgRssi: sql<number | null>`
+        round(avg(${deviceDiagnosticsLogs.rssi})::numeric, 1)
+      `.mapWith(v => (v === null ? null : Number(v))),
       })
       .from(deviceDiagnosticsLogs)
       .where(

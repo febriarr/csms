@@ -58,6 +58,7 @@ export class TemperatureService {
             httpFailCount: input.httpFailCount,
             recordedAt: data.recordedAt,
             receivedAt: data.receivedAt,
+            rssi: input.rssi,
           },
           tx
         );
