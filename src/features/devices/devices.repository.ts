@@ -86,6 +86,7 @@ export class DevicesRepository extends BaseRepository<typeof devices> {
       with: {
         alerts: {
           orderBy: (alerts, { desc }) => [desc(alerts.createdAt)],
+          limit: 20,
         },
       },
     });
