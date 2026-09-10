@@ -48,7 +48,7 @@ const offlineDetectionService = new OfflineDetectionService(
   alertsRepository,
   notificationsRecipientsRepository
 );
-const deviceDiagnosticLogsService = new DeviceDiagnosticsLogsService(deviceDiagnosticLogsRepository);
+const deviceDiagnosticLogsService = new DeviceDiagnosticsLogsService(deviceDiagnosticLogsRepository, devicesRepository);
 
 // Controller
 const temperatureController = new TemperatureController(temperatureService);

@@ -55,5 +55,6 @@ router.get(
   validateRequest({ query: diagnosticsReportQuerySchema }),
   deviceDiagnosticsLogsController.diagnosticsReport
 );
+router.get('/dashboard/reports/diagnostics/detail', deviceDiagnosticsLogsController.diagnosticsDetail);
 
 export default router;

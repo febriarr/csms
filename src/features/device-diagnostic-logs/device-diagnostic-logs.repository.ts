@@ -1,5 +1,5 @@
 import { and, desc, eq, gte, lt, sql } from 'drizzle-orm';
-import { Database, deviceDiagnosticsLogs, devices } from '../../database';
+import { Database, deviceDiagnosticsLogs, devices, DeviceTroubleReason } from '../../database';
 import { BaseRepository } from '../../shared/abstract/base-repository';
 
 export type TemperatureReportFilter = {
@@ -35,6 +35,20 @@ export type DiagnosticsTrendRow = {
   wifiFailTotal: number;
   httpFailTotal: number;
   avgRssi: number | null;
+};
+
+// Satu baris mentah di tabel device_diagnostics_logs — dipakai
+// untuk halaman detail (bukan agregat, biar reason per kejadian
+// tetap kelihatan satu-satu).
+export type DiagnosticsLogItem = {
+  id: string;
+  sensorFailCount: number;
+  wifiFailCount: number;
+  httpFailCount: number;
+  rssi: number | null;
+  reason: DeviceTroubleReason | null;
+  recordedAt: Date;
+  receivedAt: Date;
 };
 
 export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof deviceDiagnosticsLogs> {
@@ -109,5 +123,56 @@ export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof device
       )
       .groupBy(dayExpr)
       .orderBy(dayExpr);
+  }
+
+  /**
+   * Paginated raw log entries for one device — dipakai halaman detail.
+   * Beda dengan getDiagnosticsSummary/getDailyDiagnosticsTrend yang
+   * agregat, ini satu baris = satu kejadian, lengkap dengan `reason`
+   * mentahnya kalau kejadian itu memang dari crash.
+   */
+  async getDiagnosticsLogs(filter: TemperatureReportFilter): Promise<PaginatedResult<DiagnosticsLogItem>> {
+    const { deviceId, from, to, page, pageSize } = filter;
+    const offset = (page - 1) * pageSize;
+
+    const whereClause = and(
+      eq(deviceDiagnosticsLogs.deviceId, deviceId),
+      gte(deviceDiagnosticsLogs.recordedAt, from),
+      lt(deviceDiagnosticsLogs.recordedAt, to)
+    );
+
+    const [items, totalRows] = await Promise.all([
+      this.db
+        .select({
+          id: deviceDiagnosticsLogs.id,
+          sensorFailCount: deviceDiagnosticsLogs.sensorFailCount,
+          wifiFailCount: deviceDiagnosticsLogs.wifiFailCount,
+          httpFailCount: deviceDiagnosticsLogs.httpFailCount,
+          rssi: deviceDiagnosticsLogs.rssi,
+          reason: deviceDiagnosticsLogs.reason,
+          recordedAt: deviceDiagnosticsLogs.recordedAt,
+          receivedAt: deviceDiagnosticsLogs.receivedAt,
+        })
+        .from(deviceDiagnosticsLogs)
+        .where(whereClause)
+        .orderBy(desc(deviceDiagnosticsLogs.recordedAt))
+        .limit(pageSize)
+        .offset(offset),
+
+      this.db
+        .select({ count: sql<number>`count(*)`.mapWith(Number) })
+        .from(deviceDiagnosticsLogs)
+        .where(whereClause),
+    ]);
+
+    const totalItems = totalRows[0]?.count ?? 0;
+
+    return {
+      items,
+      page,
+      pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
+    };
   }
 }

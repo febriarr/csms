@@ -52,13 +52,13 @@
   </div>
 </form>
 
-<div class="wrapper-table">
+<div class="wrapper-table" data-sticky-header>
   <% if (!report) { %>
-  <p class="muted-foreground">Pilih device dan rentang tanggal, lalu klik "Lihat Laporan" untuk melihat histori suhu.</p>
+  <p class="muted-foreground p-4">Pilih device dan rentang tanggal, lalu klik "Lihat Laporan" untuk melihat histori suhu.</p>
   <% } else if (report.items.length === 0) { %>
-  <p class="muted-foreground">Tidak ada data suhu pada rentang tanggal yang dipilih.</p>
+  <p class="muted-foreground p-4">Tidak ada data suhu pada rentang tanggal yang dipilih.</p>
   <% } else { %>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; padding: 1rem;">
     <p class="muted-foreground" style="margin: 0;">
       Menampilkan <%= (report.page - 1) * report.pageSize + 1 %>-<%= Math.min(report.page * report.pageSize, report.totalItems) %>
       dari <%= report.totalItems %> data
@@ -74,7 +74,7 @@
     Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.
   </p>
 
-  <table class="dashboard-table">
+  <table class="dashboard-table" data-sticky-header>
     <thead class="muted muted-foreground">
       <tr>
         <th style="width: 60px;">No</th>
@@ -94,7 +94,7 @@
   </table>
 
   <% if (report.totalPages > 1) { %>
-  <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+  <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; padding: 1rem;">
     <% if (report.page > 1) { %>
     <a href="<%= buildPageUrl(report.page - 1) %>" class="btn btn-outline foreground" style="text-decoration: none;">Sebelumnya</a>
     <% } %>

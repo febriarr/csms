@@ -19,8 +19,8 @@
   </span>
 </div>
 <% } %>
-<div class="wrapper-table">
-  <table class="dashboard-table">
+<div class="wrapper-table" data-sticky-header>
+  <table class="dashboard-table" data-sticky-header>
     <thead class="muted muted-foreground">
       <tr>
         <th style="width: 350px;">Device</th>
@@ -67,9 +67,10 @@
         </td>
 
         
-        <td style="display: flex; gap: 1rem;">
+        <td>
 
-          <a
+          <span style="display: flex; gap: 0.5rem; align-items: center;">
+            <a
               href="/dashboard/devices/<%= device.id %>/update"
             >
               <button
@@ -80,9 +81,10 @@
               </button>
             </a>
 
-          <button type="button" class="btn-icon-sm btn-danger btn-sm btn-delete-device" data-id="<%= device.id %>" data-name="<%= device.name %>">
-            <i class="ph ph-trash"></i>
-          </button>
+            <button type="button" class="btn-icon-sm btn-danger btn-sm btn-delete-device" data-id="<%= device.id %>" data-name="<%= device.name %>">
+              <i class="ph ph-trash"></i>
+            </button>
+          </span>
         </td>
       </tr>
       <% }); %>

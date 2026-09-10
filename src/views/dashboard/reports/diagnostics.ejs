@@ -8,6 +8,16 @@
 
     return '/dashboard/reports/diagnostics?' + params.toString();
   }
+
+  function buildDeviceDetailUrl(deviceId) {
+    const params = new URLSearchParams({
+      from: filters.from || '',
+      to: filters.to || '',
+      deviceId: deviceId,
+    });
+
+    return '/dashboard/reports/diagnostics/detail?' + params.toString();
+  }
 %>
 
 <form method="GET" action="/dashboard/reports/diagnostics" id="diagnostics-report-form">
@@ -47,6 +57,7 @@
           />
         <% } %>
 
+
         <div class="field" style="align-self: flex-end;">
           <button type="submit" class="btn btn-primary">
             Terapkan
@@ -58,19 +69,19 @@
   </div>
 </form>
 
-<div class="wrapper-table" style="margin-top: 1.5rem;">
+<div class="wrapper-table" data-sticky-header>
 
-  <h3 style="margin-top: 0; margin-bottom: 1rem;">Ranking Device</h3>
+  <h3 style="padding: 1rem;">Ranking Device</h3>
 
   <% if (summary.length === 0) { %>
 
-    <p class="muted-foreground">
+    <p class="muted-foreground p-4">
       Tidak ada kejadian sensor/WiFi/HTTP gagal pada rentang tanggal ini.
     </p>
 
   <% } else { %>
 
-    <table class="dashboard-table">
+    <table class="dashboard-table" data-sticky-header>
 
       <thead class="muted muted-foreground">
         <tr>
@@ -79,6 +90,7 @@
           <th>WiFi Fail</th>
           <th>HTTP Fail</th>
           <th>Avg RSSI</th>
+          <th>Reason Terakhir</th>
           <th>Total</th>
           <th></th>
         </tr>
@@ -106,14 +118,43 @@
             <td><%= row.wifiFailTotal %></td>
             <td><%= row.httpFailTotal %></td>
             <td><%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %></td>
+            <td>
+
+              <%
+                const reasonBadgeClass = {
+                  BROWNOUT: 'badge-danger',
+                  PANIC: 'badge-purple',
+                  WATCHDOG: 'badge-warning',
+                  UNKNOWN: 'badge-muted',
+                };
+              %>
+
+              <% if (row.lastReason) { %>
+                <span
+                  class="badge <%= reasonBadgeClass[row.lastReason.resetReason] || 'badge-muted' %>"
+                  title="RSSI saat itu: <%= row.lastReason.lastRssi !== null ? row.lastReason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= row.lastReason.lastWifiFailCount %> · Sensor Fail: <%= row.lastReason.lastSensorFailCount %> · HTTP Fail: <%= row.lastReason.lastHttpFailCount %>"
+                >
+                  <%= row.lastReason.resetReason %>
+                </span>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
             <td><strong><%= row.total %></strong></td>
 
-            <td>
+            <td style="display: flex; gap: 0.5rem; align-items: center;">
               <a
                 href="<%= buildDeviceUrl(row.deviceId) %>"
                 class="btn btn-outline"
               >
                 Lihat Tren
+              </a>
+
+              <a
+                href="<%= buildDeviceDetailUrl(row.deviceId) %>"
+                class="btn btn-outline"
+              >
+                Lihat Detail
               </a>
             </td>
           </tr>
@@ -131,7 +172,7 @@
 
   <div class="wrapper-table" style="margin-top: 1.5rem;">
 
-    <h3 style="margin-top: 0;">
+    <h3 style="margin-top: 0; padding: 1rem;">
       Tren Harian —
       <%= selectedDevice.deviceName %>
       (<%= selectedDevice.deviceCode %>)

@@ -1,0 +1,129 @@
+<%
+  function buildPageUrl(page) {
+    const params = new URLSearchParams({
+      deviceId: device.id,
+      from: filters.from || '',
+      to: filters.to || '',
+      page: page,
+      pageSize: logs.pageSize,
+    });
+
+    return '/dashboard/reports/diagnostics/detail?' + params.toString();
+  }
+
+  function buildBackUrl() {
+    const params = new URLSearchParams({
+      deviceId: device.id,
+      from: filters.from || '',
+      to: filters.to || '',
+    });
+
+    return '/dashboard/reports/diagnostics?' + params.toString();
+  }
+%>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+  <div>
+    <h3 style="margin: 0;">
+      <%= device.name %>
+      <span class="device-code">(<%= device.code %>)</span>
+    </h3>
+    <p class="muted-foreground" style="margin: 0.25rem 0 0;">
+      <%= filters.from %> &mdash; <%= filters.to %>
+    </p>
+  </div>
+
+  <a href="<%= buildBackUrl() %>" class="btn btn-outline">
+    &larr; Kembali ke Ranking
+  </a>
+</div>
+
+<div class="wrapper-table" data-sticky-header>
+
+  <% if (logs.items.length === 0) { %>
+
+    <p class="muted-foreground p-4">
+      Tidak ada kejadian sensor/WiFi/HTTP gagal untuk device ini pada rentang tanggal ini.
+    </p>
+
+  <% } else { %>
+
+    <table class="dashboard-table" data-sticky-header>
+
+      <thead class="muted muted-foreground">
+        <tr>
+          <th>Waktu</th>
+          <th>Sensor Fail</th>
+          <th>WiFi Fail</th>
+          <th>HTTP Fail</th>
+          <th>RSSI</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% logs.items.forEach(item => { %>
+
+          <tr>
+            <td><%= new Date(item.recordedAt).toLocaleString('id-ID') %></td>
+            <td><%= item.sensorFailCount %></td>
+            <td><%= item.wifiFailCount %></td>
+            <td><%= item.httpFailCount %></td>
+            <td><%= item.rssi !== null ? item.rssi + ' dBm' : '—' %></td>
+            <td>
+
+              <%
+                const reasonBadgeClass = {
+                  BROWNOUT: 'badge-danger',
+                  PANIC: 'badge-purple',
+                  WATCHDOG: 'badge-warning',
+                  UNKNOWN: 'badge-muted',
+                };
+              %>
+
+              <% if (item.reason) { %>
+                <span
+                  class="badge <%= reasonBadgeClass[item.reason.resetReason] || 'badge-muted' %>"
+                  title="RSSI saat itu: <%= item.reason.lastRssi !== null ? item.reason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= item.reason.lastWifiFailCount %> · Sensor Fail: <%= item.reason.lastSensorFailCount %> · HTTP Fail: <%= item.reason.lastHttpFailCount %>"
+                >
+                  <%= item.reason.resetReason %>
+                </span>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
+          </tr>
+
+        <% }) %>
+      </tbody>
+
+    </table>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1rem; padding: 1rem;">
+
+      <span class="muted-foreground">
+        Halaman <%= logs.page %> dari <%= logs.totalPages %>
+        (<%= logs.totalItems %> kejadian)
+      </span>
+
+      <div class="flex-items-center" style="gap: 0.5rem;">
+
+        <% if (logs.page > 1) { %>
+          <a href="<%= buildPageUrl(logs.page - 1) %>" class="btn btn-outline">
+            &larr; Sebelumnya
+          </a>
+        <% } %>
+
+        <% if (logs.page < logs.totalPages) { %>
+          <a href="<%= buildPageUrl(logs.page + 1) %>" class="btn btn-outline">
+            Berikutnya &rarr;
+          </a>
+        <% } %>
+
+      </div>
+
+    </div>
+
+  <% } %>
+
+</div>

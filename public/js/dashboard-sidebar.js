@@ -71,6 +71,87 @@ logoutButton?.addEventListener('click', async () => {
   }
 });
 
+function initStickyHeader(container) {
+  const table = container.querySelector('table');
+  const thead = table && table.querySelector('thead');
+  if (!table || !thead) return;
+
+  const clone = document.createElement('div');
+  clone.className = 'table-header-clone';
+  clone.setAttribute('aria-hidden', 'true');
+
+  const cloneTable = document.createElement('table');
+  cloneTable.className = table.className;
+  const colgroup = document.createElement('colgroup');
+  const theadClone = thead.cloneNode(true);
+
+  cloneTable.appendChild(colgroup);
+  cloneTable.appendChild(theadClone);
+  clone.appendChild(cloneTable);
+  document.body.appendChild(clone);
+
+  const getHeaderHeight = () => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--header-height').trim();
+    if (raw.endsWith('rem')) {
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      return parseFloat(raw) * rootFontSize;
+    }
+    return parseFloat(raw) || 0;
+  };
+
+  function sync() {
+    const headerHeight = getHeaderHeight();
+    const containerRect = container.getBoundingClientRect();
+    const theadRect = thead.getBoundingClientRect();
+    const isScrolledPast = theadRect.top <= headerHeight;
+
+    clone.style.top = headerHeight + 'px';
+    clone.style.left = containerRect.left + 'px';
+    clone.style.width = containerRect.width + 'px';
+    cloneTable.style.width = table.offsetWidth + 'px';
+
+    const ths = Array.from(thead.querySelectorAll('th'));
+    while (colgroup.children.length < ths.length) {
+      colgroup.appendChild(document.createElement('col'));
+    }
+    while (colgroup.children.length > ths.length) {
+      colgroup.removeChild(colgroup.lastChild);
+    }
+    ths.forEach((th, i) => {
+      colgroup.children[i].style.width = th.getBoundingClientRect().width + 'px';
+    });
+
+    cloneTable.style.transform = 'translateX(-' + container.scrollLeft + 'px)';
+
+    clone.style.visibility = isScrolledPast ? 'visible' : 'hidden';
+    thead.style.visibility = isScrolledPast ? 'hidden' : 'visible';
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      sync();
+      ticking = false;
+    });
+  }
+
+  const resizeObserver = new ResizeObserver(onScroll);
+  resizeObserver.observe(container);
+  resizeObserver.observe(table);
+
+  window.addEventListener('scroll', onScroll);
+  container.addEventListener('scroll', sync);
+  window.addEventListener('resize', onScroll);
+
+  sync();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-sticky-header]').forEach(initStickyHeader);
+});
+
 console.log('Trial version of Cold Storage Monitoring System (CSMS) is running.');
 console.log('if you see bugs or issues, please report to https://github.com/febriarr/csms/issues');
 console.log('Or contact the developer at hello.febriar@gmail.com');
