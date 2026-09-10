@@ -47,7 +47,9 @@ export class TemperatureService {
         tx
       );
 
-      const hasDiagnosticIssue = input.sensorFailCount > 0 || input.wifiFailCount > 0 || input.httpFailCount > 0;
+      // reset abnormal.
+      const hasDiagnosticIssue =
+        input.sensorFailCount > 0 || input.wifiFailCount > 0 || input.httpFailCount > 0 || !!input.reason;
 
       if (hasDiagnosticIssue) {
         await this.diagnosticsRepository.create(
@@ -56,9 +58,10 @@ export class TemperatureService {
             sensorFailCount: input.sensorFailCount,
             wifiFailCount: input.wifiFailCount,
             httpFailCount: input.httpFailCount,
+            rssi: input.rssi,
+            reason: input.reason ?? null,
             recordedAt: data.recordedAt,
             receivedAt: data.receivedAt,
-            rssi: input.rssi,
           },
           tx
         );
