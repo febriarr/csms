@@ -15,7 +15,7 @@ export function buildTemperatureCsv(logs: SelectTemperature[]): string {
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
 
-  const header = ['Tanggal', 'Waktu', 'Suhu (°C)'];
+  const header = ['Date', 'Time', 'Temperature (°C)'];
   const lines = logs.map(log => {
     const r = toRow(log);
     return [r.date, r.time, r.temperature].map(escape).join(',');
@@ -39,7 +39,7 @@ export async function buildTemperatureExcelBuffer(
   sheet.addRow([]); // baris kosong pemisah
 
   const headerRowIndex = 4;
-  sheet.getRow(headerRowIndex).values = ['Tanggal', 'Waktu', 'Suhu (°C)'];
+  sheet.getRow(headerRowIndex).values = ['Date', 'Time', 'Temperature (°C)'];
   sheet.getRow(headerRowIndex).font = { bold: true };
   sheet.columns = [{ width: 15 }, { width: 12 }, { width: 14 }];
 

@@ -20,6 +20,20 @@
 
     return '/dashboard/reports/diagnostics?' + params.toString();
   }
+
+  const resetReasonCodeLabel = {
+    0: 'Unknown',
+    1: 'Power On',
+    2: 'External Pin',
+    3: 'Software Restart',
+    4: 'Panic',
+    5: 'Interrupt Watchdog',
+    6: 'Task Watchdog',
+    7: 'Watchdog (RTC/Other)',
+    8: 'Deep Sleep Wake',
+    9: 'Brownout',
+    10: 'SDIO',
+  };
 %>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
@@ -34,7 +48,7 @@
   </div>
 
   <a href="<%= buildBackUrl() %>" class="btn btn-outline">
-    &larr; Kembali ke Ranking
+    &larr; Back To Trend
   </a>
 </div>
 
@@ -52,11 +66,12 @@
 
       <thead class="muted muted-foreground">
         <tr>
-          <th>Waktu</th>
+          <th>Timestamp</th>
           <th>Sensor Fail</th>
           <th>WiFi Fail</th>
           <th>HTTP Fail</th>
           <th>RSSI</th>
+          <th>Reason Code</th>
           <th>Reason</th>
         </tr>
       </thead>
@@ -65,11 +80,23 @@
         <% logs.items.forEach(item => { %>
 
           <tr>
-            <td><%= new Date(item.recordedAt).toLocaleString('id-ID') %></td>
+            <td><%= formatDateTime(item.recordedAt) %></td>
             <td><%= item.sensorFailCount %></td>
             <td><%= item.wifiFailCount %></td>
             <td><%= item.httpFailCount %></td>
             <td><%= item.rssi !== null ? item.rssi + ' dBm' : '—' %></td>
+            <td>
+              <% if (item.reason) { %>
+                <span title="<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Tidak diketahui' %>">
+                  <%= item.reason.resetReasonCode %>
+                  <span class="muted-foreground">
+                    (<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Unknown' %>)
+                  </span>
+                </span>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
             <td>
 
               <%
@@ -84,7 +111,7 @@
               <% if (item.reason) { %>
                 <span
                   class="badge <%= reasonBadgeClass[item.reason.resetReason] || 'badge-muted' %>"
-                  title="RSSI saat itu: <%= item.reason.lastRssi !== null ? item.reason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= item.reason.lastWifiFailCount %> · Sensor Fail: <%= item.reason.lastSensorFailCount %> · HTTP Fail: <%= item.reason.lastHttpFailCount %>"
+                  title="RSSI saat itu: <%= item.reason.lastRssi !== null ? item.reason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= item.reason.lastWifiFailCount %> · Sensor Fail: <%= item.reason.lastSensorFailCount %> · HTTP Fail: <%= item.reason.lastHttpFailCount %>. ReasonCode: <%= item.reason.resetReasonCode %>."
                 >
                   <%= item.reason.resetReason %>
                 </span>
@@ -102,21 +129,21 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1rem; padding: 1rem;">
 
       <span class="muted-foreground">
-        Halaman <%= logs.page %> dari <%= logs.totalPages %>
-        (<%= logs.totalItems %> kejadian)
+        Page <%= logs.page %> of <%= logs.totalPages %>
+        (<%= logs.totalItems %> incidents)
       </span>
 
       <div class="flex-items-center" style="gap: 0.5rem;">
 
         <% if (logs.page > 1) { %>
           <a href="<%= buildPageUrl(logs.page - 1) %>" class="btn btn-outline">
-            &larr; Sebelumnya
+            &larr; Prev
           </a>
         <% } %>
 
         <% if (logs.page < logs.totalPages) { %>
           <a href="<%= buildPageUrl(logs.page + 1) %>" class="btn btn-outline">
-            Berikutnya &rarr;
+            Next &rarr;
           </a>
         <% } %>
 

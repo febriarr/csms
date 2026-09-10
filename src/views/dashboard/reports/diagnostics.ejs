@@ -26,7 +26,7 @@
       <div class="flex-items-center">
 
         <div class="field">
-          <label for="from" class="field-label">Dari Tanggal</label>
+          <label for="from" class="field-label">From Date</label>
           <input
             type="date"
             id="from"
@@ -38,7 +38,7 @@
         </div>
 
         <div class="field">
-          <label for="to" class="field-label">Sampai Tanggal</label>
+          <label for="to" class="field-label">To Date</label>
           <input
             type="date"
             id="to"
@@ -60,7 +60,7 @@
 
         <div class="field" style="align-self: flex-end;">
           <button type="submit" class="btn btn-primary">
-            Terapkan
+            Apply
           </button>
         </div>
 
@@ -90,7 +90,7 @@
           <th>WiFi Fail</th>
           <th>HTTP Fail</th>
           <th>Avg RSSI</th>
-          <th>Reason Terakhir</th>
+          <th>Last Reason</th>
           <th>Total</th>
           <th></th>
         </tr>
@@ -147,14 +147,14 @@
                 href="<%= buildDeviceUrl(row.deviceId) %>"
                 class="btn btn-outline"
               >
-                Lihat Tren
+                Show Tren
               </a>
 
               <a
                 href="<%= buildDeviceDetailUrl(row.deviceId) %>"
                 class="btn btn-outline"
               >
-                Lihat Detail
+                Show Detail
               </a>
             </td>
           </tr>
@@ -180,7 +180,7 @@
 
     <% if (trend.length === 0) { %>
 
-      <p class="muted">
+      <p class="muted-foreground">
         Tidak ada data tren untuk device ini pada rentang tanggal ini.
       </p>
 

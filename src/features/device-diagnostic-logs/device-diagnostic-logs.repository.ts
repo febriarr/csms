@@ -26,6 +26,7 @@ export type DiagnosticsSummaryRow = {
   wifiFailTotal: number;
   httpFailTotal: number;
   avgRssi: number | null;
+  lastReason: DeviceTroubleReason | null;
   total: number;
 };
 
@@ -70,11 +71,24 @@ export class DeviceDiagnosticLogsRepository extends BaseRepository<typeof device
         sensorFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.sensorFailCount})`.mapWith(Number),
         wifiFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.wifiFailCount})`.mapWith(Number),
         httpFailTotal: sql<number>`sum(${deviceDiagnosticsLogs.httpFailCount})`.mapWith(Number),
-        // avg() otomatis skip baris dengan rssi null (device
-        // disconnected saat payload dibuat). Dibulatkan 1 desimal.
         avgRssi: sql<number | null>`round(avg(${deviceDiagnosticsLogs.rssi})::numeric, 1)`.mapWith(v =>
           v === null ? null : Number(v)
         ),
+        // Reason dari log dengan recordedAt terbaru YANG PUNYA reason
+        // (bukan sekadar log terbaru apapun — kalau log terbaru nggak
+        // ada reason-nya, mundur ke yang sebelumnya)
+        lastReason: sql<DeviceTroubleReason | null>`
+          (
+            select "latest"."reason"
+            from ${deviceDiagnosticsLogs} as latest
+            where latest.device_id = ${deviceDiagnosticsLogs.deviceId}
+              and latest.reason is not null
+              and latest.recorded_at >= ${from}
+              and latest.recorded_at < ${to}
+            order by latest.recorded_at desc
+            limit 1
+          )
+        `,
       })
       .from(deviceDiagnosticsLogs)
       .innerJoin(devices, eq(deviceDiagnosticsLogs.deviceId, devices.id))

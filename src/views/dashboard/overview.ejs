@@ -7,12 +7,12 @@
 
 <div class="dashboard-page-card">
   <div class="flex-between" style="margin-bottom: 1rem;">
-    <h3 style="margin: 0;">Diagnostics Hari Ini</h3>
-    <a href="/dashboard/reports/diagnostics" class="btn btn-outline">Lihat Detail &amp; Rentang Tanggal</a>
+    <h3 style="margin: 0;">Today Diagnostics</h3>
+    <a href="/dashboard/reports/diagnostics" class="btn btn-outline"><i class="ph ph-eye"></i> View Details</a>
   </div>
 
   <% if (diagnosticsToday.length === 0) { %>
-  <p class="muted">Belum ada kejadian sensor/WiFi/HTTP gagal hari ini. 👍</p>
+  <p class="muted">Belum ada kejadian sensor/WiFi/HTTP gagal hari ini.</p>
   <% } else { %>
   <table class="dashboard-table">
     <thead class="muted muted-foreground">

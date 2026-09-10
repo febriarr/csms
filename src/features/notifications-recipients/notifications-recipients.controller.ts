@@ -36,10 +36,10 @@ export class NotificationsRecipientsController {
     const data = await this.service.findAll(req.query);
 
     res.render('dashboard/notifications-recipients', {
-      title: 'Notifications Recipients',
+      title: 'Notification Recipients',
       layout: 'layouts/dashboard',
       currentPath: '/dashboard/notifications-recipients',
-      pageTitle: 'Notifications Recipients',
+      pageTitle: 'Notification Recipients',
       pageDescription: 'Manage notification recipients for your application.',
       pageScripts: ['/js/notifications-recipients.js'],
       currentName: req.query?.name,
