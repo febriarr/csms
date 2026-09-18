@@ -64,6 +64,13 @@
       "when": 1789723675250,
       "tag": "0008_worried_the_order",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789725039301,
+      "tag": "0009_shiny_nomad",
+      "breakpoints": true
     }
   ]
 }
