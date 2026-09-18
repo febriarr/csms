@@ -27,10 +27,18 @@ export class DeviceController {
   renderStatusPage = async (_req: Request, res: Response) => {
     const devices = await this.devicesService.renderStatusPage();
 
+    const monitoringDate = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date());
+
     res.render('status', {
       title: 'Status',
       devices,
       pageScripts: ['/js/device-status.js'],
+      monitoringDate,
     });
   };
 

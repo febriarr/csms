@@ -42,9 +42,26 @@ export function formatLastSeen(date: Date | null): string {
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
+export function formatDateWIB(date: Date | string | number) {
+  const parts = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date(date));
+
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value ?? '';
+
+  return `${get('day')} ${get('month')} ${get('year')}, ${get('hour')}:${get('minute')}`;
+}
+
 export function viewHelpers(_req: Request, res: Response, next: NextFunction) {
   res.locals.formatDateTime = formatDateTime;
   res.locals.formatLastSeen = formatLastSeen;
+  res.locals.formatDateWIB = formatDateWIB;
   res.locals.stateLabelMap = stateLabelMap;
   next();
 }

@@ -44,20 +44,20 @@
         <td style="width: 350px;"><%= device.location || '-' %></td>
         <td>
 
-          <%= device.normalMinTemperature %>°C &ndash; <%= device.normalMaxTemperature %>°C
+          &lt; <%= device.defrostThreshold %>°C
 
         </td>
 
         <td>
-          <%= device.defrostMinTemperature %>°C &ndash; <%= device.defrostMaxTemperature %>°C
+          <%= device.defrostThreshold %>°C &ndash; <%= device.warningThreshold %>°C
         </td>
 
         <td>
-          <%= device.warningMinTemperature %>°C &ndash; <%= device.warningMaxTemperature %>°C
+          <%= device.warningThreshold %>°C &ndash; <%= device.criticalThreshold %>°C
         </td>
 
         <td>
-          >= <%= device.criticalMinTemperature %>°C
+          >= <%= device.criticalThreshold %>°C
         </td>
 
         <td>
@@ -70,8 +70,8 @@
         <td>
 
           <span style="display: flex; gap: 0.5rem; align-items: center;">
-            <a
-              href="/dashboard/devices/<%= device.id %>/update"
+            
+            <a  href="/dashboard/devices/<%= device.id %>/update"
             >
               <button
                 type="button"

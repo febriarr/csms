@@ -9,13 +9,13 @@ export function buildAlertReason(
 
   switch (reasonCode) {
     case 'DEFROST_DETECTED':
-      return `Temperature ${temperature}°C entered defrost range (${device.defrostMinTemperature}°C to ${device.defrostMaxTemperature}°C).`;
+      return `Temperature ${temperature}°C entered defrost range (${device.defrostThreshold}°C to ${device.warningThreshold}°C).`;
     case 'WARNING_TEMPERATURE':
-      return `Temperature ${temperature}°C exceeded warning threshold (${device.warningMinTemperature}°C to ${device.warningMaxTemperature}°C).`;
+      return `Temperature ${temperature}°C exceeded warning threshold (${device.warningThreshold}°C to ${device.criticalThreshold}°C).`;
     case 'CRITICAL_TEMPERATURE':
-      return `Temperature ${temperature}°C exceeded critical threshold (above ${device.criticalMinTemperature}°C).`;
+      return `Temperature ${temperature}°C exceeded critical threshold (above ${device.criticalThreshold}°C).`;
     case 'TEMPERATURE_RECOVERED':
-      return `Temperature ${temperature}°C returned to normal range (${device.normalMinTemperature}°C to ${device.normalMaxTemperature}°C).`;
+      return `Temperature ${temperature}°C returned to normal range (up to ${device.defrostThreshold}°C).`;
     case 'DEVICE_OFFLINE':
       return `Device stopped sending data. Last seen at ${formatDateTime(device.lastSeenAt)}.`;
     case 'DEVICE_RECOVERED':
