@@ -17,61 +17,19 @@ export const devices = pgTable('devices', {
     precision: 5,
     scale: 2,
     mode: 'number',
-  }),
+  }).notNull(),
 
   warningThreshold: numeric('warning_threshold', {
     precision: 5,
     scale: 2,
     mode: 'number',
-  }),
+  }).notNull(),
 
   criticalThreshold: numeric('critical_threshold', {
     precision: 5,
     scale: 2,
     mode: 'number',
-  }),
-
-  normalMinTemperature: numeric('normal_min_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  normalMaxTemperature: numeric('normal_max_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  defrostMinTemperature: numeric('defrost_min_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  defrostMaxTemperature: numeric('defrost_max_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  warningMinTemperature: numeric('warning_min_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  warningMaxTemperature: numeric('warning_max_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
-
-  criticalMinTemperature: numeric('critical_min_temperature', {
-    precision: 5,
-    scale: 2,
-    mode: 'number',
-  }),
+  }).notNull(),
 
   // Current Device State
 
