@@ -20,16 +20,16 @@
 
   <div class="threshold-grid">
     <div class="threshold-item">
-      <div class="threshold-title">Normal</div>
-      <div class="threshold-val"><%= device.normalMinTemperature %> – <%= device.normalMaxTemperature %></div>
+      <div class="threshold-title">Defrost</div>
+      <div class="threshold-val"><%= device.defrostThreshold %> – <%= device.warningThreshold %></div>
     </div>
     <div class="threshold-item">
       <div class="threshold-title">Warning</div>
-      <div class="threshold-val"><%= device.warningMinTemperature %> – <%= device.warningMaxTemperature %></div>
+      <div class="threshold-val"><%= device.warningThreshold %> – <%= device.criticalThreshold %></div>
     </div>
     <div class="threshold-item">
       <div class="threshold-title">Critical</div>
-      <div class="threshold-val">&gt; <%= device.criticalMinTemperature %></div>
+      <div class="threshold-val">&gt; <%= device.criticalThreshold %></div>
     </div>
   </div>
 
