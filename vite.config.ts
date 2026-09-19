@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   build: {
+    minify: true,
     rollupOptions: {
       input: resolve(process.cwd(), 'src/client/main.ts'),
 
