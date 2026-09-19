@@ -15,8 +15,8 @@
         >Belum ada riwayat alert.</ui5-message-strip
       >
     </div>
-    <div slot="footer" class="modal-footer">
-      <ui5-button design="Transparent" x-on:click="open = false">Close</ui5-button>
-    </div>
+    <ui5-toolbar slot="footer">
+      <ui5-toolbar-button design="Default" x-on:click="open = false" text="Close"></ui5-toolbar-button>
+    </ui5-toolbar>
   </ui5-dialog>
 </div>

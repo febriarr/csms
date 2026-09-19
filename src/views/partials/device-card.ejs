@@ -26,15 +26,15 @@
     <div class="threshold-grid threshold-grid--card">
       <div class="threshold-item">
         <div class="threshold-title">Defrost</div>
-        <div class="threshold-val"><%= device.defrostThreshold %>°C</div>
+        <div class="threshold-val"><%= device.defrostThreshold %>°C - <%= device.warningThreshold %>°C</div>
       </div>
       <div class="threshold-item">
         <div class="threshold-title">Warning</div>
-        <div class="threshold-val"><%= device.warningThreshold %>°C</div>
+        <div class="threshold-val"><%= device.warningThreshold %>°C - <%= device.criticalThreshold %>°C</div>
       </div>
       <div class="threshold-item">
         <div class="threshold-title">Critical</div>
-        <div class="threshold-val"><%= device.criticalThreshold %>°C</div>
+        <div class="threshold-val">> <%= device.criticalThreshold %>°C</div>
       </div>
     </div>
   </div>

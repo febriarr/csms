@@ -886,6 +886,15 @@ footer {
   border-radius: 0.25rem;
   background: #fff;
 }
+
+.alert-item-defrost {
+  border-left-color: var(--sap-information);
+}
+
+.alert-item-offline {
+  border-left-color: var(--sapContent_NonInteractiveIconColor);
+}
+
 .alert-item-critical {
   border-left-color: var(--sap-negative);
 }
