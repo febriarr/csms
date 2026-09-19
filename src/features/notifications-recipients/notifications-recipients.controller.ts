@@ -65,7 +65,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients/create',
       pageTitle: 'Create Notification Recipient',
       pageDescription: 'Create a new notification recipient for your application.',
-      pageScripts: ['/js/notifications-recipients.js'],
+      pageScripts: ['/build/js/notifications-recipients.js'],
     });
   };
 
