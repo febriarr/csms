@@ -59,9 +59,9 @@ export class AuthController {
   loginPage = async (req: Request, res: Response) => {
     return res.render('login', {
       title: 'Login Page',
-      layout: 'layouts/app',
+      layout: 'layouts/auth',
       error: req.query.error ?? null,
-      pageScripts: ['/js/login.js'],
+      pageScripts: ['/build/js/login.js'],
     });
   };
 }

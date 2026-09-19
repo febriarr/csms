@@ -4,116 +4,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title ?? 'CI-CMS Dashboard' %></title>
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-
-  <link rel="stylesheet" href="/css/app.css" />
-  <link rel="stylesheet" href="/css/app.css" />
-  <% if (typeof pageStyles !== 'undefined') { %>
-  <% pageStyles.forEach(href => { %>
-  <link rel="stylesheet" href="<%= href %>" />
-  <% }) %>
-  <% } %>
-</head>
+  <title><%= title ?? 'CI-CSMS Dashboard' %></title>
+  <link rel="icon" type="image/png" href="/build/favicon.png" />
+  <link rel="stylesheet" href="/build/css/app.css" />
+  <% if (typeof pageStyles !== 'undefined') { pageStyles.forEach(href => { %>
+  <link rel="stylesheet" href="<%= href %>" /><% }) } %>
 </head>
 
 <body class="dashboard-shell" data-app-version="<%= appVersion %>">
   <% const isActive = (path) => currentPath === path; %>
-
   <div class="dashboard-layout">
     <aside class="dashboard-sidebar" id="dashboard-sidebar">
       <div class="dashboard-sidebar__header">
         <div>
-          <p class="dashboard-sidebar__eyebrow">CI-CSMS</p>
-          <h2>Dashboard</h2>
+          <h2>Cold Storage Monitoring</h2>
         </div>
       </div>
-
       <nav class="dashboard-sidebar__nav" aria-label="Dashboard navigation">
-        <a href="/dashboard"
-          class="dashboard-sidebar__link <%= isActive('/dashboard') ? 'is-active' : '' %>">
-          <i class="ph ph-squares-four"></i>
-          <span>Overview</span>
+        <a href="/dashboard" class="dashboard-sidebar__link <%= isActive('/dashboard') ? 'is-active' : '' %>">
+          <ui5-icon name="home"></ui5-icon><span>Overview</span>
         </a>
-
-        <a href="/dashboard/devices"
-          class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">
-          <i class="ph ph-cpu"></i>
-          <span>Devices</span>
+        <a href="/dashboard/devices" class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">
+          <ui5-icon name="sys-monitor"></ui5-icon><span>Devices</span>
         </a>
-
-        <a href="/dashboard/notifications-recipients"
-          class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">
-          <i class="ph ph-bell"></i>
-          <span>Notification Recipients</span>
+        <a href="/dashboard/notifications-recipients" class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">
+          <ui5-icon name="bell"></ui5-icon><span>Notification Recipients</span>
         </a>
-
-        <a href="/dashboard/reports/temperature"
-          class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">
-          <i class="ph ph-chart-line-up"></i>
-          <span>Reports</span>
+        <a href="/dashboard/reports/temperature" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">
+          <ui5-icon name="line-chart"></ui5-icon><span>Temperature Reports</span>
         </a>
-
-        <a href="/dashboard/reports/diagnostics"
-          class="dashboard-sidebar__link <%= isActive('/dashboard/reports/diagnostics') ? 'is-active' : '' %>">
-          <i class="ph ph-stethoscope"></i>
-          <span>Diagnostics</span>
+        <a href="/dashboard/reports/diagnostics" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/diagnostics') ? 'is-active' : '' %>">
+          <ui5-icon name="activity-items"></ui5-icon><span>Diagnostics</span>
         </a>
       </nav>
     </aside>
-
     <div class="dashboard-backdrop" id="dashboard-backdrop"></div>
-
     <div class="dashboard-main">
       <header class="dashboard-topbar">
         <button type="button" class="dashboard-toggle" id="dashboard-toggle" aria-label="Toggle sidebar">
-          <span></span>
-          <span></span>
-          <span></span>
+          <ui5-icon name="menu2"></ui5-icon>
         </button>
-
         <div class="dashboard-header">
           <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
         </div>
-        <button type="button" id="logout-button" class="btn btn-outline">
-          <i class="ph ph-sign-out"></i>
-          <span>Logout</span>
-        </button>
+        <ui5-button id="logout-button" icon="log" design="Transparent">
+          Logout
+        </ui5-button>
       </header>
-
-      <section class="dashboard-content"><%- body %></section>
+      <main class="dashboard-content"><%- body %></main>
     </div>
   </div>
-
-  <script src="/js/dashboard-sidebar.js"></script>
-
-  <div data-slot="alert" class="alert alert--error" style="display: none;">
-    <span class="alert__title" data-slot="alert-title"></span>
+  <script src="/build/js/dashboard-sidebar.js"></script>
+  <div data-slot="alert" class="alert alert--error is-hidden"><span class="alert__title" data-slot="alert-title"></span>
     <ul class="alert__list" data-slot="alert-list"></ul>
   </div>
-
-  <div data-slot="loading-overlay" style="display: none;">
+  <div data-slot="loading-overlay" class="is-hidden">
     <div data-slot="loading"></div>
   </div>
-
-  <% if (typeof pageVendor !== 'undefined') { %>
-  <% pageVendor.forEach(src => { %>
-  <script src="<%= src %>"></script>
-  <% }) %>
-  <% } %>
-
-  <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
-  <% pageScripts.forEach(src => { %>
-  <script type="module" src="<%= src %>"></script>
-  <% }) %>
-  <% } %>
-
+  <% if (typeof pageVendor !== 'undefined') pageVendor.forEach(src => { %><script src="<%= src %>"></script><% }) %>
+  <% if (typeof pageScripts !== 'undefined' && pageScripts.length) pageScripts.forEach(src => { %><script type="module" src="<%= src %>"></script><% }) %>
+  <script type="module" src="/app.js"></script>
 </body>
 
 </html>

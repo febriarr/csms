@@ -1,77 +1,108 @@
 <%
-  function buildDeviceUrl(deviceId) {
-    const params = new URLSearchParams({
-      from: filters.from || '',
-      to: filters.to || '',
-      deviceId: deviceId,
-    });
+function buildDeviceUrl(deviceId) {
+  const params = new URLSearchParams({
+    from: filters.from || '',
+    to: filters.to || '',
+    deviceId: deviceId,
+  });
 
-    return '/dashboard/reports/diagnostics?' + params.toString();
-  }
+  return '/dashboard/reports/diagnostics?' + params.toString();
+}
 
-  function buildDeviceDetailUrl(deviceId) {
-    const params = new URLSearchParams({
-      from: filters.from || '',
-      to: filters.to || '',
-      deviceId: deviceId,
-    });
+function buildDeviceDetailUrl(deviceId) {
+  const params = new URLSearchParams({
+    from: filters.from || '',
+    to: filters.to || '',
+    deviceId: deviceId,
+  });
 
-    return '/dashboard/reports/diagnostics/detail?' + params.toString();
-  }
+  return '/dashboard/reports/diagnostics/detail?' + params.toString();
+}
 %>
 
-<form method="GET" action="/dashboard/reports/diagnostics" id="diagnostics-report-form">
-  <div style="display:flex; justify-content:end">
-    <div class="field-group" style="max-width: 600px;">
+
+<form
+  method="GET"
+  action="/dashboard/reports/diagnostics"
+  id="diagnostics-report-form"
+  class="filter-bar"
+>
+  <div class="filter-actions">
+
+    <div class="field-group diagnostics-filter-group">
+
       <div class="flex-items-center">
 
         <div class="field">
-          <label for="from" class="field-label">From Date</label>
-          <input
+          <label for="from" class="field-label">
+            From Date
+          </label>
+
+          <ui5-date-picker
             type="date"
             id="from"
             name="from"
             required
-            class="field-input"
             value="<%= filters.from %>"
-          />
+          ></ui5-date-picker>
         </div>
 
+
         <div class="field">
-          <label for="to" class="field-label">To Date</label>
-          <input
+          <label for="to" class="field-label">
+            To Date
+          </label>
+
+          <ui5-date-picker
             type="date"
             id="to"
             name="to"
             required
-            class="field-input"
             value="<%= filters.to %>"
-          />
+          ></ui5-date-picker>
         </div>
 
+
         <% if (filters.deviceId) { %>
+
           <input
             type="hidden"
             name="deviceId"
             value="<%= filters.deviceId %>"
           />
+
         <% } %>
 
 
-        <div class="field" style="align-self: flex-end;">
-          <button type="submit" class="btn btn-primary">
+        <div class="field diagnostics-filter-submit">
+
+          <ui5-button
+            type="Submit"
+            design="Emphasized"
+          >
             Apply
-          </button>
+          </ui5-button>
+
         </div>
 
       </div>
+
     </div>
+
   </div>
 </form>
 
-<div class="wrapper-table" data-sticky-header>
 
-  <h3 style="padding: 1rem;">Ranking Device</h3>
+<div>
+
+  <div class="section-toolbar">
+
+    <h3 class="section-title">
+      Ranking Device
+    </h3>
+
+  </div>
+
 
   <% if (summary.length === 0) { %>
 
@@ -81,102 +112,185 @@
 
   <% } else { %>
 
-    <table class="dashboard-table" data-sticky-header>
 
-      <thead class="muted muted-foreground">
-        <tr>
-          <th>Device</th>
-          <th>Sensor Fail</th>
-          <th>WiFi Fail</th>
-          <th>HTTP Fail</th>
-          <th>Avg RSSI</th>
-          <th>Last Reason</th>
-          <th>Total</th>
-          <th></th>
-        </tr>
-      </thead>
+    <ui5-table
+      id="table"
+      class="enterprise-table"
+      sticky-column-header
+      overflow-mode="Scroll"
+      accessible-name="Device Diagnostics Ranking"
+    >
 
-      <tbody>
-        <% summary.forEach(row => { %>
+      <ui5-table-header-row slot="headerRow">
 
-          <tr
-            <% if (filters.deviceId === row.deviceId) { %>
-              style="background: #f3f4f6;"
-            <% } %>
-          >
-            <td>
-              <div class="device-name">
-                <%= row.deviceName %>
-              </div>
+        <ui5-table-header-cell min-width="220px">
+          Device
+        </ui5-table-header-cell>
 
-              <div class="device-code">
-                <%= row.deviceCode %>
-              </div>
-            </td>
+        <ui5-table-header-cell min-width="130px">
+          Sensor Fail
+        </ui5-table-header-cell>
 
-            <td><%= row.sensorFailTotal %></td>
-            <td><%= row.wifiFailTotal %></td>
-            <td><%= row.httpFailTotal %></td>
-            <td><%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %></td>
-            <td>
+        <ui5-table-header-cell min-width="130px">
+          WiFi Fail
+        </ui5-table-header-cell>
 
-              <%
-                const reasonBadgeClass = {
-                  BROWNOUT: 'badge-danger',
-                  PANIC: 'badge-purple',
-                  WATCHDOG: 'badge-warning',
-                  UNKNOWN: 'badge-muted',
-                };
-              %>
+        <ui5-table-header-cell min-width="130px">
+          HTTP Fail
+        </ui5-table-header-cell>
 
-              <% if (row.lastReason) { %>
-                <span
-                  class="badge <%= reasonBadgeClass[row.lastReason.resetReason] || 'badge-muted' %>"
-                  title="RSSI saat itu: <%= row.lastReason.lastRssi !== null ? row.lastReason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= row.lastReason.lastWifiFailCount %> · Sensor Fail: <%= row.lastReason.lastSensorFailCount %> · HTTP Fail: <%= row.lastReason.lastHttpFailCount %>"
-                >
-                  <%= row.lastReason.resetReason %>
-                </span>
-              <% } else { %>
-                —
-              <% } %>
-            </td>
-            <td><strong><%= row.total %></strong></td>
+        <ui5-table-header-cell min-width="130px">
+          Avg RSSI
+        </ui5-table-header-cell>
 
-            <td style="display: flex; gap: 0.5rem; align-items: center;">
-              <a
-                href="<%= buildDeviceUrl(row.deviceId) %>"
-                class="btn btn-outline"
+        <ui5-table-header-cell min-width="220px">
+          Last Reason
+        </ui5-table-header-cell>
+
+        <ui5-table-header-cell min-width="100px">
+          Total
+        </ui5-table-header-cell>
+
+        <ui5-table-header-cell min-width="220px">
+          Actions
+        </ui5-table-header-cell>
+
+      </ui5-table-header-row>
+
+
+      <% summary.forEach(row => { %>
+
+        <ui5-table-row>
+
+          <!-- Device -->
+          <ui5-table-cell min-width="220px" style="display: flex; align-items: center; gap: 1rem;">
+
+            <div class="device-name">
+              <%= row.deviceName %>
+            </div>
+
+            <div class="device-code">
+              <%= row.deviceCode %>
+            </div>
+
+          </ui5-table-cell>
+
+
+          <!-- Sensor Fail -->
+          <ui5-table-cell min-width="130px">
+            <%= row.sensorFailTotal %>
+          </ui5-table-cell>
+
+
+          <!-- WiFi Fail -->
+          <ui5-table-cell min-width="130px">
+            <%= row.wifiFailTotal %>
+          </ui5-table-cell>
+
+
+          <!-- HTTP Fail -->
+          <ui5-table-cell min-width="130px">
+            <%= row.httpFailTotal %>
+          </ui5-table-cell>
+
+
+          <!-- Avg RSSI -->
+          <ui5-table-cell min-width="130px">
+            <%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %>
+          </ui5-table-cell>
+
+
+          <!-- Last Reason -->
+          <ui5-table-cell min-width="220px">
+
+            <%
+              const reasonTagDesign = {
+                BROWNOUT: 'Negative',
+                PANIC: 'Critical',
+                WATCHDOG: 'Critical',
+                UNKNOWN: 'Neutral',
+              };
+            %>
+
+
+            <% if (row.lastReason) { %>
+
+              <ui5-tag
+                design="<%= reasonTagDesign[row.lastReason.resetReason] || 'Neutral' %>"
+                title="RSSI saat itu: <%= row.lastReason.lastRssi !== null ? row.lastReason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= row.lastReason.lastWifiFailCount %> · Sensor Fail: <%= row.lastReason.lastSensorFailCount %> · HTTP Fail: <%= row.lastReason.lastHttpFailCount %>"
               >
-                Show Tren
-              </a>
+                <%= row.lastReason.resetReason %>
+              </ui5-tag>
 
-              <a
+            <% } else { %>
+
+              <ui5-text class="table-empty-value">
+                —
+              </ui5-text>
+
+            <% } %>
+
+          </ui5-table-cell>
+
+
+          <!-- Total -->
+          <ui5-table-cell min-width="100px">
+
+            <strong>
+              <%= row.total %>
+            </strong>
+
+          </ui5-table-cell>
+
+
+          <!-- Actions -->
+          <ui5-table-cell min-width="220px">
+
+            <div class="diagnostics-row-actions">
+
+              <ui5-link
+                href="<%= buildDeviceUrl(row.deviceId) %>"
+              >
+                Show Trend
+              </ui5-link>
+
+
+              <ui5-link
                 href="<%= buildDeviceDetailUrl(row.deviceId) %>"
-                class="btn btn-outline"
               >
                 Show Detail
-              </a>
-            </td>
-          </tr>
+              </ui5-link>
 
-        <% }) %>
-      </tbody>
+            </div>
 
-    </table>
+          </ui5-table-cell>
+
+        </ui5-table-row>
+
+      <% }) %>
+
+    </ui5-table>
+
 
   <% } %>
 
 </div>
 
+
 <% if (selectedDevice && trend) { %>
 
-  <div class="wrapper-table" style="margin-top: 1.5rem;">
+  <div class="dashboard-page-card diagnostics-trend-card">
 
-    <h3 style="margin-top: 0; padding: 1rem;">
+    <h3 class="section-title trend-title">
+
       Tren Harian —
+
       <%= selectedDevice.deviceName %>
+
       (<%= selectedDevice.deviceCode %>)
+
     </h3>
+
 
     <% if (trend.length === 0) { %>
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="icon" type="image/png" href="/build/favicon.png" />
+
+  <title><%= title ?? 'CI-CSMS' %></title>
+
+  <link rel="stylesheet" href="/build/css/app.css" />
+
+  <script src="/build/vendor/htmx.min.js" defer></script>
+</head>
+
+<body class="auth-shell">
+
+  <main class="auth-layout">
+    <%- body %>
+  </main>
+
+  <div
+    data-slot="alert"
+    class="alert alert--error"
+    style="display: none"
+  >
+    <span
+      class="alert__title"
+      data-slot="alert-title"
+    ></span>
+
+    <ul
+      class="alert__list"
+      data-slot="alert-list"
+    ></ul>
+  </div>
+
+  <div
+    data-slot="loading-overlay"
+    style="display: none"
+  >
+    <div data-slot="loading"></div>
+  </div>
+
+  <% if (typeof pageScripts !== 'undefined' && pageScripts.length) { %>
+    <% pageScripts.forEach(src => { %>
+      <script src="<%= src %>"></script>
+    <% }) %>
+  <% } %>
+
+  <script type="module" src="/app.js"></script>
+
+</body>
+</html>

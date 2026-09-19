@@ -14,13 +14,26 @@ const app = express();
 
 app.locals.appVersion = appVersion;
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+
+        scriptSrc: ["'self'", "'unsafe-eval'"],
+
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 // Gunnakan views engine dari ejs
 app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'src', 'views'));
+app.use(express.static(path.join(process.cwd(), 'dist', 'client')));
 
 // Gunakan layout dari express layouts
 app.use(expressLayouts);

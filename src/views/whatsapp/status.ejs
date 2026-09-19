@@ -1,9 +1,1 @@
-<h1>Status WhatsApp Gateway</h1>
-<% if (connected) { %>
-<p style="color: green;">✅ Terhubung</p>
-<% } else if (qrImage) { %>
-<p>Scan QR ini pakai WhatsApp:</p>
-<img src="<%= qrImage %>" alt="QR Code" />
-<% } else { %>
-<p>Menunggu QR code...</p>
-<% } %>
+<div class="dashboard-page-header"><div><p class="dashboard-page-eyebrow">Integration</p><h2>Status WhatsApp Gateway</h2><p>Connection status for outbound alert notifications.</p></div></div><div class="dashboard-page-card"><div class="section-body"><ui5-message-strip design="Positive" hide-close-button>Terhubung</ui5-message-strip><p class="muted-foreground" style="margin-top:1rem">Scan QR ini pakai WhatsApp:</p><p>Menunggu QR code...</p></div></div>

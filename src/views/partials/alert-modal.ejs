@@ -3,18 +3,20 @@
   x-on:open-alert-modal.window="open = true"
   x-on:close-alert-modal.window="open = false"
   x-on:keydown.escape.window="open = false"
-  x-show="open"
-  x-cloak
-  class="modal-overlay"
+  x-effect="$refs.dialog.open = open"
+  x-on:ui5-dialog-close.window="open = false"
 >
-  <div class="modal-box" x-on:click.outside="open = false">
-    <div class="modal-header">
-      <h3>Log History</h3>
-      <button class="modal-close" x-on:click="open = false">&times;</button>
-    </div>
-
+  <ui5-dialog id="log-history-dialog" x-ref="dialog" header-text="Log History" class="log-history-dialog">
     <div id="alert-modal-body" class="modal-body">
-      <p class="modal-loading htmx-indicator">Memuat riwayat alert...</p>
+      <div id="alert-modal-loading" class="modal-loading htmx-indicator">
+        <ui5-busy-indicator active></ui5-busy-indicator><span>Memuat riwayat alert...</span>
+      </div>
+      <ui5-message-strip id="alert-modal-empty" design="Information" hide-close-button class="is-hidden"
+        >Belum ada riwayat alert.</ui5-message-strip
+      >
     </div>
-  </div>
+    <div slot="footer" class="modal-footer">
+      <ui5-button design="Transparent" x-on:click="open = false">Close</ui5-button>
+    </div>
+  </ui5-dialog>
 </div>

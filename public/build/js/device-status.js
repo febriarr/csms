@@ -1,5 +1,15 @@
 const source = new EventSource('/events/device-status');
 
+function openAlertHistory() {
+  window.dispatchEvent(new CustomEvent('open-alert-modal'));
+}
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('.btn-view-alerts');
+  if (!button) return;
+  openAlertHistory();
+});
+
 const stateLabelMap = {
   NORMAL: 'Active Stable',
   DEFROST: 'Defrost Cycle',
@@ -30,6 +40,7 @@ source.addEventListener('device-update', event => {
   // badge status
   const badge = card.querySelector('.status-badge');
   badge.className = `status-badge status-${device.state.toLowerCase()}`;
+  badge.design = device.state === 'NORMAL' ? 'Positive' : device.state === 'WARNING' ? 'Critical' : device.state === 'CRITICAL' ? 'Negative' : device.state === 'DEFROST' ? 'Information' : 'Neutral';
   badge.textContent = device.state;
 
   // gauge box

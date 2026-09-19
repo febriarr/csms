@@ -37,7 +37,7 @@ export class DeviceController {
     res.render('status', {
       title: 'Status',
       devices,
-      pageScripts: ['/js/device-status.js'],
+      pageScripts: ['/build/js/device-status.js'],
       monitoringDate,
     });
   };

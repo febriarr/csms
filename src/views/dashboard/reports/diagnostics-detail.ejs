@@ -1,156 +1,256 @@
 <%
-  function buildPageUrl(page) {
-    const params = new URLSearchParams({
-      deviceId: device.id,
-      from: filters.from || '',
-      to: filters.to || '',
-      page: page,
-      pageSize: logs.pageSize,
-    });
+function buildPageUrl(page) {
+  const params = new URLSearchParams({
+    deviceId: device.id,
+    from: filters.from || '',
+    to: filters.to || '',
+    page: page,
+    pageSize: logs.pageSize,
+  });
 
-    return '/dashboard/reports/diagnostics/detail?' + params.toString();
-  }
+  return '/dashboard/reports/diagnostics/detail?' + params.toString();
+}
 
-  function buildBackUrl() {
-    const params = new URLSearchParams({
-      deviceId: device.id,
-      from: filters.from || '',
-      to: filters.to || '',
-    });
+function buildBackUrl() {
+  const params = new URLSearchParams({
+    deviceId: device.id,
+    from: filters.from || '',
+    to: filters.to || '',
+  });
 
-    return '/dashboard/reports/diagnostics?' + params.toString();
-  }
+  return '/dashboard/reports/diagnostics?' + params.toString();
+}
 
-  const resetReasonCodeLabel = {
-    0: 'Unknown',
-    1: 'Power On',
-    2: 'External Pin',
-    3: 'Software Restart',
-    4: 'Panic',
-    5: 'Interrupt Watchdog',
-    6: 'Task Watchdog',
-    7: 'Watchdog (RTC/Other)',
-    8: 'Deep Sleep Wake',
-    9: 'Brownout',
-    10: 'SDIO',
-  };
+const resetReasonCodeLabel = {
+  0: 'Unknown',
+  1: 'Power On',
+  2: 'External Pin',
+  3: 'Software Restart',
+  4: 'Panic',
+  5: 'Interrupt Watchdog',
+  6: 'Task Watchdog',
+  7: 'Watchdog (RTC/Other)',
+  8: 'Deep Sleep Wake',
+  9: 'Brownout',
+  10: 'SDIO',
+};
 %>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+
+<div class="detail-page-header">
+
   <div>
-    <h3 style="margin: 0;">
+
+    <h3>
       <%= device.name %>
-      <span class="device-code">(<%= device.code %>)</span>
+      <span class="device-code">
+        (<%= device.code %>)
+      </span>
     </h3>
-    <p class="muted-foreground" style="margin: 0.25rem 0 0;">
+
+    <p class="muted-foreground">
       <%= filters.from %> &mdash; <%= filters.to %>
     </p>
+
   </div>
 
-  <a href="<%= buildBackUrl() %>" class="btn btn-outline">
+
+  <a
+    href="<%= buildBackUrl() %>"
+    class="btn btn-outline"
+  >
     &larr; Back To Trend
   </a>
+
 </div>
 
-<div class="wrapper-table" data-sticky-header>
 
-  <% if (logs.items.length === 0) { %>
+<% if (logs.items.length === 0) { %>
 
-    <p class="muted-foreground p-4">
+  <div class="section-body">
+
+    <ui5-message-strip
+      design="Information"
+      hide-close-button
+    >
       Tidak ada kejadian sensor/WiFi/HTTP gagal untuk device ini pada rentang tanggal ini.
-    </p>
+    </ui5-message-strip>
 
-  <% } else { %>
+  </div>
 
-    <table class="dashboard-table" data-sticky-header>
+<% } else { %>
 
-      <thead class="muted muted-foreground">
-        <tr>
-          <th>Timestamp</th>
-          <th>Sensor Fail</th>
-          <th>WiFi Fail</th>
-          <th>HTTP Fail</th>
-          <th>RSSI</th>
-          <th>Reason Code</th>
-          <th>Reason</th>
-        </tr>
-      </thead>
 
-      <tbody>
-        <% logs.items.forEach(item => { %>
+  <ui5-table
+    class="enterprise-table "
+    overflow-mode="Scroll"
+    accessible-name="Diagnostic Logs"
+    style="height: 600px;"
+  >
 
-          <tr>
-            <td><%= formatDateTime(item.recordedAt) %></td>
-            <td><%= item.sensorFailCount %></td>
-            <td><%= item.wifiFailCount %></td>
-            <td><%= item.httpFailCount %></td>
-            <td><%= item.rssi !== null ? item.rssi + ' dBm' : '—' %></td>
-            <td>
-              <% if (item.reason) { %>
-                <span title="<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Tidak diketahui' %>">
-                  <%= item.reason.resetReasonCode %>
-                  <span class="muted-foreground">
-                    (<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Unknown' %>)
-                  </span>
-                </span>
-              <% } else { %>
-                —
-              <% } %>
-            </td>
-            <td>
+    <ui5-table-header-row slot="headerRow" sticky>
 
-              <%
-                const reasonBadgeClass = {
-                  BROWNOUT: 'badge-danger',
-                  PANIC: 'badge-purple',
-                  WATCHDOG: 'badge-warning',
-                  UNKNOWN: 'badge-muted',
-                };
-              %>
+      <ui5-table-header-cell min-width="220px">
+        Timestamp
+      </ui5-table-header-cell>
 
-              <% if (item.reason) { %>
-                <span
-                  class="badge <%= reasonBadgeClass[item.reason.resetReason] || 'badge-muted' %>"
-                  title="RSSI saat itu: <%= item.reason.lastRssi !== null ? item.reason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= item.reason.lastWifiFailCount %> · Sensor Fail: <%= item.reason.lastSensorFailCount %> · HTTP Fail: <%= item.reason.lastHttpFailCount %>. ReasonCode: <%= item.reason.resetReasonCode %>."
-                >
-                  <%= item.reason.resetReason %>
-                </span>
-              <% } else { %>
-                —
-              <% } %>
-            </td>
-          </tr>
+      <ui5-table-header-cell min-width="130px">
+        Sensor Fail
+      </ui5-table-header-cell>
 
-        <% }) %>
-      </tbody>
+      <ui5-table-header-cell min-width="130px">
+        WiFi Fail
+      </ui5-table-header-cell>
 
-    </table>
+      <ui5-table-header-cell min-width="130px">
+        HTTP Fail
+      </ui5-table-header-cell>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1rem; padding: 1rem;">
+      <ui5-table-header-cell min-width="130px">
+        RSSI
+      </ui5-table-header-cell>
 
-      <span class="muted-foreground">
-        Page <%= logs.page %> of <%= logs.totalPages %>
-        (<%= logs.totalItems %> incidents)
-      </span>
+      <ui5-table-header-cell min-width="220px">
+        Reason Code
+      </ui5-table-header-cell>
 
-      <div class="flex-items-center" style="gap: 0.5rem;">
+      <ui5-table-header-cell min-width="180px">
+        Reason
+      </ui5-table-header-cell>
 
-        <% if (logs.page > 1) { %>
-          <a href="<%= buildPageUrl(logs.page - 1) %>" class="btn btn-outline">
-            &larr; Prev
-          </a>
-        <% } %>
+    </ui5-table-header-row>
 
-        <% if (logs.page < logs.totalPages) { %>
-          <a href="<%= buildPageUrl(logs.page + 1) %>" class="btn btn-outline">
-            Next &rarr;
-          </a>
-        <% } %>
 
-      </div>
+    <% logs.items.forEach(item => { %>
+
+      <ui5-table-row>
+
+        <!-- Timestamp -->
+        <ui5-table-cell min-width="220px">
+          <%= formatDateTime(item.recordedAt) %>
+        </ui5-table-cell>
+
+
+        <!-- Sensor Fail -->
+        <ui5-table-cell min-width="130px">
+          <%= item.sensorFailCount %>
+        </ui5-table-cell>
+
+
+        <!-- WiFi Fail -->
+        <ui5-table-cell min-width="130px">
+          <%= item.wifiFailCount %>
+        </ui5-table-cell>
+
+
+        <!-- HTTP Fail -->
+        <ui5-table-cell min-width="130px">
+          <%= item.httpFailCount %>
+        </ui5-table-cell>
+
+
+        <!-- RSSI -->
+        <ui5-table-cell min-width="130px">
+          <%= item.rssi !== null ? item.rssi + ' dBm' : '—' %>
+        </ui5-table-cell>
+
+
+        <!-- Reason Code -->
+        <ui5-table-cell min-width="220px">
+
+          <% if (item.reason) { %>
+
+            <span
+              title="<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Tidak diketahui' %>"
+            >
+              <%= item.reason.resetReasonCode %>
+
+              <span class="muted-foreground">
+                (
+                <%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Unknown' %>
+                )
+              </span>
+            </span>
+
+          <% } else { %>
+
+            —
+
+          <% } %>
+
+        </ui5-table-cell>
+
+
+        <!-- Reason -->
+        <ui5-table-cell min-width="180px">
+
+          <% if (item.reason) { %>
+
+            <ui5-tag
+              design="<%= item.reason.resetReason === 'PANIC'
+                ? 'Negative'
+                : item.reason.resetReason === 'WATCHDOG'
+                  ? 'Critical'
+                  : item.reason.resetReason === 'BROWNOUT'
+                    ? 'Critical'
+                    : 'Neutral' %>"
+            >
+              <%= item.reason.resetReason %>
+            </ui5-tag>
+
+          <% } else { %>
+
+            —
+
+          <% } %>
+
+        </ui5-table-cell>
+
+      </ui5-table-row>
+
+    <% }) %>
+
+  </ui5-table>
+
+
+  <div class="table-pagination">
+
+    <span class="muted-foreground">
+      Page
+      <%= logs.page %>
+      of
+      <%= logs.totalPages %>
+      (<%= logs.totalItems %> incidents)
+    </span>
+
+
+    <div class="page-actions">
+
+      <% if (logs.page > 1) { %>
+
+        <a
+          href="<%= buildPageUrl(logs.page - 1) %>"
+          class="btn btn-outline"
+        >
+          &larr; Prev
+        </a>
+
+      <% } %>
+
+
+      <% if (logs.page < logs.totalPages) { %>
+
+        <a
+          href="<%= buildPageUrl(logs.page + 1) %>"
+          class="btn btn-outline"
+        >
+          Next &rarr;
+        </a>
+
+      <% } %>
 
     </div>
 
-  <% } %>
+  </div>
 
-</div>
+<% } %>

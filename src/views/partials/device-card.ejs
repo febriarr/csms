@@ -1,52 +1,57 @@
-<div class="device-card" id="device-<%= device.id %>" data-device-id="<%= device.id %>" x-data="{}">
-  <div class="device-card-header">
+<ui5-card id="device-<%= device.id %>" data-device-id="<%= device.id %>" class="device-card" x-data="{}">
+  <div slot="header" class="device-card-header">
     <div class="device-info">
       <h3><%= device.name %></h3>
       <p><%= device.location ?? '-' %></p>
     </div>
-    <span class="status-badge status-<%= device.state.toLowerCase() %>"><%= device.state %></span>
+    <ui5-tag
+      class="status-badge"
+      design="<%= device.state === 'NORMAL' ? 'Positive' : device.state === 'WARNING' ? 'Critical' : device.state === 'CRITICAL' ? 'Negative' : device.state === 'DEFROST' ? 'Information' : 'Neutral' %>"
+      ><%= device.state %></ui5-tag
+    >
   </div>
-
   <div class="gauge-box status-<%= device.state.toLowerCase() %>">
     <div>
       <div class="gauge-label">Current Temperature</div>
       <div class="gauge-temp temp-value"><%= device.lastTemperature ?? '--.--' %> °C</div>
     </div>
-    <div>
-      <div class="gauge-label">State Status</div>
-      <div class="state-label"><%= stateLabelMap[device.state] %></div>
+    <ui5-icon name="temperature"></ui5-icon>
+  </div>
+  <div class="section-body device-state-block" style="display: flex; justify-content: space-between">
+    <div class="gauge-label">State Status</div>
+    <div class="state-label"><%= stateLabelMap[device.state] %></div>
+  </div>
+  <div class="section-body">
+    <div class="gauge-label">Temperature Threshold</div>
+    <div class="threshold-grid threshold-grid--card">
+      <div class="threshold-item">
+        <div class="threshold-title">Defrost</div>
+        <div class="threshold-val"><%= device.defrostThreshold %>°C</div>
+      </div>
+      <div class="threshold-item">
+        <div class="threshold-title">Warning</div>
+        <div class="threshold-val"><%= device.warningThreshold %>°C</div>
+      </div>
+      <div class="threshold-item">
+        <div class="threshold-title">Critical</div>
+        <div class="threshold-val"><%= device.criticalThreshold %>°C</div>
+      </div>
     </div>
   </div>
-
-  <div class="threshold-grid">
-    <div class="threshold-item">
-      <div class="threshold-title">Defrost</div>
-      <div class="threshold-val"><%= device.defrostThreshold %> – <%= device.warningThreshold %></div>
-    </div>
-    <div class="threshold-item">
-      <div class="threshold-title">Warning</div>
-      <div class="threshold-val"><%= device.warningThreshold %> – <%= device.criticalThreshold %></div>
-    </div>
-    <div class="threshold-item">
-      <div class="threshold-title">Critical</div>
-      <div class="threshold-val">&gt; <%= device.criticalThreshold %></div>
-    </div>
-  </div>
-
   <div class="card-meta">
-    <span class="meta-code"><%= device.code %></span>
-    <span class="last-seen-label"><%= formatDateWIB(device.lastSeenAt) %></span>
+    <span>Device <strong class="meta-code"><%= device.code %></strong></span
+    ><span>Last Seen <strong class="last-seen-label"><%= formatLastSeen(device.lastSeenAt) %></strong></span>
   </div>
-
   <div class="sk-button-group">
-    <button
-      class="btn btn-primary"
+    <ui5-button
+      design="Default"
+      class="btn-view-alerts"
+      data-id="<%= device.id %>"
       hx-get="/device/<%= device.id %>/alerts-partial"
       hx-target="#alert-modal-body"
-      hx-swap="innerHTML"
-      x-on:click="$dispatch('open-alert-modal')"
+      hx-indicator="#alert-modal-loading"
+      style="width: 100%"
+      >View Alert History</ui5-button
     >
-      Log History
-    </button>
   </div>
-</div>
+</ui5-card>

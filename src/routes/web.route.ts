@@ -14,6 +14,7 @@ import { notificationRecipientsQuerySchema } from '../features/notifications-rec
 import whatsappRoute from '../shared/whatsapp/whatsapp.controller';
 import { temperatureExportQuerySchema, temperatureReportQuerySchema } from '../features/reports/reports.validator';
 import { diagnosticsReportQuerySchema } from '../features/device-diagnostic-logs/device-diagnostics-logs.validator';
+import { isPublic } from '../middleware/is-public.middleware';
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.get('/', devicesController.renderStatusPage);
 router.get('/pages/login', authController.loginPage);
 
 router.get('/events/device-status', streamDeviceStatus);
-router.get('/device/:deviceId/alerts-partial', devicesController.findDeviceByIdWithAlert);
+router.get('/device/:deviceId/alerts-partial', isPublic, devicesController.findDeviceByIdWithAlert);
 
 router.use(authenticate); // Apply authentication middleware to all routes below
 router.use(whatsappRoute);

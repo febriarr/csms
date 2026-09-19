@@ -1,98 +1,251 @@
-<div class="flex-between">
+<div class="dashboard-page-header">
 
-  <div style="width: 100%; max-width: 500px; display: flex; gap: 0.5rem;  align-items: center;">
-    <input type="text" placeholder="cari berdasarkan code atau nama" id="search-input-device" class="field-input" style="max-width: 500px;">
-    <button class="btn btn-outline" id="search-button-device">Search</button>
+  <div>
+
+    <p class="dashboard-page-eyebrow">
+      Master Data
+    </p>
+
+    <h2>
+      <%= pageTitle %>
+    </h2>
+
+    <p>
+      Kelola perangkat monitoring dan batas temperatur operasional.
+    </p>
+
   </div>
 
-  <a href="/dashboard/devices/create" style="text-decoration: none; color: white;">
-    <button class="btn btn-primary">Create Device</button>
+
+  <a
+    href="/dashboard/devices/create"
+    class="btn btn-primary"
+  >
+    <ui5-icon name="add" style="color: inherit;"></ui5-icon>
+    Create Device
   </a>
+
 </div>
+
+
+<div class="filter-bar">
+
+  <div class="section-toolbar section-toolbar--compact">
+
+    <div class="section-toolbar__left search-field">
+
+      <ui5-input
+        id="search-input-device"
+        placeholder="Search by device code or name"
+        value="<%= currentSearch || '' %>"
+        style="width: 100%;"
+      ></ui5-input>
+
+      <ui5-button
+        id="search-button-device"
+        design="Emphasized"
+      >
+        Search
+      </ui5-button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <% if (currentSearch) { %>
-<div class="filter-chips">
-  <span class="chip">
-    <span>"<%= currentSearch %>"</span>
-    <button type="button" class="chip-remove" id="clear-search" aria-label="Hapus filter">
-      <i class="ph ph-x" style="color: var(--state-normal); font-weight: bold;"></i>
-    </button>
-  </span>
-</div>
+
+  <div class="filter-chips">
+
+    <span class="chip">
+
+      Search:
+      <strong>
+        <%= currentSearch %>
+      </strong>
+
+      <button
+        type="button"
+        class="chip-remove"
+        id="clear-search"
+        aria-label="Clear filter"
+      >
+        ×
+      </button>
+
+    </span>
+
+  </div>
+
 <% } %>
-<div class="wrapper-table" data-sticky-header>
-  <table class="dashboard-table" data-sticky-header>
-    <thead class="muted muted-foreground">
-      <tr>
-        <th style="width: 350px;">Device</th>
-        <th style="width: 350px;">Location</th>
-        <th>Threshold Normal</th>
-        <th>Threshold Defrost</th>
-        <th>Threshold Warning</th>
-        <th>Threshold Critical</th>
-        <th>Status</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if (devices && devices.length > 0) { %>
-      <% devices.forEach(device => { %>
-      <tr style="width: 350px;">
-        <td>
-          <div class="device-name"><%= device.name %></div>
-          <div class="device-code"><%= device.code %></div>
-        </td>
-        <td style="width: 350px;"><%= device.location || '-' %></td>
-        <td>
 
+
+<ui5-table
+  class="enterprise-table"
+  sticky-column-header
+  overflow-mode="Scroll"
+  accessible-name="Devices"
+>
+
+  <ui5-table-header-row slot="headerRow">
+
+    <ui5-table-header-cell min-width="240px">
+      Device
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="200px">
+      Location
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="160px">
+      Normal
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="180px">
+      Defrost
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="180px">
+      Warning
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="160px">
+      Critical
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="150px">
+      Status
+    </ui5-table-header-cell>
+
+    <ui5-table-header-cell min-width="160px">
+      Actions
+    </ui5-table-header-cell>
+
+  </ui5-table-header-row>
+
+
+  <% if (devices && devices.length) { %>
+
+    <% devices.forEach(device => { %>
+
+      <ui5-table-row>
+
+        <!-- Device -->
+        <ui5-table-cell min-width="240px">
+
+          <div class="device-name">
+            <%= device.name %>
+          </div>
+
+          <div class="device-code">
+            <%= device.code %>
+          </div>
+
+        </ui5-table-cell>
+
+
+        <!-- Location -->
+        <ui5-table-cell min-width="200px">
+          <%= device.location || '-' %>
+        </ui5-table-cell>
+
+
+        <!-- Normal -->
+        <ui5-table-cell min-width="160px">
           &lt; <%= device.defrostThreshold %>°C
+        </ui5-table-cell>
 
-        </td>
 
-        <td>
-          <%= device.defrostThreshold %>°C &ndash; <%= device.warningThreshold %>°C
-        </td>
+        <!-- Defrost -->
+        <ui5-table-cell min-width="180px">
+          <%= device.defrostThreshold %>
+          –
+          <%= device.warningThreshold %>°C
+        </ui5-table-cell>
 
-        <td>
-          <%= device.warningThreshold %>°C &ndash; <%= device.criticalThreshold %>°C
-        </td>
 
-        <td>
-          >= <%= device.criticalThreshold %>°C
-        </td>
+        <!-- Warning -->
+        <ui5-table-cell min-width="180px">
+          <%= device.warningThreshold %>
+          –
+          <%= device.criticalThreshold %>°C
+        </ui5-table-cell>
 
-        <td>
-          <span style="padding: 4px 1rem !important; font-size: small !important; border-radius: 4px;" class="status-<%= device.state.toLowerCase() %>">
+
+        <!-- Critical -->
+        <ui5-table-cell min-width="160px">
+          ≥ <%= device.criticalThreshold %>°C
+        </ui5-table-cell>
+
+
+        <!-- Status -->
+        <ui5-table-cell min-width="150px">
+
+          <ui5-tag
+            design="<%= device.state === 'NORMAL'
+              ? 'Positive'
+              : device.state === 'WARNING'
+                ? 'Critical'
+                : device.state === 'CRITICAL'
+                  ? 'Negative'
+                  : device.state === 'DEFROST'
+                    ? 'Information'
+                    : 'Neutral' %>"
+          >
             <%= device.state %>
-          </span>
-        </td>
+          </ui5-tag>
 
-        
-        <td>
+        </ui5-table-cell>
 
-          <span style="display: flex; gap: 0.5rem; align-items: center;">
-            
-            <a  href="/dashboard/devices/<%= device.id %>/update"
+
+        <!-- Actions -->
+        <ui5-table-cell min-width="160px">
+
+          <div class="page-actions">
+
+            <a
+              href="/dashboard/devices/<%= device.id %>/update"
+              class="btn btn-icon-sm btn-outline"
+              title="Edit"
             >
-              <button
-                type="button"
-                class="btn-icon-sm btn-primary btn-sm"
-              >
-                <i class="ph ph-pencil-simple"></i>
-              </button>
+              <ui5-icon name="edit"></ui5-icon>
             </a>
 
-            <button type="button" class="btn-icon-sm btn-danger btn-sm btn-delete-device" data-id="<%= device.id %>" data-name="<%= device.name %>">
-              <i class="ph ph-trash"></i>
+
+            <button
+              type="button"
+              class="btn btn-icon-sm btn-danger btn-delete-device"
+              data-id="<%= device.id %>"
+              data-name="<%= device.name %>"
+              title="Delete"
+            >
+              <ui5-icon name="delete"></ui5-icon>
             </button>
-          </span>
-        </td>
-      </tr>
-      <% }); %>
-      <% } else { %>
-      <tr>
-        <td colspan="8" class="empty-state">Belum ada data device.</td>
-      </tr>
-      <% } %>
-    </tbody>
-  </table>
-</div>
+
+          </div>
+
+        </ui5-table-cell>
+
+      </ui5-table-row>
+
+    <% }) %>
+
+
+  <% } else { %>
+
+    <ui5-table-row>
+
+      <ui5-table-cell
+        colspan="8"
+        class="empty-state"
+      >
+        Belum ada data device.
+      </ui5-table-cell>
+
+    </ui5-table-row>
+
+  <% } %>
+
+</ui5-table>

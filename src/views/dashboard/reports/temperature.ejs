@@ -1,108 +1,55 @@
 <%
-  function buildPageUrl(page) {
-    const params = new URLSearchParams({
-      deviceId: filters.deviceId || '',
-      from: filters.from || '',
-      to: filters.to || '',
-      page: String(page),
-    });
-    return '/dashboard/reports/temperature?' + params.toString();
-  }
-
-  function buildExportUrl(format) {
-    const params = new URLSearchParams({
-      deviceId: filters.deviceId || '',
-      from: filters.from || '',
-      to: filters.to || '',
-      format,
-    });
-    return '/dashboard/reports/temperature/export?' + params.toString();
-  }
+function buildPageUrl(page){const params=new URLSearchParams({deviceId:filters.deviceId||'',from:filters.from||'',to:filters.to||'',page:String(page)});return '/dashboard/reports/temperature?'+params.toString();}
+function buildExportUrl(format){const params=new URLSearchParams({deviceId:filters.deviceId||'',from:filters.from||'',to:filters.to||'',format});return '/dashboard/reports/temperature/export?'+params.toString();}
 %>
-
-<form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form">
-  <div class="field-group">
-    <div class="field-filters">
-      <div class="field">
-        <label for="deviceId" class="field-label">Device</label>
-        <select id="deviceId" name="deviceId" required class="field-input">
-          <option value="" disabled <%= !filters.deviceId ? 'selected' : '' %>>Choose device</option>
-          <% devices.forEach(device => { %>
-          <option value="<%= device.id %>" <%= filters.deviceId === device.id ? 'selected' : '' %>>
-            <%= device.name %> (<%= device.code %>)
-          </option>
-          <% }) %>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="from" class="field-label">From Date</label>
-        <input type="date" id="from" name="from" required class="field-input" value="<%= filters.from || '' %>" />
-      </div>
-
-      <div class="field">
-        <label for="to" class="field-label">To Date</label>
-        <input type="date" id="to" name="to" required class="field-input" value="<%= filters.to || '' %>" />
-      </div>
-
-      <div class="field" style="align-self: flex-end;">
-        <button type="submit" id="temperature-report-submit" class="btn btn-primary">Show Report</button>
-      </div>
+<div class="dashboard-page-header">
+  <div>
+    <p class="dashboard-page-eyebrow">Analytics</p>
+    <h2>Temperature Report</h2>
+    <p>Review raw temperature telemetry and export the selected range.</p>
+  </div>
+</div>
+<form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form" class="filter-bar">
+  <div class="field-filters">
+    <div class="field">
+      <ui5-label for="deviceId" required>Device</ui5-label>
+      <ui5-select id="deviceId" name="deviceId" required>
+        <ui5-option value="" <%= !filters.deviceId ? 'selected' : '' %>>Choose device</ui5-option><% devices.forEach(device=>{ %><ui5-option value="<%= device.id %>" <%= filters.deviceId===device.id?'selected':'' %>><%= device.name %> (<%= device.code %>)</ui5-option><% }) %>
+      </ui5-select>
     </div>
+    <div class="field">
+      <ui5-label for="from" required>From Date</ui5-label>
+      <ui5-date-picker id="from" name="from" value="<%= filters.from || '' %>" required></ui5-date-picker>
+    </div>
+    <div class="field">
+      <ui5-label for="to" required>To Date</ui5-label>
+      <ui5-date-picker id="to" name="to" value="<%= filters.to || '' %>" required></ui5-date-picker>
+    </div>
+    <ui5-button type="Submit" id="temperature-report-submit" design="Emphasized">Show Report</ui5-button>
   </div>
 </form>
-
-<div class="wrapper-table" data-sticky-header>
-  <% if (!report) { %>
-  <p class="muted-foreground p-4">Pilih device dan rentang tanggal, lalu klik "Lihat Laporan" untuk melihat histori suhu.</p>
-  <% } else if (report.items.length === 0) { %>
-  <p class="muted-foreground p-4">Tidak ada data suhu pada rentang tanggal yang dipilih.</p>
-  <% } else { %>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; padding: 1rem;">
-    <p class="muted-foreground" style="margin: 0;">
-      Show <%= (report.page - 1) * report.pageSize + 1 %>-<%= Math.min(report.page * report.pageSize, report.totalItems) %>
-      of <%= report.totalItems %> items
-    </p>
-
-    <div id="export-actions" style="display: flex; gap: 0.5rem;">
-      <a href="<%= buildExportUrl('xlsx') %>" id="export-xlsx-btn" class="btn btn-success" style="text-decoration: none;">Export Excel</a>
-      <a href="<%= buildExportUrl('csv') %>" id="export-csv-btn" class="btn btn-outline" style="text-decoration: none;">Export CSV</a>
-    </div>
+<div class="ui5-table-shell"><% if(!report){ %><div class="section-body">
+    <ui5-message-strip design="Information" hide-close-button>Pilih device dan rentang tanggal, lalu klik "Show Report" untuk melihat histori suhu.</ui5-message-strip>
+  </div><% } else if(report.items.length===0){ %><div class="section-body">
+    <ui5-message-strip design="Warning" hide-close-button>Tidak ada data suhu pada rentang tanggal yang dipilih.</ui5-message-strip>
+  </div><% } else { %>
+  <div class="section-toolbar">
+    <div><strong>Temperature History</strong><span class="muted-foreground"> &nbsp; Show <%= (report.page-1)*report.pageSize+1 %>–<%= Math.min(report.page*report.pageSize,report.totalItems) %> of <%= report.totalItems %> items</span></div>
+    <div id="export-actions" class="page-actions"><a href="<%= buildExportUrl('xlsx') %>" id="export-xlsx-btn" class="btn btn-success">
+        <ui5-icon name="excel-attachment" style="color: white;"></ui5-icon>Export Excel
+      </a><a href="<%= buildExportUrl('csv') %>" id="export-csv-btn" class="btn btn-outline">Export CSV</a></div>
   </div>
-
-  <p id="export-range-warning" class="muted-foreground" style="display: none; color: #dc2626; margin-top: -0.5rem; margin-bottom: 0.75rem;">
-    Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.
-  </p>
-
-  <table class="dashboard-table" data-sticky-header>
-    <thead class="muted muted-foreground">
-      <tr>
-        <th style="width: 60px;">No</th>
-        <th>Recorded At</th>
-        <th>Temperature</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% report.items.forEach((log, i) => { %>
-      <tr>
-        <td><%= (report.page - 1) * report.pageSize + i + 1 %></td>
-        <td><%= formatDateTime(log.recordedAt) %></td>
-        <td><%= log.temperature %>°C</td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-
-  <% if (report.totalPages > 1) { %>
-  <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; padding: 1rem;">
-    <% if (report.page > 1) { %>
-    <a href="<%= buildPageUrl(report.page - 1) %>" class="btn btn-outline foreground" style="text-decoration: none;">Prev</a>
-    <% } %>
-    <span class="muted-foreground" style="align-self: center;">Page <%= report.page %> of <%= report.totalPages %></span>
-    <% if (report.page < report.totalPages) { %>
-    <a href="<%= buildPageUrl(report.page + 1) %>" class="btn btn-outline foreground" style="text-decoration: none;">Next</a>
-    <% } %>
-  </div>
-  <% } %>
-  <% } %>
+  <p id="export-range-warning" class="section-body export-range-warning">Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.</p>
+  <ui5-table class="enterprise-table" overflow-mode="Scroll" accessible-name="Temperature History" style="height: 600px;">
+    <ui5-table-header-row slot="headerRow" sticky>
+      <ui5-table-header-cell>No</ui5-table-header-cell>
+      <ui5-table-header-cell>Recorded At</ui5-table-header-cell>
+      <ui5-table-header-cell>Temperature</ui5-table-header-cell>
+    </ui5-table-header-row><% report.items.forEach((log,i)=>{ %><ui5-table-row>
+      <ui5-table-cell><%= (report.page-1)*report.pageSize+i+1 %></ui5-table-cell>
+      <ui5-table-cell><%= formatDateTime(log.recordedAt) %></ui5-table-cell>
+      <ui5-table-cell><strong><%= log.temperature %> °C</strong></ui5-table-cell>
+    </ui5-table-row><% }) %>
+  </ui5-table>
+  <% if(report.totalPages>1){ %><div class="table-pagination"><% if(report.page>1){ %><a href="<%= buildPageUrl(report.page-1) %>" class="btn btn-outline">Previous</a><% } %><span class="muted-foreground">Page <%= report.page %> of <%= report.totalPages %></span><% if(report.page<report.totalPages){ %><a href="<%= buildPageUrl(report.page+1) %>" class="btn btn-outline">Next</a><% } %></div><% } %><% } %>
 </div>

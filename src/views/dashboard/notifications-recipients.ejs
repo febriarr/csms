@@ -1,244 +1,246 @@
-<div class="flex-between">
+<div class="dashboard-page-header">
+  <div>
+    <p class="dashboard-page-eyebrow">Notifications</p>
 
-  <div
-    style="
-      width: 100%;
-      display: flex;
-      gap: .5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    "
-  >
-    <input
-      type="text"
-      id="search-name"
-      class="field-input"
-      placeholder="Search name..."
-      value="<%= currentName || '' %>"
-      style="max-width: 220px;"
-    />
+    <h2><%= pageTitle %></h2>
 
-    <select
-      id="search-channel"
-      class="field-input"
-      style="max-width: 180px;"
-    >
-      <option value="">All Channels</option>
-
-      <option
-        value="email"
-        <%= currentChannel === 'email' ? 'selected' : '' %>>
-        Email
-      </option>
-
-      <option
-        value="whatsapp"
-        <%= currentChannel === 'whatsapp' ? 'selected' : '' %>>
-        WhatsApp
-      </option>
-    </select>
-
-    <button
-      class="btn btn-outline"
-      id="search-button-notification-recipient"
-    >
-      Search
-    </button>
+    <p>Kelola penerima alert temperatur abnormal.</p>
   </div>
 
   <a
     href="/dashboard/notifications-recipients/create"
-    style="text-decoration:none;color:white;"
+    class="btn btn-primary"
   >
-    <button class="btn btn-primary">
-      Create Recipient
-    </button>
+    <ui5-icon name="add" style="color: inherit;"></ui5-icon>
+    Create Recipient
   </a>
-
 </div>
+
+
+<div class="filter-bar">
+  <div class="field-filters notification-filters">
+
+    <div class="field">
+      <ui5-label for="search-name">
+        Name
+      </ui5-label>
+
+      <ui5-input
+        id="search-name"
+        placeholder="Search name..."
+        value="<%= currentName || '' %>"
+      ></ui5-input>
+    </div>
+
+
+    <div class="field">
+      <ui5-label for="search-channel">
+        Channel
+      </ui5-label>
+
+      <ui5-select id="search-channel">
+
+        <ui5-option value="">
+          All Channels
+        </ui5-option>
+
+        <ui5-option
+          value="email"
+          <%= currentChannel === 'email' ? 'selected' : '' %>
+        >
+          Email
+        </ui5-option>
+
+        <ui5-option
+          value="whatsapp"
+          <%= currentChannel === 'whatsapp' ? 'selected' : '' %>
+        >
+          WhatsApp
+        </ui5-option>
+
+      </ui5-select>
+    </div>
+
+
+    <ui5-button
+      id="search-button-notification-recipient"
+      design="Emphasized"
+    >
+      Search
+    </ui5-button>
+
+  </div>
+</div>
+
 
 <% if (currentName || currentChannel) { %>
 
-<div class="filter-chips">
+  <div class="filter-chips">
 
-  <% if (currentName) { %>
-  <span class="chip">
-    Name:
-    <span><%= currentName %></span>
-  </span>
-  <% } %>
+    <% if (currentName) { %>
 
-  <% if (currentChannel) { %>
-  <span class="chip">
-    Channel:
-    <span><%= currentChannel %></span>
-  </span>
-  <% } %>
+      <span class="chip">
+        Name:
+        <strong><%= currentName %></strong>
+      </span>
 
-  <button
-    type="button"
-    class="chip-remove"
-    id="clear-search"
-    aria-label="Clear filters"
-  >
-    <i
-      class="ph ph-x"
-      style="color: var(--state-normal); font-weight:bold;"
-    ></i>
-  </button>
+    <% } %>
 
-</div>
+
+    <% if (currentChannel) { %>
+
+      <span class="chip">
+        Channel:
+        <strong><%= currentChannel %></strong>
+      </span>
+
+    <% } %>
+
+
+    <button
+      type="button"
+      class="chip-remove"
+      id="clear-search"
+    >
+      Clear filters
+    </button>
+
+  </div>
 
 <% } %>
 
-<div class="wrapper-table" data-sticky-header>
 
-  <table class="dashboard-table" data-sticky-header>
+<div class="ui5-table-shell">
 
-    <thead class="muted muted-foreground">
-      <tr>
-        <th style="width:240px;">Recipient</th>
-        <th style="width:150px;">Channel</th>
-        <th>Target</th>
-        <th style="width:140px;">Status</th>
-        <th style="width:100px;">Action</th>
-      </tr>
-    </thead>
+  <ui5-table
+    class="enterprise-table"
+    id="table"
+    style="height: 600px; width: 100%;"
+    overflow-mode="Scroll"
+    accessible-name="Notification Recipients"
+  >
 
-    <tbody>
+    <ui5-table-header-row slot="headerRow">
 
-      <% if (data && data.length > 0) { %>
+      <ui5-table-header-cell min-width="300px">
+        Recipient
+      </ui5-table-header-cell>
+
+
+      <ui5-table-header-cell min-width="250px">
+        Channel
+      </ui5-table-header-cell>
+
+
+      <ui5-table-header-cell min-width="240px">
+        Target
+      </ui5-table-header-cell>
+
+
+      <ui5-table-header-cell min-width="140px">
+        Status
+      </ui5-table-header-cell>
+
+
+      <ui5-table-header-cell min-width="160px">
+        Actions
+      </ui5-table-header-cell>
+
+    </ui5-table-header-row>
+
+
+    <% if (data && data.length) { %>
 
       <% data.forEach(recipient => { %>
 
-      <tr>
+        <ui5-table-row>
 
-        <td>
-          <div class="device-name">
-            <%= recipient.name %>
-          </div>
-        </td>
+          <!-- Recipient -->
+          <ui5-table-cell min-width="300px">
 
-        <td>
+            <div class="device-name">
+              <%= recipient.name %>
+            </div>
 
-          <% if (recipient.channel === 'email') { %>
+          </ui5-table-cell>
 
-          <span
-            style="
-              display:flex;
-              align-items:center;
-              gap:.35rem;
-            "
-          >
-            <i class="ph ph-envelope-simple"></i>
-            Email
-          </span>
 
-          <% } else { %>
+          <!-- Channel -->
+          <ui5-table-cell min-width="250px">
 
-          <span
-            style="
-              display:flex;
-              align-items:center;
-              gap:.35rem;
-            "
-          >
-            <i class="ph ph-whatsapp-logo"></i>
-            WhatsApp
-          </span>
+            <ui5-tag design="Information">
+              <%= recipient.channel === 'email' ? 'Email' : 'WhatsApp' %>
+            </ui5-tag>
 
-          <% } %>
+          </ui5-table-cell>
 
-        </td>
 
-        <td>
-          <%= recipient.target %>
-        </td>
+          <!-- Target -->
+          <ui5-table-cell min-width="240px">
 
-        <td>
+            <%= recipient.target %>
 
-          <% if (recipient.isActive) { %>
+          </ui5-table-cell>
 
-          <span
-            class="status-normal"
-            style="
-              padding:4px 1rem;
-              border-radius:4px;
-              font-size:small;
-            "
-          >
-            Active
-          </span>
 
-          <% } else { %>
+          <!-- Status -->
+          <ui5-table-cell min-width="140px">
 
-          <span
-            class="status-critical"
-            style="
-              padding:4px 1rem;
-              border-radius:4px;
-              font-size:small;
-            "
-          >
-            Inactive
-          </span>
-
-          <% } %>
-
-        </td>
-
-        <td>
-
-          <div
-            style="
-              display:flex;
-              gap:.5rem;
-            "
-          >
-
-            <a
-              href="/dashboard/notifications-recipients/<%= recipient.id %>/edit"
+            <ui5-tag
+              design="<%= recipient.isActive ? 'Positive' : 'Negative' %>"
             >
+              <%= recipient.isActive ? 'Active' : 'Inactive' %>
+            </ui5-tag>
+
+          </ui5-table-cell>
+
+
+          <!-- Actions -->
+          <ui5-table-cell min-width="160px">
+
+            <div class="page-actions notification-row-actions">
+
+              <a
+                href="/dashboard/notifications-recipients/<%= recipient.id %>/edit"
+                class="btn btn-icon-sm btn-outline"
+              >
+                <ui5-icon name="edit"></ui5-icon>
+              </a>
+
+
               <button
                 type="button"
-                class="btn-icon-sm btn-primary btn-sm"
+                class="btn btn-icon-sm btn-danger btn-delete-notification-recipient"
+                data-id="<%= recipient.id %>"
+                data-name="<%= recipient.name %>"
               >
-                <i class="ph ph-pencil-simple"></i>
+                <ui5-icon name="delete"></ui5-icon>
               </button>
-            </a>
 
-            <button
-              type="button"
-              class="btn-icon-sm btn-danger btn-sm btn-delete-notification-recipient"
-              data-id="<%= recipient.id %>"
-              data-name="<%= recipient.name %>"
-            >
-              <i class="ph ph-trash"></i>
-            </button>
+            </div>
 
-          </div>
+          </ui5-table-cell>
 
-        </td>
-
-      </tr>
+        </ui5-table-row>
 
       <% }) %>
 
-      <% } else { %>
 
-      <tr>
-        <td
-          colspan="6"
+    <% } else { %>
+
+      <ui5-table-row>
+
+        <ui5-table-cell
+          colspan="5"
           class="empty-state"
         >
           No notification recipients found.
-        </td>
-      </tr>
+        </ui5-table-cell>
 
-      <% } %>
+      </ui5-table-row>
 
-    </tbody>
+    <% } %>
 
-  </table>
+  </ui5-table>
 
 </div>

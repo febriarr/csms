@@ -89,7 +89,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients',
       pageTitle: 'Update Notification Recipient',
       pageDescription: 'Update the details of an existing notification recipient.',
-      pageScripts: ['/js/notifications-recipients.js'],
+      pageScripts: ['/build/js/notifications-recipients.js'],
       data,
     });
   };

@@ -56,10 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Delete device
 
-  const tableBody = document.querySelector('.dashboard-table tbody');
+  const table = document.querySelector('ui5-table');
 
-  if (tableBody) {
-    tableBody.addEventListener('click', async event => {
+  if (table) {
+    table.addEventListener('click', async event => {
       const deleteBtn = event.target.closest('.btn-delete-device');
       if (!deleteBtn) return;
 
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
           throw result;
         }
 
-        const row = deleteBtn.closest('tr');
+        const row = deleteBtn.closest('ui5-table-row');
         row?.remove();
       } catch (err) {
         showAlert(err);
