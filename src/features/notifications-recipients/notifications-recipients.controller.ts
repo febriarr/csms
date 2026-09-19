@@ -41,7 +41,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients',
       pageTitle: 'Notification Recipients',
       pageDescription: 'Manage notification recipients for your application.',
-      pageScripts: ['/js/notifications-recipients.js'],
+      pageScripts: ['/build/js/notifications-recipients.js'],
       currentName: req.query?.name,
       currentChannel: req.query?.channel,
       data,
