@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import fullReload from 'vite-plugin-full-reload';
 
 export default defineConfig({
+  base: '/client/',
   plugins: [fullReload(['src/views/**/*.ejs'])],
 
   server: {
