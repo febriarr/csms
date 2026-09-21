@@ -15,6 +15,9 @@ import whatsappRoute from '../shared/whatsapp/whatsapp.controller';
 import { temperatureExportQuerySchema, temperatureReportQuerySchema } from '../features/reports/reports.validator';
 import { diagnosticsReportQuerySchema } from '../features/device-diagnostic-logs/device-diagnostics-logs.validator';
 import { isPublic } from '../middleware/is-public.middleware';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { renderMarkdown } from '../shared/utils/renderMarkdown';
 
 const router = Router();
 
@@ -57,5 +60,21 @@ router.get(
   deviceDiagnosticsLogsController.diagnosticsReport
 );
 router.get('/dashboard/reports/diagnostics/detail', deviceDiagnosticsLogsController.diagnosticsDetail);
+router.get('/dashboard/docs/user-guide', async (req, res) => {
+  const filePath = path.join(process.cwd(), 'docs', 'CSMS_Website_User_Guide.md');
+
+  const source = await fs.readFile(filePath, 'utf8');
+
+  const content = renderMarkdown(source);
+
+  res.render('dashboard/docs/user-guide', {
+    title: 'User Guide',
+    currentPath: '/dashboard/docs/user-guide',
+    pageTitle: 'User Guide',
+    pageDescription: 'Panduan Penggunaan Website',
+    layout: 'layouts/dashboard',
+    content,
+  });
+});
 
 export default router;
