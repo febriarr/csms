@@ -122,27 +122,27 @@
 
     <ui5-table-header-row slot="headerRow">
 
-      <ui5-table-header-cell min-width="300px">
+      <ui5-table-header-cell min-width="max-content">
         Recipient
       </ui5-table-header-cell>
 
 
-      <ui5-table-header-cell min-width="250px">
+      <ui5-table-header-cell min-width="max-content">
         Channel
       </ui5-table-header-cell>
 
 
-      <ui5-table-header-cell min-width="240px">
+      <ui5-table-header-cell min-width="max-content">
         Target
       </ui5-table-header-cell>
 
 
-      <ui5-table-header-cell min-width="140px">
+      <ui5-table-header-cell min-width="max-content">
         Status
       </ui5-table-header-cell>
 
 
-      <ui5-table-header-cell min-width="160px">
+      <ui5-table-header-cell min-width="max-content">
         Actions
       </ui5-table-header-cell>
 
@@ -156,7 +156,7 @@
         <ui5-table-row>
 
           <!-- Recipient -->
-          <ui5-table-cell min-width="300px">
+          <ui5-table-cell>
 
             <div class="device-name">
               <%= recipient.name %>
@@ -166,7 +166,7 @@
 
 
           <!-- Channel -->
-          <ui5-table-cell min-width="250px">
+          <ui5-table-cell>
 
             <ui5-tag design="Information">
               <%= recipient.channel === 'email' ? 'Email' : 'WhatsApp' %>
@@ -176,7 +176,7 @@
 
 
           <!-- Target -->
-          <ui5-table-cell min-width="240px">
+          <ui5-table-cell>
 
             <%= recipient.target %>
 
@@ -184,7 +184,7 @@
 
 
           <!-- Status -->
-          <ui5-table-cell min-width="140px">
+          <ui5-table-cell>
 
             <ui5-tag
               design="<%= recipient.isActive ? 'Positive' : 'Negative' %>"
@@ -196,7 +196,7 @@
 
 
           <!-- Actions -->
-          <ui5-table-cell min-width="160px">
+          <ui5-table-cell>
 
             <div class="page-actions notification-row-actions">
 

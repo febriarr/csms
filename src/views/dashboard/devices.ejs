@@ -91,35 +91,35 @@
 
   <ui5-table-header-row slot="headerRow">
 
-    <ui5-table-header-cell min-width="240px">
+    <ui5-table-header-cell min-width="max-content">
       Device
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="200px">
+    <ui5-table-header-cell min-width="max-content">
       Location
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="140px">
+    <ui5-table-header-cell min-width="max-content">
       Normal
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="140px">
+    <ui5-table-header-cell min-width="max-content">
       Defrost
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="140px">
+    <ui5-table-header-cell min-width="max-content">
       Warning
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="140px">
+    <ui5-table-header-cell min-width="max-content">
       Critical
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="140px">
+    <ui5-table-header-cell min-width="max-content">
       Status
     </ui5-table-header-cell>
 
-    <ui5-table-header-cell min-width="160px">
+    <ui5-table-header-cell min-width="max-content">
       Actions
     </ui5-table-header-cell>
 
@@ -133,7 +133,7 @@
       <ui5-table-row>
 
         <!-- Device -->
-        <ui5-table-cell min-width="240px" style="display: flex;gap: 0.5rem; align-items: center;">
+        <ui5-table-cell style="display: flex;gap: 0.5rem; align-items: center;">
 
           <div class="device-name">
             <%= device.name %>
@@ -147,19 +147,19 @@
 
 
         <!-- Location -->
-        <ui5-table-cell min-width="200px">
+        <ui5-table-cell>
           <%= device.location || '-' %>
         </ui5-table-cell>
 
 
         <!-- Normal -->
-        <ui5-table-cell min-width="140px">
+        <ui5-table-cell>
           &lt; <%= device.defrostThreshold %>°C
         </ui5-table-cell>
 
 
         <!-- Defrost -->
-        <ui5-table-cell min-width="140px">
+        <ui5-table-cell>
           <%= device.defrostThreshold %>
           –
           <%= device.warningThreshold %>°C
@@ -167,7 +167,7 @@
 
 
         <!-- Warning -->
-        <ui5-table-cell min-width="140px">
+        <ui5-table-cell>
           <%= device.warningThreshold %>
           –
           <%= device.criticalThreshold %>°C
@@ -175,13 +175,13 @@
 
 
         <!-- Critical -->
-        <ui5-table-cell min-width="140px">
+        <ui5-table-cell>
           ≥ <%= device.criticalThreshold %>°C
         </ui5-table-cell>
 
 
         <!-- Status -->
-        <ui5-table-cell min-width="140px">
+        <ui5-table-cell>
 
           <ui5-tag
             design="<%= device.state === 'NORMAL'
@@ -201,7 +201,7 @@
 
 
         <!-- Actions -->
-        <ui5-table-cell min-width="160px">
+        <ui5-table-cell>
 
           <div class="page-actions">
 

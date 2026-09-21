@@ -42,9 +42,9 @@ function buildExportUrl(format){const params=new URLSearchParams({deviceId:filte
   <p id="export-range-warning" class="section-body export-range-warning">Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.</p>
   <ui5-table class="enterprise-table" overflow-mode="Scroll" accessible-name="Temperature History" style="height: 600px;">
     <ui5-table-header-row slot="headerRow" sticky>
-      <ui5-table-header-cell>No</ui5-table-header-cell>
-      <ui5-table-header-cell>Recorded At</ui5-table-header-cell>
-      <ui5-table-header-cell>Temperature</ui5-table-header-cell>
+      <ui5-table-header-cell min-width="max-content">No</ui5-table-header-cell>
+      <ui5-table-header-cell min-width="max-content">Recorded At</ui5-table-header-cell>
+      <ui5-table-header-cell min-width="max-content">Temperature</ui5-table-header-cell>
     </ui5-table-header-row><% report.items.forEach((log,i)=>{ %><ui5-table-row>
       <ui5-table-cell><%= (report.page-1)*report.pageSize+i+1 %></ui5-table-cell>
       <ui5-table-cell><%= formatDateTime(log.recordedAt) %></ui5-table-cell>

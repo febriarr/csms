@@ -90,31 +90,31 @@ const resetReasonCodeLabel = {
 
     <ui5-table-header-row slot="headerRow" sticky>
 
-      <ui5-table-header-cell min-width="220px">
+      <ui5-table-header-cell min-width="max-content">
         Timestamp
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="130px">
+      <ui5-table-header-cell min-width="max-content">
         Sensor Fail
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="130px">
+      <ui5-table-header-cell min-width="max-content">
         WiFi Fail
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="130px">
+      <ui5-table-header-cell min-width="max-content">
         HTTP Fail
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="130px">
+      <ui5-table-header-cell min-width="max-content">
         RSSI
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="220px">
+      <ui5-table-header-cell min-width="max-content">
         Reason Code
       </ui5-table-header-cell>
 
-      <ui5-table-header-cell min-width="180px">
+      <ui5-table-header-cell min-width="max-content">
         Reason
       </ui5-table-header-cell>
 
@@ -126,37 +126,37 @@ const resetReasonCodeLabel = {
       <ui5-table-row>
 
         <!-- Timestamp -->
-        <ui5-table-cell min-width="220px">
+        <ui5-table-cell>
           <%= formatDateTime(item.recordedAt) %>
         </ui5-table-cell>
 
 
         <!-- Sensor Fail -->
-        <ui5-table-cell min-width="130px">
+        <ui5-table-cell>
           <%= item.sensorFailCount %>
         </ui5-table-cell>
 
 
         <!-- WiFi Fail -->
-        <ui5-table-cell min-width="130px">
+        <ui5-table-cell>
           <%= item.wifiFailCount %>
         </ui5-table-cell>
 
 
         <!-- HTTP Fail -->
-        <ui5-table-cell min-width="130px">
+        <ui5-table-cell>
           <%= item.httpFailCount %>
         </ui5-table-cell>
 
 
         <!-- RSSI -->
-        <ui5-table-cell min-width="130px">
+        <ui5-table-cell>
           <%= item.rssi !== null ? item.rssi + ' dBm' : '—' %>
         </ui5-table-cell>
 
 
         <!-- Reason Code -->
-        <ui5-table-cell min-width="220px">
+        <ui5-table-cell>
 
           <% if (item.reason) { %>
 
@@ -182,7 +182,7 @@ const resetReasonCodeLabel = {
 
 
         <!-- Reason -->
-        <ui5-table-cell min-width="180px">
+        <ui5-table-cell>
 
           <% if (item.reason) { %>
 
