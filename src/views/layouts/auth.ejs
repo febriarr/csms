@@ -8,12 +8,115 @@
 
   <title><%= title ?? 'CI-CSMS' %></title>
 
-  <link rel="stylesheet" href="/build/css/app.css" />
+  <% if (isDevelopment) { %>
+  <script
+    type="module"
+    src="http://localhost:5173/@vite/client"
+  ></script>
+
+  <script
+    type="module"
+    src="http://localhost:5173/src/client/main.ts"
+  ></script>
+<% } else { %>
+
+  <% viteAssets.css.forEach((href) => { %>
+    <link rel="stylesheet" href="<%= href %>" />
+  <% }) %>
+
+  <script
+    type="module"
+    src="<%= viteAssets.js %>"
+  ></script>
+
+<% } %>
 
   <script src="/build/vendor/htmx.min.js" defer></script>
+  <style>
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  .page-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: grid;
+    place-items: center;
+
+    background: #f5f6f7;
+
+    opacity: 1;
+    pointer-events: auto;
+
+    transition: opacity 220ms ease;
+  }
+
+  .page-loading.is-loaded {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .page-loading__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .page-loading__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  .page-loading__logo {
+    width: 2.75rem;
+    height: 2.75rem;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 0.5rem;
+
+    background: #0070f2;
+    color: #fff;
+
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+</style>
 </head>
 
 <body class="auth-shell">
+  <div id="page-loading" class="page-loading">
+  <div class="page-loading__content">
+    <div class="page-loading__brand">
+      <span class="page-loading__logo">CS</span>
+
+      <div>
+        <ui5-title level="H5">
+          Cold Storage Monitoring System
+        </ui5-title>
+
+        <ui5-text>
+          Preparing monitoring environment...
+        </ui5-text>
+      </div>
+    </div>
+
+    <ui5-busy-indicator
+      active
+      size="M"
+    ></ui5-busy-indicator>
+  </div>
+</div>
 
   <main class="auth-layout">
     <%- body %>

@@ -6,12 +6,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title ?? 'CI-CSMS Dashboard' %></title>
   <link rel="icon" type="image/png" href="/build/favicon.png" />
-  <link rel="stylesheet" href="/build/css/app.css" />
-  <% if (typeof pageStyles !== 'undefined') { pageStyles.forEach(href => { %>
-  <link rel="stylesheet" href="<%= href %>" /><% }) } %>
+
+  <% if (isDevelopment) { %>
+  <script type="module" src="http://localhost:5173/@vite/client"></script>
+
+  <script type="module" src="http://localhost:5173/src/client/main.ts"></script>
+  <% } else { %>
+
+  <% viteAssets.css.forEach((href) => { %>
+  <link rel="stylesheet" href="<%= href %>" />
+  <% }) %>
+
+  <script type="module" src="<%= viteAssets.js %>"></script>
+
+  <% } %>
+
+  <% if (typeof pageStyles !== 'undefined') { %>
+  <% pageStyles.forEach(href => { %>
+  <link rel="stylesheet" href="<%= href %>" />
+  <% }) %>
+  <% } %>
+
+  <style>
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  .page-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: grid;
+    place-items: center;
+
+    background: #f5f6f7;
+
+    opacity: 1;
+    pointer-events: auto;
+
+    transition: opacity 220ms ease;
+  }
+
+  .page-loading.is-loaded {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .page-loading__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .page-loading__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  .page-loading__logo {
+    width: 2.75rem;
+    height: 2.75rem;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 0.5rem;
+
+    background: #0070f2;
+    color: #fff;
+
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+</style>
 </head>
 
 <body class="dashboard-shell" data-app-version="<%= appVersion %>">
+  <div id="page-loading" class="page-loading">
+  <div class="page-loading__content">
+    <div class="page-loading__brand">
+      <span class="page-loading__logo">CS</span>
+
+      <div>
+        <ui5-title level="H5">
+          Cold Storage Monitoring System
+        </ui5-title>
+
+        <ui5-text>
+          Preparing monitoring environment...
+        </ui5-text>
+      </div>
+    </div>
+
+    <ui5-busy-indicator
+      active
+      size="M"
+    ></ui5-busy-indicator>
+  </div>
+</div>
   <% const isActive = (path) => currentPath === path; %>
   <div class="dashboard-layout">
     <aside class="dashboard-sidebar" id="dashboard-sidebar">
@@ -47,9 +147,14 @@
         <div class="dashboard-header">
           <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
         </div>
-        <ui5-button id="logout-button" icon="action" design="Transparent">
-          Logout
-        </ui5-button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <ui5-button id="button-documentation" icon="information" design="Default">
+            Docs
+          </ui5-button>
+          <ui5-button id="logout-button" icon="action" design="Default">
+            Logout
+          </ui5-button>
+        </div>       
       </header>
       <main class="dashboard-content"><%- body %></main>
     </div>
@@ -63,7 +168,6 @@
   </div>
   <% if (typeof pageVendor !== 'undefined') pageVendor.forEach(src => { %><script src="<%= src %>"></script><% }) %>
   <% if (typeof pageScripts !== 'undefined' && pageScripts.length) pageScripts.forEach(src => { %><script type="module" src="<%= src %>"></script><% }) %>
-  <script type="module" src="/app.js"></script>
 </body>
 
 </html>

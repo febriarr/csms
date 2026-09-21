@@ -9,10 +9,24 @@ import { notFoundHandler } from './middleware/not-found-handler';
 import { appVersion } from './config/app-info';
 import { viewHelpers } from './middleware/view-helper';
 import cookieParser from 'cookie-parser';
+import { getViteAssets } from './shared/utils/vite';
 
 const app = express();
 
 app.locals.appVersion = appVersion;
+const isDevelopment = process.env.NODE_ENV === 'development';
+app.locals.appVersion = appVersion;
+
+app.locals.isDevelopment = isDevelopment;
+
+app.locals.viteAssets = {
+  js: '',
+  css: [],
+};
+
+if (!isDevelopment) {
+  app.locals.viteAssets = getViteAssets();
+}
 
 app.use(
   helmet({
@@ -20,9 +34,11 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
 
-        scriptSrc: ["'self'", "'unsafe-eval'"],
+        scriptSrc: ["'self'", "'unsafe-eval'", ...(isDevelopment ? ['http://localhost:5173'] : [])],
 
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", ...(isDevelopment ? ['http://localhost:5173'] : [])],
+
+        connectSrc: ["'self'", ...(isDevelopment ? ['http://localhost:5173', 'ws://localhost:5173'] : [])],
       },
     },
   })
@@ -33,7 +49,7 @@ app.use(cookieParser());
 // Gunnakan views engine dari ejs
 app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'src', 'views'));
-app.use(express.static(path.join(process.cwd(), 'dist', 'client')));
+app.use('/client', express.static(path.join(process.cwd(), 'dist/client')));
 
 // Gunakan layout dari express layouts
 app.use(expressLayouts);
