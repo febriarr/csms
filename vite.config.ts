@@ -2,8 +2,9 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import fullReload from 'vite-plugin-full-reload';
 
-export default defineConfig({
-  base: '/client/',
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '/' : '/client/',
+
   plugins: [fullReload(['src/views/**/*.ejs'])],
 
   server: {
@@ -27,4 +28,4 @@ export default defineConfig({
 
     outDir: 'dist/client',
   },
-});
+}));
