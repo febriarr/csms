@@ -9,13 +9,14 @@ import {
 } from '../container';
 import { createDeviceSchema, updateDeviceSchema } from '../features/devices/devices.validator';
 import { authenticate } from '../middleware/authenticate.middleware';
+import { loginPayloadSchema } from '../features/auth/auth.validator';
 
 const router = Router();
 
 router.post('/telemetry', validateRequest({ body: createTemperatureSchema }), temperatureController.record);
 
 // auth
-router.post('/auth/login', authController.login);
+router.post('/auth/login', validateRequest({ body: loginPayloadSchema }), authController.login);
 router.post('/auth/refresh', authController.refresh);
 router.post('/auth/logout', authController.logout);
 router.get('/auth/me', authController.me);

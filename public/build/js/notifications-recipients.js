@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const tableBody = document.querySelector('.dashboard-table tbody');
+  const tableBody = document.querySelector('#table');
 
   if (tableBody) {
     tableBody.addEventListener('click', async event => {
@@ -96,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       deleteButton.disabled = true;
-      deleteButton.innerHTML = '<i class="ph ph-spinner-gap ph-spin"></i>';
 
       try {
         const response = await fetch(`/api/notifications-recipients/${id}`, {
@@ -109,13 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
           throw result;
         }
 
-        deleteButton.closest('tr')?.remove();
         window.location.reload();
       } catch (error) {
         showAlert(error);
 
         deleteButton.disabled = false;
-        deleteButton.innerHTML = '<i class="ph ph-trash"></i>';
       }
     });
   }

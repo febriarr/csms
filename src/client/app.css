@@ -64,6 +64,61 @@ body {
   background: #f2f2f2;
 }
 
+.alert {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--sap-negative);
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 12%);
+}
+
+.alert--error {
+  color: var(--sap-negative);
+}
+
+.alert__title {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.alert__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgb(255 255 255 / 60%);
+  backdrop-filter: blur(2px);
+}
+
+.loading-overlay__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 5rem;
+  min-height: 5rem;
+
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 12%);
+}
+
 .field-group {
   display: flex;
   flex-direction: column;
