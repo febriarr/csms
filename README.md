@@ -2,7 +2,7 @@
 
 Sistem monitoring cold storage berbasis web yang dirancang untuk memantau suhu penyimpanan secara **real-time**. Aplikasi ini menerima data suhu dari perangkat monitoring, menyimpan riwayat data ke PostgreSQL, menampilkan visualisasi suhu, serta memberikan notifikasi ketika suhu melewati batas yang telah ditentukan.
 
-> 🚧 Project ini masih dalam tahap pengembangan.
+> 🔧 Fitur utama telah selesai dan dapat digunakan di production. Saat ini project sedang dalam tahap optimasi, pengujian, dan penyempurnaan.
 
 ---
 
@@ -151,6 +151,26 @@ npm run seed:db:users
 
 ---
 
+---
+
+## 🧪 Test
+
+```bash
+# Unit
+npm run test:unit
+
+# Integration
+npm run test:integration
+
+# e2e
+npm run test:e2e
+
+# all
+npm run test:all
+```
+
+---
+
 ## 📌 Roadmap
 
 ### Fondasi Project
@@ -201,13 +221,6 @@ npm run seed:db:users
 
 - [ ] Email Notification
 - [x] WhatsApp Notification
-
-### Deployment
-
-- [ ] Docker
-- [ ] PM2
-- [ ] Nginx
-- [ ] Deployment Production
 
 ---
 
