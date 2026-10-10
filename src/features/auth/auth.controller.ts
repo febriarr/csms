@@ -61,7 +61,7 @@ export class AuthController {
       title: 'Login Page',
       layout: 'layouts/auth',
       error: req.query.error ?? null,
-      pageScripts: ['/build/js/login.js'],
+      pageScripts: ['login'],
     });
   };
 }

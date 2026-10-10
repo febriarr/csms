@@ -1,0 +1,40 @@
+<style>
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  .page-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: grid;
+    place-items: center;
+    background: var(--sapBackgroundColor, #f5f6f7);
+    transition: opacity 220ms ease;
+  }
+
+  .page-loading.is-loaded {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .page-loading__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    text-align: center;
+  }
+</style>
+<div id="page-loading" class="page-loading">
+  <div class="page-loading__content">
+    <div>
+      <ui5-title level="H5">Cold Storage Monitoring System</ui5-title>
+      <ui5-text>Preparing monitoring environment...</ui5-text>
+    </div>
+    <ui5-busy-indicator active size="M"></ui5-busy-indicator>
+  </div>
+</div>

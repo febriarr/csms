@@ -61,7 +61,7 @@ export class DashboardController {
       pageTitle: 'Devices',
       currentPath: '/dashboard/devices',
       pageDescription: 'Manage devices anda.',
-      pageScripts: ['/build/js/devices.js'],
+      pageScripts: ['devices'],
       currentSearch: search,
       devices,
     });
@@ -74,7 +74,7 @@ export class DashboardController {
       pageTitle: 'Form Create Device',
       currentPath: '/dashboard/devices',
       pageDescription: 'Isi input dibawah ini',
-      pageScripts: ['/build/js/devices.js'],
+      pageScripts: ['devices'],
     });
   };
 
@@ -89,7 +89,7 @@ export class DashboardController {
       currentPath: '/dashboard/devices',
       pageDescription: 'Isi input dibawah ini',
       data: data,
-      pageScripts: ['/build/js/update-device.js'],
+      pageScripts: ['update-device'],
     });
   };
 

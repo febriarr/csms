@@ -35,7 +35,7 @@ export class ReportsController {
       currentPath: '/dashboard/reports/temperature',
       pageTitle: 'Reports',
       pageDescription: 'Pilih device dan rentang tanggal untuk melihat histori suhu.',
-      pageScripts: ['/build/js/temperature-report.js'],
+      pageScripts: ['temperature-report'],
       devices,
       report,
       filters: { deviceId, from, to },

@@ -1,186 +1,58 @@
-<div class="dashboard-page-header">
-
-  <div>
-
-    <p class="dashboard-page-eyebrow">
-      Monitoring
-    </p>
-
-    <h2>
-      <%= pageTitle %>
-    </h2>
-
-    <p>
-      Ringkasan diagnostics yang tercatat hari ini.
-    </p>
-
-  </div>
-
-
-  <!-- <div class="page-actions">
-
-    <ui5-button
-      design="Transparent"
-      id="overview-refresh"
-    >
-      <ui5-icon name="refresh"></ui5-icon>
-      Refresh
-    </ui5-button>
-
-  </div> -->
-
-</div>
-
-
-<div class="dashboard-page-card">
-
-  <div class="section-toolbar">
-
-    <div>
-
-      <h3 class="section-title">
-        Today Diagnostics
-      </h3>
-
-      <p class="section-subtitle">
-        Device dengan kejadian sensor, Wi-Fi, atau HTTP.
-      </p>
-
+<ui5-panel header-text="Today Diagnostics" accessible-name="Today diagnostics" fixed>
+  <div class="stack">
+    <div class="toolbar-row">
+      <ui5-text class="muted">Device dengan kejadian sensor, Wi-Fi, atau HTTP.</ui5-text>
+      <span class="toolbar-spacer"></span>
+      <ui5-button
+        id="diagnostics-view-details"
+        design="Transparent"
+        icon="display"
+        accessible-name="View diagnostics details"
+        data-href="/dashboard/reports/diagnostics"
+      >View Details</ui5-button>
     </div>
 
+    <% if (diagnosticsToday.length === 0) { %>
 
-    <a
-      href="/dashboard/reports/diagnostics"
-      class="btn btn-outline"
-    >
-      <ui5-icon name="display"></ui5-icon>
-      View Details
-    </a>
-
-  </div>
-
-
-  <% if (diagnosticsToday.length === 0) { %>
-
-    <div class="section-body">
-
-      <ui5-message-strip
-        design="Positive"
-        hide-close-button
-      >
+      <ui5-message-strip design="Positive" hide-close-button>
         Belum ada kejadian sensor/WiFi/HTTP gagal hari ini.
       </ui5-message-strip>
 
-    </div>
+    <% } else { %>
 
-  <% } else { %>
+      <ui5-table sticky-column-header overflow-mode="Scroll" accessible-name="Today Diagnostics">
+        <ui5-table-header-row slot="headerRow">
+          <ui5-table-header-cell min-width="max-content">Device</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Sensor Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">WiFi Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">HTTP Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Total</ui5-table-header-cell>
+        </ui5-table-header-row>
 
-
-    <ui5-table
-      class="enterprise-table"
-      sticky-column-header
-      overflow-mode="Scroll"
-      accessible-name="Today Diagnostics"
-    >
-
-      <ui5-table-header-row slot="headerRow">
-
-        <ui5-table-header-cell min-width="max-content">
-          Device
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Sensor Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          WiFi Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          HTTP Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Total
-        </ui5-table-header-cell>
-
-      </ui5-table-header-row>
-
-
-      <% diagnosticsToday.slice(0, 5).forEach(row => { %>
-
-        <ui5-table-row>
-
-          <!-- Device -->
-          <ui5-table-cell>
-            <div style="display: flex;align-items: center; gap: 1rem;">
-              <div class="device-name">
-              <%= row.deviceName %>
+        <% diagnosticsToday.slice(0, 5).forEach(row => { %>
+          <ui5-table-row>
+            <ui5-table-cell>
+              <div class="cell-stack">
+                <ui5-text class="cell-strong"><%= row.deviceName %></ui5-text>
+                <ui5-text class="muted"><%= row.deviceCode %></ui5-text>
               </div>
+            </ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.sensorFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.wifiFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.httpFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text class="cell-strong"><%= row.total %></ui5-text></ui5-table-cell>
+          </ui5-table-row>
+        <% }) %>
+      </ui5-table>
 
-              <div class="device-code">
-                <%= row.deviceCode %>
-              </div>
-            </div>
-
-          </ui5-table-cell>
-
-
-          <!-- Sensor Fail -->
-          <ui5-table-cell>
-            <%= row.sensorFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- WiFi Fail -->
-          <ui5-table-cell>
-            <%= row.wifiFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- HTTP Fail -->
-          <ui5-table-cell>
-            <%= row.httpFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- Total -->
-          <ui5-table-cell>
-
-            <strong>
-              <%= row.total %>
-            </strong>
-
-          </ui5-table-cell>
-
-        </ui5-table-row>
-
-      <% }) %>
-
-    </ui5-table>
-
-
-    <% if (diagnosticsToday.length > 5) { %>
-
-      <div class="section-body">
-
-        <span class="muted-foreground">
-
-          +<%= diagnosticsToday.length - 5 %>
-          device lain punya kejadian hari ini —
-
-          <a href="/dashboard/reports/diagnostics">
-            lihat semua
-          </a>.
-
-        </span>
-
-      </div>
+      <% if (diagnosticsToday.length > 5) { %>
+        <div class="toolbar-row">
+          <ui5-text class="muted">+<%= diagnosticsToday.length - 5 %> device lain punya kejadian hari ini</ui5-text>
+          <span class="toolbar-spacer"></span>
+          <ui5-link href="/dashboard/reports/diagnostics">Lihat semua</ui5-link>
+        </div>
+      <% } %>
 
     <% } %>
-
-
-  <% } %>
-
-</div>
+  </div>
+</ui5-panel>

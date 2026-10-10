@@ -1,29 +1,10 @@
-<div
-  style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 180px); padding: 2rem"
->
-  <div style="max-width: 600px; width: 100%; text-align: center">
-    <div style="font-size: 5rem; color: var(--primary); margin-bottom: 1rem">
-      <i class="ph ph-warning-circle"></i>
-    </div>
+<div class="error-page">
+  <ui5-icon name="message-warning" class="error-page__icon"></ui5-icon>
+  <ui5-title level="H3"><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : '403 - Unauthorized' %></ui5-title>
+  <ui5-text class="muted"><%= typeof pageDescription !== 'undefined' && pageDescription ? pageDescription : "You don't have permission to access this page." %></ui5-text>
 
-    <h1 style="margin-bottom: 0.75rem"><%= pageTitle || '403 - Unauthorized' %></h1>
-
-    <p class="muted muted-foreground" style="margin-bottom: 2rem">
-      <%= pageDescription || "You don't have permission to access this page." %>
-    </p>
-
-    <div style="display: flex; justify-content: center; gap: 0.75rem">
-      <a href="<%= currentPath || '/dashboard' %>" class="btn btn-outline" style="text-decoration: none">
-        <i class="ph ph-arrow-left"></i>
-        Go Back
-      </a>
-
-      <a href="/dashboard" style="text-decoration: none">
-        <button type="button" class="btn btn-primary">
-          <i class="ph ph-house"></i>
-          Dashboard
-        </button>
-      </a>
-    </div>
+  <div class="error-page__actions">
+    <ui5-button design="Transparent" icon="navigation-left-arrow" data-href="<%= typeof currentPath !== 'undefined' && currentPath ? currentPath : '/dashboard' %>">Go Back</ui5-button>
+    <ui5-button design="Emphasized" icon="home" data-href="/dashboard">Dashboard</ui5-button>
   </div>
 </div>

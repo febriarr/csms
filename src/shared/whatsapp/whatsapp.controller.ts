@@ -14,7 +14,7 @@ router.get('/whatsapp/status', authorize(AUTHR.SUPERADMIN), async (_req, res) =>
     title: 'WhatsApp QR',
     connected: whatsappService.isConnected(),
     qrImage,
-    pageScripts: ['/js/whatsapp-status.js'],
+    pageScripts: ['whatsapp-status'],
   });
 });
 

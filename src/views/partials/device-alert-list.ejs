@@ -1,18 +1,18 @@
 <% if (alerts.length === 0) { %>
-  <p class="alert-empty">Belum ada riwayat alert.</p>
+  <ui5-message-strip design="Information" hide-close-button>Belum ada riwayat alert.</ui5-message-strip>
 <% } else { %>
-  <ul class="alert-list">
+  <%
+    const stateDesign = { NORMAL: 'Positive', DEFROST: 'Information', WARNING: 'Critical', CRITICAL: 'Negative' };
+  %>
+  <ui5-list class="alert-list" accessible-name="Alert history">
     <% alerts.forEach(function(alert) { %>
-      <li class="alert-item alert-item-<%= alert.toState.toLowerCase() %>">
-        <div class="alert-item-header">
-          <span class="alert-transition"><%= alert.fromState %> &rarr; <%= alert.toState %></span>
-          <span class="alert-time"><%= formatDateTime(alert.occurredAt) %></span>
-        </div>
-        <div class="alert-reason-code"><%= alert.reasonCode.replaceAll('_', ' ') %></div>
-        <% if (alert.reason) { %>
-          <p class="alert-reason-text"><%= alert.reason %></p>
-        <% } %>
-      </li>
+      <ui5-li
+        wrapping-type="Normal"
+        text="<%= alert.fromState %> → <%= alert.toState %>"
+        description="<%= alert.reasonCode.replaceAll('_', ' ') %><%= alert.reason ? ' — ' + alert.reason : '' %>"
+        additional-text="<%= formatDateTime(alert.occurredAt) %>"
+        additional-text-state="<%= stateDesign[alert.toState] ?? 'None' %>"
+      ></ui5-li>
     <% }); %>
-  </ul>
+  </ui5-list>
 <% } %>

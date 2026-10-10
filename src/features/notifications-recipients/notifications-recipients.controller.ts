@@ -41,7 +41,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients',
       pageTitle: 'Notification Recipients',
       pageDescription: 'Manage notification recipients for your application.',
-      pageScripts: ['/build/js/notifications-recipients.js'],
+      pageScripts: ['notifications-recipients'],
       currentName: req.query?.name,
       currentChannel: req.query?.channel,
       data,
@@ -65,7 +65,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients/create',
       pageTitle: 'Create Notification Recipient',
       pageDescription: 'Create a new notification recipient for your application.',
-      pageScripts: ['/build/js/notifications-recipients.js'],
+      pageScripts: ['notifications-recipients'],
     });
   };
 
@@ -89,7 +89,7 @@ export class NotificationsRecipientsController {
       currentPath: '/dashboard/notifications-recipients',
       pageTitle: 'Update Notification Recipient',
       pageDescription: 'Update the details of an existing notification recipient.',
-      pageScripts: ['/build/js/notifications-recipients.js'],
+      pageScripts: ['notifications-recipients'],
       data,
     });
   };

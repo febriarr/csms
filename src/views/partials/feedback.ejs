@@ -1,0 +1,9 @@
+<%# Global feedback slots driven by src/client/lib/alert.ts and lib/loading.ts %>
+<ui5-message-strip data-slot="alert" class="app-alert is-hidden" design="Negative">
+  <strong data-slot="alert-title"></strong>
+  <ul class="app-alert__list" data-slot="alert-list"></ul>
+</ui5-message-strip>
+
+<div data-slot="loading-overlay" class="app-loading is-hidden">
+  <ui5-busy-indicator active size="L"></ui5-busy-indicator>
+</div>

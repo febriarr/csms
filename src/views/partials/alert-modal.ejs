@@ -1,22 +1,11 @@
-<div
-  x-data="{ open: false }"
-  x-on:open-alert-modal.window="open = true"
-  x-on:close-alert-modal.window="open = false"
-  x-on:keydown.escape.window="open = false"
-  x-effect="$refs.dialog.open = open"
-  x-on:ui5-dialog-close.window="open = false"
->
-  <ui5-dialog id="log-history-dialog" x-ref="dialog" header-text="Log History" class="log-history-dialog">
-    <div id="alert-modal-body" class="modal-body">
-      <div id="alert-modal-loading" class="modal-loading htmx-indicator">
-        <ui5-busy-indicator active></ui5-busy-indicator><span>Memuat riwayat alert...</span>
-      </div>
-      <ui5-message-strip id="alert-modal-empty" design="Information" hide-close-button class="is-hidden"
-        >Belum ada riwayat alert.</ui5-message-strip
-      >
-    </div>
-    <ui5-toolbar slot="footer">
-      <ui5-toolbar-button design="Default" x-on:click="open = false" text="Close"></ui5-toolbar-button>
-    </ui5-toolbar>
-  </ui5-dialog>
-</div>
+<ui5-dialog id="log-history-dialog" header-text="Log History" class="log-history-dialog" style="width: 100%">
+  <div id="alert-modal-loading" class="modal-loading htmx-indicator">
+    <ui5-busy-indicator active size="S"></ui5-busy-indicator>
+    <ui5-text>Memuat riwayat alert...</ui5-text>
+  </div>
+  <div id="alert-modal-body" class="modal-body"></div>
+
+  <ui5-bar slot="footer" design="Footer">
+    <ui5-button slot="endContent" id="log-history-close" design="Default">Close</ui5-button>
+  </ui5-bar>
+</ui5-dialog>

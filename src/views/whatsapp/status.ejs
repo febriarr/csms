@@ -1,1 +1,14 @@
-<div class="dashboard-page-header"><div><p class="dashboard-page-eyebrow">Integration</p><h2>Status WhatsApp Gateway</h2><p>Connection status for outbound alert notifications.</p></div></div><div class="dashboard-page-card"><div class="section-body"><ui5-message-strip design="Positive" hide-close-button>Terhubung</ui5-message-strip><p class="muted-foreground" style="margin-top:1rem">Scan QR ini pakai WhatsApp:</p><p>Menunggu QR code...</p></div></div>
+<ui5-panel header-text="Status WhatsApp Gateway" fixed>
+  <div class="stack">
+    <ui5-text class="muted">Connection status for outbound alert notifications.</ui5-text>
+
+    <% if (connected) { %>
+      <ui5-message-strip design="Positive" hide-close-button>Terhubung</ui5-message-strip>
+    <% } else if (qrImage) { %>
+      <ui5-text>Scan QR ini pakai WhatsApp:</ui5-text>
+      <img src="<%= qrImage %>" alt="QR Code" class="qr-image" />
+    <% } else { %>
+      <ui5-message-strip design="Information" hide-close-button>Menunggu QR code...</ui5-message-strip>
+    <% } %>
+  </div>
+</ui5-panel>

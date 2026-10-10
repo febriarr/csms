@@ -1,9 +1,16 @@
-<div class="dashboard-page-header">
-  <div>
-    <h2>Cold Storage Temperature Monitoring</h2>
-    <p style="font-size: 1rem;">Real-time device status</p>
-    <p class="monitoring-date" style="font-size: 1rem;">Monitoring Date: <%= monitoringDate %></p>
+<section class="page-header-row">
+  <div class="page-heading">
+    <ui5-title level="H2">Cold Storage Temperature Monitoring</ui5-title>
+    <ui5-text>Real-time device status</ui5-text>
+    <ui5-text class="muted monitoring-date">Monitoring Date: <%= monitoringDate %></ui5-text>
   </div>
-  <div class="system-status"><span class="status-dot-global"></span><strong id="device-count"><%= devices.length %> DEVICES MONITORED</strong></div>
+  <ui5-tag id="device-count" design="Positive"><%= devices.length %> DEVICES MONITORED</ui5-tag>
+</section>
+
+<div id="device-grid" class="device-grid">
+  <% devices.forEach(device => { %>
+    <%- include('partials/device-card', { device, stateLabelMap, formatLastSeen }) %>
+  <% }) %>
 </div>
-<div id="device-grid" class="device-grid"><% devices.forEach(device=>{ %><%- include('partials/device-card',{device,stateLabelMap,formatLastSeen}) %><% }) %></div><%- include('partials/alert-modal') %>
+
+<%- include('partials/alert-modal') %>

@@ -6,168 +6,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title ?? 'CI-CSMS Dashboard' %></title>
   <link rel="icon" type="image/png" href="/build/favicon.png" />
-
-  <% if (isDevelopment) { %>
-  <script type="module" src="http://localhost:5173/@vite/client"></script>
-
-  <script type="module" src="http://localhost:5173/src/client/main.ts"></script>
-  <% } else { %>
-
-  <% viteAssets.css.forEach((href) => { %>
-  <link rel="stylesheet" href="<%= href %>" />
-  <% }) %>
-
-  <script type="module" src="<%= viteAssets.js %>"></script>
-
-  <% } %>
-
-  <% if (typeof pageStyles !== 'undefined') { %>
-  <% pageStyles.forEach(href => { %>
-  <link rel="stylesheet" href="<%= href %>" />
-  <% }) %>
-  <% } %>
-
-  <style>
-  html,
-  body {
-    margin: 0;
-    min-height: 100%;
-  }
-
-  .page-loading {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-
-    display: grid;
-    place-items: center;
-
-    background: #f5f6f7;
-
-    opacity: 1;
-    pointer-events: auto;
-
-    transition: opacity 220ms ease;
-  }
-
-  .page-loading.is-loaded {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .page-loading__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .page-loading__brand {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-  }
-
-  .page-loading__logo {
-    width: 2.75rem;
-    height: 2.75rem;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 0.5rem;
-
-    background: #0070f2;
-    color: #fff;
-
-    font-size: 0.875rem;
-    font-weight: 700;
-  }
-</style>
+  <%- include('../partials/assets') %>
 </head>
 
-<body class="dashboard-shell" data-app-version="<%= appVersion %>">
-  <div id="page-loading" class="page-loading">
-  <div class="page-loading__content">
-    <div class="page-loading__brand">
-      <span class="page-loading__logo">CS</span>
+<body class="dashboard-shell" data-app-version="<%= appVersion %>" data-page-scripts="<%= JSON.stringify(typeof pageScripts !== 'undefined' ? pageScripts : []) %>">
+  <%- include('../partials/page-loading') %>
 
-      <div>
-        <ui5-title level="H5">
-          Cold Storage Monitoring System
-        </ui5-title>
+  <%
+    const navItems = [
+      { text: 'Overview', icon: 'home', href: '/dashboard', exact: true },
+      { text: 'Devices', icon: 'sys-monitor', href: '/dashboard/devices' },
+      { text: 'Notification Recipients', icon: 'bell', href: '/dashboard/notifications-recipients' },
+      { text: 'Temperature Reports', icon: 'line-chart', href: '/dashboard/reports/temperature' },
+      { text: 'Diagnostics', icon: 'activity-items', href: '/dashboard/reports/diagnostics' },
+    ];
+    const current = typeof currentPath !== 'undefined' ? currentPath : '';
+    const isActive = (item) => item.exact ? current === item.href : current === item.href || current.startsWith(item.href + '/');
+  %>
 
-        <ui5-text>
-          Preparing monitoring environment...
-        </ui5-text>
-      </div>
-    </div>
+  <ui5-navigation-layout id="dashboard-layout">
 
-    <ui5-busy-indicator
-      active
-      size="M"
-    ></ui5-busy-indicator>
-  </div>
-</div>
-  <% const isActive = (path) => currentPath === path; %>
-  <div class="dashboard-layout">
-    <aside class="dashboard-sidebar" id="dashboard-sidebar">
-      <div class="dashboard-sidebar__header">
-        <div>
-          <h2>Cold Storage Monitoring</h2>
-        </div>
-      </div>
-      <nav class="dashboard-sidebar__nav" aria-label="Dashboard navigation">
-        <a href="/dashboard" class="dashboard-sidebar__link <%= isActive('/dashboard') ? 'is-active' : '' %>">
-          <ui5-icon name="home"></ui5-icon><span>Overview</span>
-        </a>
-        <a href="/dashboard/devices" class="dashboard-sidebar__link <%= isActive('/dashboard/devices') ? 'is-active' : '' %>">
-          <ui5-icon name="sys-monitor"></ui5-icon><span>Devices</span>
-        </a>
-        <a href="/dashboard/notifications-recipients" class="dashboard-sidebar__link <%= isActive('/dashboard/notifications-recipients') ? 'is-active' : '' %>">
-          <ui5-icon name="bell"></ui5-icon><span>Notification Recipients</span>
-        </a>
-        <a href="/dashboard/reports/temperature" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/temperature') ? 'is-active' : '' %>">
-          <ui5-icon name="line-chart"></ui5-icon><span>Temperature Reports</span>
-        </a>
-        <a href="/dashboard/reports/diagnostics" class="dashboard-sidebar__link <%= isActive('/dashboard/reports/diagnostics') ? 'is-active' : '' %>">
-          <ui5-icon name="activity-items"></ui5-icon><span>Diagnostics</span>
-        </a>
-      </nav>
-    </aside>
-    <div class="dashboard-backdrop" id="dashboard-backdrop"></div>
-    <div class="dashboard-main">
-      <header class="dashboard-topbar">
-        <button type="button" class="dashboard-toggle" id="dashboard-toggle" aria-label="Toggle sidebar">
-          <ui5-icon name="menu2"></ui5-icon>
-        </button>
-        <div class="dashboard-header">
-          <h1><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></h1>
-        </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <ui5-button id="button-documentation" icon="information" design="Default">
-            Docs
-          </ui5-button>
-          <ui5-button id="logout-button" icon="action" design="Default">
-            Logout
-          </ui5-button>
-        </div>       
+    <ui5-bar slot="header" design="Header" class="header-bar">
+      <ui5-button
+        id="navigation-toggle"
+        icon="menu2"
+        design="Transparent"
+        tooltip="Toggle navigation"
+        accessible-name="Toggle navigation"
+        slot="startContent"
+      ></ui5-button>
+
+      <img slot="startContent" src="/build/logo-stp.webp" alt="STP" class="brand-logo" />
+
+      <ui5-title level="H5" class="header-title">Cold Storage Monitoring System</ui5-title>
+
+      <ui5-button slot="endContent" id="button-documentation" design="Transparent" icon="sys-help" data-href="/dashboard/docs/user-guide">Docs</ui5-button>
+      <ui5-button slot="endContent" id="logout-button" design="Transparent" icon="log">Logout</ui5-button>
+    </ui5-bar>
+
+    <ui5-side-navigation slot="sideContent">
+      <% navItems.forEach(item => { %>
+      <ui5-side-navigation-item
+        text="<%= item.text %>"
+        icon="<%= item.icon %>"
+        href="<%= item.href %>"
+        <%= isActive(item) ? 'selected' : '' %>
+      ></ui5-side-navigation-item>
+      <% }) %>
+    </ui5-side-navigation>
+
+    <main class="dashboard-content">
+      <header class="dashboard-page-header">
+        <ui5-title level="H2"><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Dashboard' %></ui5-title>
+        <% if (typeof pageDescription !== 'undefined' && pageDescription) { %>
+        <ui5-text class="muted"><%= pageDescription %></ui5-text>
+        <% } %>
       </header>
-      <main class="dashboard-content"><%- body %></main>
-    </div>
-  </div>
-  <script src="/build/js/dashboard-sidebar.js"></script>
-  <div data-slot="alert" class="alert alert--error is-hidden"><span class="alert__title" data-slot="alert-title"></span>
-    <ul class="alert__list" data-slot="alert-list"></ul>
-  </div>
-  <div data-slot="loading-overlay" class="is-hidden">
-    <div data-slot="loading"></div>
-  </div>
-  <% if (typeof pageVendor !== 'undefined') pageVendor.forEach(src => { %><script src="<%= src %>"></script><% }) %>
-  <% if (typeof pageScripts !== 'undefined' && pageScripts.length) pageScripts.forEach(src => { %><script type="module" src="<%= src %>"></script><% }) %>
+
+      <%- include('../partials/feedback') %>
+
+      <%- body %>
+    </main>
+
+  </ui5-navigation-layout>
 </body>
 
 </html>

@@ -1,2 +1,40 @@
-<div class="dashboard-page-header"><div><p class="dashboard-page-eyebrow">Notifications</p><h2>Update Notification Recipient</h2><p>Maintain recipient delivery settings.</p></div></div>
-<form id="form-update-notification-recipient" data-id="<%= data.id %>" class="enterprise-form form-card"><div class="form-card__header"><h3 class="section-title"><%= data.name %></h3></div><div class="form-card__body"><div class="field-group"><div class="field"><ui5-label for="name" required>Name</ui5-label><ui5-input id="name" name="name" value="<%= data.name %>" required></ui5-input></div><div class="field"><ui5-label for="channel" required>Channel</ui5-label><ui5-select id="channel" name="channel" required><ui5-option value="">Select channel</ui5-option><ui5-option value="email" <%= data.channel === 'email' ? 'selected' : '' %>>Email</ui5-option><ui5-option value="whatsapp" <%= data.channel === 'whatsapp' ? 'selected' : '' %>>WhatsApp</ui5-option></ui5-select></div><div class="field"><ui5-label id="target-label" for="target" required>Target</ui5-label><ui5-input id="target" name="target" value="<%= data.target %>" required></ui5-input></div><div class="field"><ui5-label for="isActive">Status</ui5-label><ui5-switch id="isActive" name="isActive" <%= data.isActive ? 'checked' : '' %>>Active</ui5-switch></div></div></div><div class="form-card__actions"><a href="/dashboard/notifications-recipients" class="btn btn-outline">Cancel</a><ui5-button type="Submit" design="Emphasized">Save Recipient</ui5-button></div></form>
+<form id="form-update-notification-recipient" data-id="<%= data.id %>" class="form-card">
+  <div class="form-card__header">
+    <ui5-title level="H4"><%= data.name %></ui5-title>
+    <ui5-text class="muted">Maintain recipient delivery settings.</ui5-text>
+  </div>
+
+  <div class="form-card__body field-group">
+    <div class="field">
+      <ui5-label for="name" required>Name</ui5-label>
+      <ui5-input id="name" name="name" value="<%= data.name %>" required></ui5-input>
+    </div>
+
+    <div class="field">
+      <ui5-label for="channel" required>Channel</ui5-label>
+      <ui5-select id="channel" name="channel" required accessible-name="Channel">
+        <ui5-option value="">Select channel</ui5-option>
+        <ui5-option value="email" <%= data.channel === 'email' ? 'selected' : '' %>>Email</ui5-option>
+        <ui5-option value="whatsapp" <%= data.channel === 'whatsapp' ? 'selected' : '' %>>WhatsApp</ui5-option>
+      </ui5-select>
+    </div>
+
+    <div class="field">
+      <ui5-label id="target-label" for="target" required>Target</ui5-label>
+      <ui5-input id="target" name="target" value="<%= data.target %>" required></ui5-input>
+    </div>
+
+    <div class="field">
+      <ui5-label for="isActive">Status</ui5-label>
+      <div class="switch-row">
+        <ui5-switch id="isActive" accessible-name="Active" <%= data.isActive ? 'checked' : '' %>></ui5-switch>
+        <ui5-text>Active</ui5-text>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card__actions">
+    <ui5-button design="Transparent" data-href="/dashboard/notifications-recipients">Cancel</ui5-button>
+    <ui5-button type="Submit" design="Emphasized">Save Recipient</ui5-button>
+  </div>
+</form>

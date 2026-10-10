@@ -1,25 +1,32 @@
 <div class="login-page">
   <section class="login-brand">
-    <div class="login-brand__mark">CS</div>
-    <h1>Cold Storage Monitoring System</h1>
-    <p>Monitoring untuk menjaga visibilitas kondisi cold storage, status perangkat, dan histori temperatur secara terpusat.</p>
+    <ui5-icon name="temperature" class="login-brand__icon"></ui5-icon>
+    <ui5-title level="H1">Cold Storage Monitoring System</ui5-title>
+    <ui5-text>Monitoring untuk menjaga visibilitas kondisi cold storage, status perangkat, dan histori temperatur secara terpusat.</ui5-text>
   </section>
+
   <section class="login-panel">
     <form id="loginForm" class="login-card">
       <ui5-title level="H2">Sign in</ui5-title>
-      <p class="login-card__sub">Masuk menggunakan akun yang diberikan administrator.</p>
+      <ui5-text class="muted">Masuk menggunakan akun yang diberikan administrator.</ui5-text>
+
       <div class="field-group">
         <div class="field">
           <ui5-label for="name" required>Name</ui5-label>
-          <ui5-input id="name" name="name" type="Text" placeholder="Enter your name" required style="width: 100%;"></ui5-input>
+          <ui5-input id="name" name="name" type="Text" placeholder="Enter your name" required></ui5-input>
         </div>
+
         <div class="field">
           <ui5-label for="password" required>Password</ui5-label>
-          <ui5-input id="password" name="password" type="Password" placeholder="Enter your password" required style="width: 100%;"></ui5-input>
+          <ui5-input id="password" name="password" type="Password" placeholder="Enter your password" required></ui5-input>
         </div>
-        <ui5-button type="Submit" design="Emphasized" style="width:100%">Login</ui5-button>
+
+        <ui5-button type="Submit" design="Emphasized" class="btn-block">Login</ui5-button>
       </div>
-      <% if (error) { %><ui5-message-strip class="login-error" design="Negative" hide-close-button><%= error %></ui5-message-strip><% } %>
+
+      <% if (error) { %>
+        <ui5-message-strip design="Negative" hide-close-button><%= error %></ui5-message-strip>
+      <% } %>
     </form>
   </section>
 </div>

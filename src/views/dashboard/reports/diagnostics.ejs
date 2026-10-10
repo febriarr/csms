@@ -1,318 +1,120 @@
 <%
 function buildDeviceUrl(deviceId) {
-  const params = new URLSearchParams({
-    from: filters.from || '',
-    to: filters.to || '',
-    deviceId: deviceId,
-  });
-
+  const params = new URLSearchParams({ from: filters.from || '', to: filters.to || '', deviceId: deviceId });
   return '/dashboard/reports/diagnostics?' + params.toString();
 }
 
 function buildDeviceDetailUrl(deviceId) {
-  const params = new URLSearchParams({
-    from: filters.from || '',
-    to: filters.to || '',
-    deviceId: deviceId,
-  });
-
+  const params = new URLSearchParams({ from: filters.from || '', to: filters.to || '', deviceId: deviceId });
   return '/dashboard/reports/diagnostics/detail?' + params.toString();
 }
+
+const reasonTagDesign = { BROWNOUT: 'Negative', PANIC: 'Critical', WATCHDOG: 'Critical', UNKNOWN: 'Neutral' };
 %>
+<div class="stack">
 
-
-<form
-  method="GET"
-  action="/dashboard/reports/diagnostics"
-  id="diagnostics-report-form"
-  class="filter-bar"
->
-  <div class="filter-actions">
-
-    <div class="field-group diagnostics-filter-group">
-
-      <div class="flex-items-center">
-
-        <div class="field">
-          <label for="from" class="field-label">
-            From Date
-          </label>
-
-          <ui5-date-picker
-            type="date"
-            id="from"
-            name="from"
-            required
-            value="<%= filters.from %>"
-          ></ui5-date-picker>
-        </div>
-
-
-        <div class="field">
-          <label for="to" class="field-label">
-            To Date
-          </label>
-
-          <ui5-date-picker
-            type="date"
-            id="to"
-            name="to"
-            required
-            value="<%= filters.to %>"
-          ></ui5-date-picker>
-        </div>
-
-
-        <% if (filters.deviceId) { %>
-
-          <input
-            type="hidden"
-            name="deviceId"
-            value="<%= filters.deviceId %>"
-          />
-
-        <% } %>
-
-
-        <div class="field diagnostics-filter-submit">
-
-          <ui5-button
-            type="Submit"
-            design="Emphasized"
-          >
-            Apply
-          </ui5-button>
-
-        </div>
-
-      </div>
-
+  <form method="GET" action="/dashboard/reports/diagnostics" id="diagnostics-report-form" class="toolbar-row toolbar-row--filters">
+    <div class="field">
+      <ui5-label for="from" required>From Date</ui5-label>
+      <ui5-date-picker id="from" name="from" value-format="yyyy-MM-dd" display-format="yyyy-MM-dd" value="<%= filters.from %>" required></ui5-date-picker>
     </div>
 
-  </div>
-</form>
-
-
-<div>
-
-  <div class="section-toolbar">
-
-    <h3 class="section-title">
-      Ranking Device
-    </h3>
-
-  </div>
-
-
-  <% if (summary.length === 0) { %>
-
-    <p class="muted-foreground p-4">
-      Tidak ada kejadian sensor/WiFi/HTTP gagal pada rentang tanggal ini.
-    </p>
-
-  <% } else { %>
-
-
-    <ui5-table
-      id="table"
-      class="enterprise-table"
-      sticky-column-header
-      overflow-mode="Scroll"
-      accessible-name="Device Diagnostics Ranking"
-    >
-
-      <ui5-table-header-row slot="headerRow">
-
-        <ui5-table-header-cell min-width="max-content">
-          Device
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Sensor Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          WiFi Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          HTTP Fail
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Avg RSSI
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Last Reason
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Total
-        </ui5-table-header-cell>
-
-        <ui5-table-header-cell min-width="max-content">
-          Actions
-        </ui5-table-header-cell>
-
-      </ui5-table-header-row>
-
-
-      <% summary.forEach(row => { %>
-
-        <ui5-table-row>
-
-          <!-- Device -->
-          <ui5-table-cell style="display: flex; align-items: center; gap: 1rem;">
-
-            <div class="device-name">
-              <%= row.deviceName %>
-            </div>
-
-            <div class="device-code">
-              <%= row.deviceCode %>
-            </div>
-
-          </ui5-table-cell>
-
-
-          <!-- Sensor Fail -->
-          <ui5-table-cell>
-            <%= row.sensorFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- WiFi Fail -->
-          <ui5-table-cell>
-            <%= row.wifiFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- HTTP Fail -->
-          <ui5-table-cell>
-            <%= row.httpFailTotal %>
-          </ui5-table-cell>
-
-
-          <!-- Avg RSSI -->
-          <ui5-table-cell>
-            <%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %>
-          </ui5-table-cell>
-
-
-          <!-- Last Reason -->
-          <ui5-table-cell>
-
-            <%
-              const reasonTagDesign = {
-                BROWNOUT: 'Negative',
-                PANIC: 'Critical',
-                WATCHDOG: 'Critical',
-                UNKNOWN: 'Neutral',
-              };
-            %>
-
-
-            <% if (row.lastReason) { %>
-
-              <ui5-tag
-                design="<%= reasonTagDesign[row.lastReason.resetReason] || 'Neutral' %>"
-                title="RSSI saat itu: <%= row.lastReason.lastRssi !== null ? row.lastReason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= row.lastReason.lastWifiFailCount %> · Sensor Fail: <%= row.lastReason.lastSensorFailCount %> · HTTP Fail: <%= row.lastReason.lastHttpFailCount %>"
-              >
-                <%= row.lastReason.resetReason %>
-              </ui5-tag>
-
-            <% } else { %>
-
-              <ui5-text class="table-empty-value">
-                —
-              </ui5-text>
-
-            <% } %>
-
-          </ui5-table-cell>
-
-
-          <!-- Total -->
-          <ui5-table-cell>
-
-            <strong>
-              <%= row.total %>
-            </strong>
-
-          </ui5-table-cell>
-
-
-          <!-- Actions -->
-          <ui5-table-cell>
-
-            <div class="diagnostics-row-actions">
-
-              <ui5-link
-                href="<%= buildDeviceUrl(row.deviceId) %>"
-              >
-                Show Trend
-              </ui5-link>
-
-
-              <ui5-link
-                href="<%= buildDeviceDetailUrl(row.deviceId) %>"
-              >
-                Show Detail
-              </ui5-link>
-
-            </div>
-
-          </ui5-table-cell>
-
-        </ui5-table-row>
-
-      <% }) %>
-
-    </ui5-table>
-
-
-  <% } %>
-
-</div>
-
-
-<% if (selectedDevice && trend) { %>
-
-  <div class="dashboard-page-card diagnostics-trend-card">
-
-    <h3 class="section-title trend-title">
-
-      Tren Harian —
-
-      <%= selectedDevice.deviceName %>
-
-      (<%= selectedDevice.deviceCode %>)
-
-    </h3>
-
-
-    <% if (trend.length === 0) { %>
-
-      <p class="muted-foreground">
-        Tidak ada data tren untuk device ini pada rentang tanggal ini.
-      </p>
+    <div class="field">
+      <ui5-label for="to" required>To Date</ui5-label>
+      <ui5-date-picker id="to" name="to" value-format="yyyy-MM-dd" display-format="yyyy-MM-dd" value="<%= filters.to %>" required></ui5-date-picker>
+    </div>
+
+    <% if (filters.deviceId) { %>
+      <input type="hidden" name="deviceId" value="<%= filters.deviceId %>" />
+    <% } %>
+
+    <ui5-button type="Submit" design="Emphasized" icon="filter">Apply</ui5-button>
+  </form>
+
+  <ui5-panel header-text="Ranking Device" fixed>
+    <% if (summary.length === 0) { %>
+
+      <ui5-message-strip design="Information" hide-close-button>
+        Tidak ada kejadian sensor/WiFi/HTTP gagal pada rentang tanggal ini.
+      </ui5-message-strip>
 
     <% } else { %>
 
-      <div
-        id="diagnostics-trend-chart"
-        data-chart='<%- JSON.stringify({
-          days: trend.map(t => t.day),
-          sensor: trend.map(t => t.sensorFailTotal),
-          wifi: trend.map(t => t.wifiFailTotal),
-          http: trend.map(t => t.httpFailTotal),
-          rssi: trend.map(t => t.avgRssi),
-        }) %>'
-      ></div>
+      <ui5-table id="table" sticky-column-header overflow-mode="Scroll" accessible-name="Device Diagnostics Ranking">
+        <ui5-table-header-row slot="headerRow">
+          <ui5-table-header-cell min-width="max-content">Device</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Sensor Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">WiFi Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">HTTP Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Avg RSSI</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Last Reason</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Total</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Actions</ui5-table-header-cell>
+        </ui5-table-header-row>
+
+        <% summary.forEach(row => { %>
+          <ui5-table-row>
+            <ui5-table-cell>
+              <div class="cell-stack">
+                <ui5-text class="cell-strong"><%= row.deviceName %></ui5-text>
+                <ui5-text class="muted"><%= row.deviceCode %></ui5-text>
+              </div>
+            </ui5-table-cell>
+
+            <ui5-table-cell><ui5-text><%= row.sensorFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.wifiFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.httpFailTotal %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= row.avgRssi !== null ? row.avgRssi + ' dBm' : '—' %></ui5-text></ui5-table-cell>
+
+            <ui5-table-cell>
+              <% if (row.lastReason) { %>
+                <ui5-tag
+                  design="<%= reasonTagDesign[row.lastReason.resetReason] || 'Neutral' %>"
+                  title="RSSI saat itu: <%= row.lastReason.lastRssi !== null ? row.lastReason.lastRssi + ' dBm' : 'tidak diketahui' %> · WiFi Fail: <%= row.lastReason.lastWifiFailCount %> · Sensor Fail: <%= row.lastReason.lastSensorFailCount %> · HTTP Fail: <%= row.lastReason.lastHttpFailCount %>"
+                ><%= row.lastReason.resetReason %></ui5-tag>
+              <% } else { %>
+                <ui5-text class="muted">—</ui5-text>
+              <% } %>
+            </ui5-table-cell>
+
+            <ui5-table-cell><ui5-text class="cell-strong"><%= row.total %></ui5-text></ui5-table-cell>
+
+            <ui5-table-cell>
+              <div class="row-actions">
+                <ui5-link href="<%= buildDeviceUrl(row.deviceId) %>">Show Trend</ui5-link>
+                <ui5-link href="<%= buildDeviceDetailUrl(row.deviceId) %>">Show Detail</ui5-link>
+              </div>
+            </ui5-table-cell>
+          </ui5-table-row>
+        <% }) %>
+      </ui5-table>
 
     <% } %>
+  </ui5-panel>
 
-  </div>
+  <% if (selectedDevice && trend) { %>
+    <ui5-panel header-text="Tren Harian — <%= selectedDevice.deviceName %> (<%= selectedDevice.deviceCode %>)" fixed>
+      <% if (trend.length === 0) { %>
 
-<% } %>
+        <ui5-message-strip design="Information" hide-close-button>
+          Tidak ada data tren untuk device ini pada rentang tanggal ini.
+        </ui5-message-strip>
+
+      <% } else { %>
+
+        <div
+          id="diagnostics-trend-chart"
+          data-chart='<%- JSON.stringify({
+            days: trend.map(t => t.day),
+            sensor: trend.map(t => t.sensorFailTotal),
+            wifi: trend.map(t => t.wifiFailTotal),
+            http: trend.map(t => t.httpFailTotal),
+            rssi: trend.map(t => t.avgRssi),
+          }) %>'
+        ></div>
+
+      <% } %>
+    </ui5-panel>
+  <% } %>
+
+</div>

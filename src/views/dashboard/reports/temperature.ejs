@@ -2,54 +2,86 @@
 function buildPageUrl(page){const params=new URLSearchParams({deviceId:filters.deviceId||'',from:filters.from||'',to:filters.to||'',page:String(page)});return '/dashboard/reports/temperature?'+params.toString();}
 function buildExportUrl(format){const params=new URLSearchParams({deviceId:filters.deviceId||'',from:filters.from||'',to:filters.to||'',format});return '/dashboard/reports/temperature/export?'+params.toString();}
 %>
-<div class="dashboard-page-header">
-  <div>
-    <p class="dashboard-page-eyebrow">Analytics</p>
-    <h2>Temperature Report</h2>
-    <p>Review raw temperature telemetry and export the selected range.</p>
-  </div>
-</div>
-<form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form" class="filter-bar">
-  <div class="field-filters">
+<div class="stack">
+
+  <form method="GET" action="/dashboard/reports/temperature" id="temperature-report-form" class="toolbar-row toolbar-row--filters">
     <div class="field">
       <ui5-label for="deviceId" required>Device</ui5-label>
-      <ui5-select id="deviceId" name="deviceId" required>
-        <ui5-option value="" <%= !filters.deviceId ? 'selected' : '' %>>Choose device</ui5-option><% devices.forEach(device=>{ %><ui5-option value="<%= device.id %>" <%= filters.deviceId===device.id?'selected':'' %>><%= device.name %> (<%= device.code %>)</ui5-option><% }) %>
+      <ui5-select id="deviceId" name="deviceId" required accessible-name="Device">
+        <ui5-option value="" <%= !filters.deviceId ? 'selected' : '' %>>Choose device</ui5-option>
+        <% devices.forEach(device => { %>
+          <ui5-option value="<%= device.id %>" <%= filters.deviceId === device.id ? 'selected' : '' %>><%= device.name %> (<%= device.code %>)</ui5-option>
+        <% }) %>
       </ui5-select>
     </div>
+
     <div class="field">
       <ui5-label for="from" required>From Date</ui5-label>
-      <ui5-date-picker id="from" name="from" value="<%= filters.from || '' %>" required></ui5-date-picker>
+      <ui5-date-picker id="from" name="from" value-format="yyyy-MM-dd" display-format="yyyy-MM-dd" value="<%= filters.from || '' %>" required></ui5-date-picker>
     </div>
+
     <div class="field">
       <ui5-label for="to" required>To Date</ui5-label>
-      <ui5-date-picker id="to" name="to" value="<%= filters.to || '' %>" required></ui5-date-picker>
+      <ui5-date-picker id="to" name="to" value-format="yyyy-MM-dd" display-format="yyyy-MM-dd" value="<%= filters.to || '' %>" required></ui5-date-picker>
     </div>
-    <ui5-button type="Submit" id="temperature-report-submit" design="Emphasized">Show Report</ui5-button>
-  </div>
-</form>
-<div class="ui5-table-shell"><% if(!report){ %><div class="section-body">
+
+    <ui5-button type="Submit" id="temperature-report-submit" design="Emphasized" icon="search">Show Report</ui5-button>
+  </form>
+
+  <% if (!report) { %>
+
     <ui5-message-strip design="Information" hide-close-button>Pilih device dan rentang tanggal, lalu klik "Show Report" untuk melihat histori suhu.</ui5-message-strip>
-  </div><% } else if(report.items.length===0){ %><div class="section-body">
-    <ui5-message-strip design="Warning" hide-close-button>Tidak ada data suhu pada rentang tanggal yang dipilih.</ui5-message-strip>
-  </div><% } else { %>
-  <div class="section-toolbar">
-    <div><strong>Temperature History</strong><span class="muted-foreground"> &nbsp; Show <%= (report.page-1)*report.pageSize+1 %>–<%= Math.min(report.page*report.pageSize,report.totalItems) %> of <%= report.totalItems %> items</span></div>
-    <div id="export-actions" class="page-actions"><a href="<%= buildExportUrl('xlsx') %>" id="export-xlsx-btn" class="btn btn-success">
-        <ui5-icon name="excel-attachment" style="color: white;"></ui5-icon>Export Excel
-      </a><a href="<%= buildExportUrl('csv') %>" id="export-csv-btn" class="btn btn-outline">Export CSV</a></div>
-  </div>
-  <p id="export-range-warning" class="section-body export-range-warning">Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.</p>
-  <ui5-table class="enterprise-table" overflow-mode="Scroll" accessible-name="Temperature History" style="height: 600px;">
-    <ui5-table-header-row slot="headerRow" sticky>
-      <ui5-table-header-cell min-width="max-content">No</ui5-table-header-cell>
-      <ui5-table-header-cell min-width="max-content">Recorded At</ui5-table-header-cell>
-      <ui5-table-header-cell min-width="max-content">Temperature</ui5-table-header-cell>
-    </ui5-table-header-row><% report.items.forEach((log,i)=>{ %><ui5-table-row>
-      <ui5-table-cell><%= (report.page-1)*report.pageSize+i+1 %></ui5-table-cell>
-      <ui5-table-cell><%= formatDateTime(log.recordedAt) %></ui5-table-cell>
-      <ui5-table-cell><strong><%= log.temperature %> °C</strong></ui5-table-cell>
-    </ui5-table-row><% }) %>
-  </ui5-table>
-  <% if(report.totalPages>1){ %><div class="table-pagination"><% if(report.page>1){ %><a href="<%= buildPageUrl(report.page-1) %>" class="btn btn-outline">Previous</a><% } %><span class="muted-foreground">Page <%= report.page %> of <%= report.totalPages %></span><% if(report.page<report.totalPages){ %><a href="<%= buildPageUrl(report.page+1) %>" class="btn btn-outline">Next</a><% } %></div><% } %><% } %>
+
+  <% } else if (report.items.length === 0) { %>
+
+    <ui5-message-strip design="Critical" hide-close-button>Tidak ada data suhu pada rentang tanggal yang dipilih.</ui5-message-strip>
+
+  <% } else { %>
+
+    <div class="toolbar-row">
+      <div class="cell-stack">
+        <ui5-title level="H5">Temperature History</ui5-title>
+        <ui5-text class="muted">Show <%= (report.page-1)*report.pageSize+1 %>–<%= Math.min(report.page*report.pageSize,report.totalItems) %> of <%= report.totalItems %> items</ui5-text>
+      </div>
+
+      <span class="toolbar-spacer"></span>
+
+      <div id="export-actions" class="row-actions">
+        <ui5-button id="export-xlsx-btn" design="Positive" icon="excel-attachment" data-export-url="<%= buildExportUrl('xlsx') %>">Export Excel</ui5-button>
+        <ui5-button id="export-csv-btn" design="Default" icon="download" data-export-url="<%= buildExportUrl('csv') %>">Export CSV</ui5-button>
+      </div>
+    </div>
+
+    <ui5-message-strip id="export-range-warning" class="is-hidden" design="Critical" hide-close-button>
+      Rentang tanggal lebih dari 1 bulan — export tidak tersedia. Persempit rentang tanggal terlebih dahulu.
+    </ui5-message-strip>
+
+    <div class="surface">
+      <ui5-table class="table-tall" overflow-mode="Scroll" sticky-column-header accessible-name="Temperature History">
+        <ui5-table-header-row slot="headerRow" sticky>
+          <ui5-table-header-cell min-width="max-content">No</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Recorded At</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Temperature</ui5-table-header-cell>
+        </ui5-table-header-row>
+
+        <% report.items.forEach((log, i) => { %>
+          <ui5-table-row>
+            <ui5-table-cell><ui5-text><%= (report.page-1)*report.pageSize+i+1 %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= formatDateTime(log.recordedAt) %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text class="cell-strong"><%= log.temperature %> °C</ui5-text></ui5-table-cell>
+          </ui5-table-row>
+        <% }) %>
+      </ui5-table>
+    </div>
+
+    <% if (report.totalPages > 1) { %>
+      <div class="table-pagination">
+        <ui5-button design="Default" icon="navigation-left-arrow" <%= report.page > 1 ? '' : 'disabled' %> data-href="<%= report.page > 1 ? buildPageUrl(report.page - 1) : '' %>">Previous</ui5-button>
+        <ui5-text class="muted">Page <%= report.page %> of <%= report.totalPages %></ui5-text>
+        <ui5-button design="Default" end-icon="navigation-right-arrow" <%= report.page < report.totalPages ? '' : 'disabled' %> data-href="<%= report.page < report.totalPages ? buildPageUrl(report.page + 1) : '' %>">Next</ui5-button>
+      </div>
+    <% } %>
+
+  <% } %>
+
 </div>

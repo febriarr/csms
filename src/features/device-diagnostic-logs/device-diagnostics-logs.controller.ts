@@ -41,7 +41,7 @@ export class DeviceDiagnosticsLogsController {
       pageDescription: 'Pantau jumlah kegagalan sensor, WiFi, dan HTTP tiap device.',
       pageStyles: ['/build/vendor/apexcharts.css'],
       pageVendor: ['/build/vendor/apexcharts.min.js'],
-      pageScripts: ['/build/js/diagnostics-report.js'],
+      pageScripts: ['diagnostics-report'],
       summary,
       trend,
       selectedDevice,

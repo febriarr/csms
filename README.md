@@ -50,10 +50,10 @@ Beberapa tujuan utama dari project ini antara lain:
 
 ### Frontend
 
-- EJS
-- Vanilla JavaScript
-- Custom CSS
-- Chart.js
+- EJS (server-rendered views)
+- TypeScript + Vite (`src/client`)
+- SAP UI5 Web Components (theme-driven styling)
+- ApexCharts
 
 ---
 

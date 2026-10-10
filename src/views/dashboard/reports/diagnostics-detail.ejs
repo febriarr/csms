@@ -35,222 +35,84 @@ const resetReasonCodeLabel = {
   10: 'SDIO',
 };
 %>
+<div class="stack">
 
+  <div class="toolbar-row">
+    <div class="cell-stack">
+      <ui5-title level="H4"><%= device.name %> <ui5-text class="muted">(<%= device.code %>)</ui5-text></ui5-title>
+      <ui5-text class="muted"><%= filters.from %> &mdash; <%= filters.to %></ui5-text>
+    </div>
 
-<div class="detail-page-header">
+    <span class="toolbar-spacer"></span>
 
-  <div>
-
-    <h3>
-      <%= device.name %>
-      <span class="device-code">
-        (<%= device.code %>)
-      </span>
-    </h3>
-
-    <p class="muted-foreground">
-      <%= filters.from %> &mdash; <%= filters.to %>
-    </p>
-
+    <ui5-button design="Default" icon="navigation-left-arrow" data-href="<%= buildBackUrl() %>">Back To Trend</ui5-button>
   </div>
 
+  <% if (logs.items.length === 0) { %>
 
-  <a
-    href="<%= buildBackUrl() %>"
-    class="btn btn-outline"
-  >
-    &larr; Back To Trend
-  </a>
-
-</div>
-
-
-<% if (logs.items.length === 0) { %>
-
-  <div class="section-body">
-
-    <ui5-message-strip
-      design="Information"
-      hide-close-button
-    >
+    <ui5-message-strip design="Information" hide-close-button>
       Tidak ada kejadian sensor/WiFi/HTTP gagal untuk device ini pada rentang tanggal ini.
     </ui5-message-strip>
 
-  </div>
+  <% } else { %>
 
-<% } else { %>
+    <div class="surface">
+      <ui5-table class="table-tall" overflow-mode="Scroll" sticky-column-header accessible-name="Diagnostic Logs">
+        <ui5-table-header-row slot="headerRow" sticky>
+          <ui5-table-header-cell min-width="max-content">Timestamp</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Sensor Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">WiFi Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">HTTP Fail</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">RSSI</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Reason Code</ui5-table-header-cell>
+          <ui5-table-header-cell min-width="max-content">Reason</ui5-table-header-cell>
+        </ui5-table-header-row>
 
+        <% logs.items.forEach(item => { %>
+          <ui5-table-row>
+            <ui5-table-cell><ui5-text><%= formatDateTime(item.recordedAt) %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= item.sensorFailCount %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= item.wifiFailCount %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= item.httpFailCount %></ui5-text></ui5-table-cell>
+            <ui5-table-cell><ui5-text><%= item.rssi !== null ? item.rssi + ' dBm' : '—' %></ui5-text></ui5-table-cell>
 
-  <ui5-table
-    class="enterprise-table "
-    overflow-mode="Scroll"
-    accessible-name="Diagnostic Logs"
-    style="height: 600px;"
-  >
+            <ui5-table-cell>
+              <% if (item.reason) { %>
+                <ui5-text title="<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Tidak diketahui' %>">
+                  <%= item.reason.resetReasonCode %>
+                  (<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Unknown' %>)
+                </ui5-text>
+              <% } else { %>
+                <ui5-text class="muted">—</ui5-text>
+              <% } %>
+            </ui5-table-cell>
 
-    <ui5-table-header-row slot="headerRow" sticky>
-
-      <ui5-table-header-cell min-width="max-content">
-        Timestamp
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        Sensor Fail
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        WiFi Fail
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        HTTP Fail
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        RSSI
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        Reason Code
-      </ui5-table-header-cell>
-
-      <ui5-table-header-cell min-width="max-content">
-        Reason
-      </ui5-table-header-cell>
-
-    </ui5-table-header-row>
-
-
-    <% logs.items.forEach(item => { %>
-
-      <ui5-table-row>
-
-        <!-- Timestamp -->
-        <ui5-table-cell>
-          <%= formatDateTime(item.recordedAt) %>
-        </ui5-table-cell>
-
-
-        <!-- Sensor Fail -->
-        <ui5-table-cell>
-          <%= item.sensorFailCount %>
-        </ui5-table-cell>
-
-
-        <!-- WiFi Fail -->
-        <ui5-table-cell>
-          <%= item.wifiFailCount %>
-        </ui5-table-cell>
-
-
-        <!-- HTTP Fail -->
-        <ui5-table-cell>
-          <%= item.httpFailCount %>
-        </ui5-table-cell>
-
-
-        <!-- RSSI -->
-        <ui5-table-cell>
-          <%= item.rssi !== null ? item.rssi + ' dBm' : '—' %>
-        </ui5-table-cell>
-
-
-        <!-- Reason Code -->
-        <ui5-table-cell>
-
-          <% if (item.reason) { %>
-
-            <span
-              title="<%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Tidak diketahui' %>"
-            >
-              <%= item.reason.resetReasonCode %>
-
-              <span class="muted-foreground">
-                (
-                <%= resetReasonCodeLabel[item.reason.resetReasonCode] || 'Unknown' %>
-                )
-              </span>
-            </span>
-
-          <% } else { %>
-
-            —
-
-          <% } %>
-
-        </ui5-table-cell>
-
-
-        <!-- Reason -->
-        <ui5-table-cell>
-
-          <% if (item.reason) { %>
-
-            <ui5-tag
-              design="<%= item.reason.resetReason === 'PANIC'
-                ? 'Negative'
-                : item.reason.resetReason === 'WATCHDOG'
-                  ? 'Critical'
-                  : item.reason.resetReason === 'BROWNOUT'
-                    ? 'Critical'
-                    : 'Neutral' %>"
-            >
-              <%= item.reason.resetReason %>
-            </ui5-tag>
-
-          <% } else { %>
-
-            —
-
-          <% } %>
-
-        </ui5-table-cell>
-
-      </ui5-table-row>
-
-    <% }) %>
-
-  </ui5-table>
-
-
-  <div class="table-pagination">
-
-    <span class="muted-foreground">
-      Page
-      <%= logs.page %>
-      of
-      <%= logs.totalPages %>
-      (<%= logs.totalItems %> incidents)
-    </span>
-
-
-    <div class="page-actions">
-
-      <% if (logs.page > 1) { %>
-
-        <a
-          href="<%= buildPageUrl(logs.page - 1) %>"
-          class="btn btn-outline"
-        >
-          &larr; Prev
-        </a>
-
-      <% } %>
-
-
-      <% if (logs.page < logs.totalPages) { %>
-
-        <a
-          href="<%= buildPageUrl(logs.page + 1) %>"
-          class="btn btn-outline"
-        >
-          Next &rarr;
-        </a>
-
-      <% } %>
-
+            <ui5-table-cell>
+              <% if (item.reason) { %>
+                <ui5-tag design="<%= item.reason.resetReason === 'PANIC' ? 'Negative' : (item.reason.resetReason === 'WATCHDOG' || item.reason.resetReason === 'BROWNOUT') ? 'Critical' : 'Neutral' %>"><%= item.reason.resetReason %></ui5-tag>
+              <% } else { %>
+                <ui5-text class="muted">—</ui5-text>
+              <% } %>
+            </ui5-table-cell>
+          </ui5-table-row>
+        <% }) %>
+      </ui5-table>
     </div>
 
-  </div>
+    <div class="table-pagination">
+      <ui5-text class="muted">Page <%= logs.page %> of <%= logs.totalPages %> (<%= logs.totalItems %> incidents)</ui5-text>
 
-<% } %>
+      <div class="row-actions">
+        <% if (logs.page > 1) { %>
+          <ui5-button design="Default" icon="navigation-left-arrow" data-href="<%= buildPageUrl(logs.page - 1) %>">Prev</ui5-button>
+        <% } %>
+
+        <% if (logs.page < logs.totalPages) { %>
+          <ui5-button design="Default" end-icon="navigation-right-arrow" data-href="<%= buildPageUrl(logs.page + 1) %>">Next</ui5-button>
+        <% } %>
+      </div>
+    </div>
+
+  <% } %>
+
+</div>
