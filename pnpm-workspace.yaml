@@ -1,0 +1,11 @@
+packages:
+    - "apps/*"
+    - "packages/*"
+
+allowBuilds:
+    "@parcel/watcher": true
+    esbuild: true
+    msw: false
+    unrs-resolver: true
+catalog:
+    zod: ^4.6.5
