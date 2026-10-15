@@ -32,6 +32,7 @@
         "@nestjs/platform-express": "^11.0.1",
         "@thallesp/nestjs-better-auth": "^2.8.0",
         "better-auth": "^1.7.7",
+        "@workspace/validator": "workspace:*",
         "drizzle-orm": "^0.45.4",
         "pg": "^8.23.1",
         "reflect-metadata": "^0.2.2",

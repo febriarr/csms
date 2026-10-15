@@ -8,6 +8,9 @@ import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { DatabaseService } from './database/database.service';
 import { createAuth } from './auth/auth';
 import { TemperatureModule } from './temperature/temperature.module';
+import { DivisionModule } from './division/division.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './common/filters/all_exceptions.filter';
 
 @Module({
     imports: [
@@ -33,8 +36,16 @@ import { TemperatureModule } from './temperature/temperature.module';
         }),
 
         TemperatureModule,
+
+        DivisionModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [
+        AppService,
+        {
+            provide: APP_FILTER,
+            useClass: AllExceptionsFilter,
+        },
+    ],
 })
 export class AppModule {}
