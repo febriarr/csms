@@ -16,3 +16,6 @@ export const locations = pgTable(
     },
     (t) => [index('locations_divisions_id_idx').on(t.divisionId)],
 );
+
+export type InsertLocation = typeof locations.$inferInsert;
+export type SelectLocation = typeof locations.$inferSelect;
