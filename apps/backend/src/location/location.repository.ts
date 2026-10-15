@@ -1,8 +1,10 @@
 import { BaseRepository } from '@/common/abstracts/base.repository';
 import { DatabaseService } from '@/database/database.service';
-import { InsertLocation, locations, SelectLocation } from '@/database/schema';
+import { coldStorages, InsertLocation, locations, SelectLocation } from '@/database/schema';
+import { Injectable } from '@nestjs/common';
 import { and, desc, eq, ilike, SQL } from 'drizzle-orm';
 
+@Injectable()
 export class LocationRepository extends BaseRepository<typeof locations> {
     constructor(db: DatabaseService) {
         super(db, locations);
@@ -47,5 +49,15 @@ export class LocationRepository extends BaseRepository<typeof locations> {
             .returning({ id: locations.id });
 
         return rows.length > 0;
+    }
+
+    async hasRelationCs(id: SelectLocation['id']): Promise<boolean> {
+        const [row] = await this.db
+            .select({ id: coldStorages.id })
+            .from(coldStorages)
+            .where(eq(coldStorages.locationId, id))
+            .limit(1);
+
+        return row !== undefined;
     }
 }

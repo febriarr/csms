@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LocationRepository } from './location.repository';
 import { CreateLocationInput, LocationQuery, UpdateLocationInput } from '@workspace/validator';
 import { Location } from '@workspace/shared';
-import { EntityNotFoundException } from '@/common/exception/app.exception';
+import { EntityNotFoundException, ResourceInUseException } from '@/common/exception/app.exception';
 
 @Injectable()
 export class LocationService {
@@ -23,6 +23,9 @@ export class LocationService {
     }
 
     async remove(id: string): Promise<void> {
+        if (await this.repo.hasRelationCs(id)) {
+            throw new ResourceInUseException('Lokasi tidak dapat dihapus karena masih dipakai oleh cold storage');
+        }
         await this.repo.destroy(id);
     }
 
