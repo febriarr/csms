@@ -11,3 +11,6 @@ export const divisions = pgTable('divisions', {
     name: varchar('name', { length: 100 }).notNull().unique(),
     ...timestamps,
 });
+
+export type SelectDivision = typeof divisions.$inferSelect;
+export type InsertDivision = typeof divisions.$inferInsert;

@@ -26,7 +26,7 @@ type UnknownRecord = Record<string, unknown>;
 
 const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && value !== null;
 
-/* ------------------------------------------------------------------ type guards */
+/*  type guards */
 
 /**
  * zod errors are recognised by shape, not `instanceof`: in a monorepo the validator package and the backend can
@@ -113,7 +113,7 @@ function findInCauseChain<T>(error: unknown, guard: (value: unknown) => value is
     return undefined;
 }
 
-/* --------------------------------------------------------------- status helpers */
+/* status helpers */
 
 const DEFAULT_MESSAGES: Record<number, string> = {
     [HttpStatus.BAD_REQUEST]: 'Permintaan tidak valid',
@@ -172,7 +172,7 @@ const GENERIC_NEST_MESSAGES = new Set([
 const isGenericNestMessage = (message: string): boolean =>
     GENERIC_NEST_MESSAGES.has(message) || /^Cannot (GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD) /.test(message);
 
-/* ---------------------------------------------------------------- the mappers */
+/* the mappers */
 
 export function zodIssuesToFieldErrors(issues: { path: PropertyKey[]; message: string }[]): FieldErrors {
     const errors: FieldErrors = {};
