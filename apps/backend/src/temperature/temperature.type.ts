@@ -1,6 +1,6 @@
 import type { DevicesState, SelectDevices } from '../database/schema';
 
-/* ------------------------------------------------------------------ states */
+/* states */
 
 export const TemperatureState = {
     NORMAL: 'NORMAL',
@@ -16,7 +16,7 @@ export const NOTIFIABLE_STATES = ['WARNING', 'CRITICAL'] as const;
 
 export type NotifiableState = (typeof NOTIFIABLE_STATES)[number];
 
-/* -------------------------------------------------------------- thresholds */
+/* thresholds */
 
 /**
  * `defrostThreshold` is null for devices that have no DEFROST state (the production spiral).
@@ -28,7 +28,7 @@ export type TemperatureThresholds = {
     criticalThreshold: number;
 };
 
-/* ------------------------------------------------------------ alert reason */
+/* alert reason */
 
 export type PauseKind = 'MAINTENANCE' | 'MACHINE_OFF';
 
@@ -38,10 +38,17 @@ export type PauseContext = {
 };
 
 export type AlertReasonContext = {
-    device: Pick<SelectDevices, 'defrostThreshold' | 'warningThreshold' | 'criticalThreshold' | 'lastSeenAt'>;
-    /** The reading that caused the transition. Not needed for DEVICE_OFFLINE / DEVICE_RECOVERED. */
+    /**
+     * The device row as it was BEFORE the reading was applied (do not re-read it after `touch`): `lastSeenAt` and
+     * `lastTemperature` then describe the last message before an outage, which is what the offline notes print.
+     */
+    device: Pick<SelectDevices, 'defrostThreshold' | 'warningThreshold' | 'criticalThreshold' | 'lastSeenAt'> &
+        Partial<Pick<SelectDevices, 'lastTemperature'>>;
+    /** The reading that caused the transition. Not needed for DEVICE_OFFLINE. */
     temperature?: number;
-    /** Previous state: enables "fell from X" wording and the "was offline" note. */
+    /** When that reading was recorded (device time). With `device.lastSeenAt` it gives the outage length. */
+    occurredAt?: Date;
+    /** Previous state: enables "fell from X" wording and the "was offline" notes. */
     fromState?: DevicesState;
     /** Set when this is the first alert after a planned pause (pull-down time ran out while still too warm). */
     pause?: PauseContext;

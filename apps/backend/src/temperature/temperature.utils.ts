@@ -11,8 +11,9 @@ import {
 
 /**
  * Pure temperature rules. Everything is static: call `TemperatureUtils.getTemperatureState(...)` directly,
- * there is nothing to instantiate. No method uses `this`, so any of them can be passed around as a plain
- * callback (e.g. `readings.map(r => TemperatureUtils.getTemperatureState(t, r))`).
+ * there is nothing to instantiate. No public method uses `this`, and each one is declared `this: void` to say so:
+ * that is what lets them be passed around as plain callbacks (`states.filter(TemperatureUtils.shouldNotify)`)
+ * without `@typescript-eslint/unbound-method` complaining. Calling them as `TemperatureUtils.x(...)` is unaffected.
  *
  * The class only classifies and describes. Whether a result may be APPLIED (planned pause, newest-reading
  * check, duplicates) is decided by the caller.
@@ -45,7 +46,7 @@ export class TemperatureUtils {
      * Checks run from the worst state down, so overlapping thresholds resolve to the more severe state.
      * The ordering (defrost < warning < critical) is guaranteed by a CHECK constraint on `devices`.
      */
-    static getTemperatureState(thresholds: TemperatureThresholds, temperature: number): TemperatureState {
+    static getTemperatureState(this: void, thresholds: TemperatureThresholds, temperature: number): TemperatureState {
         // Every comparison with NaN is false, which would silently report NORMAL for a broken reading.
         if (!Number.isFinite(temperature)) {
             throw new RangeError(`Temperature must be a finite number, received ${temperature}`);
@@ -60,22 +61,22 @@ export class TemperatureUtils {
         return TemperatureState.NORMAL;
     }
 
-    static isTemperatureState(state: DevicesState): state is TemperatureState {
+    static isTemperatureState(this: void, state: DevicesState): state is TemperatureState {
         return state !== 'OFFLINE';
     }
 
-    static severityOf(state: TemperatureState): number {
+    static severityOf(this: void, state: TemperatureState): number {
         return TemperatureUtils.SEVERITY[state];
     }
 
     /** True when `to` is a worse temperature state than `from`. Anything involving OFFLINE is not an escalation. */
-    static isEscalation(from: DevicesState, to: DevicesState): boolean {
+    static isEscalation(this: void, from: DevicesState, to: DevicesState): boolean {
         if (!TemperatureUtils.isTemperatureState(from) || !TemperatureUtils.isTemperatureState(to)) return false;
 
         return TemperatureUtils.severityOf(to) > TemperatureUtils.severityOf(from);
     }
 
-    static shouldNotify(state: DevicesState): state is NotifiableState {
+    static shouldNotify(this: void, state: DevicesState): state is NotifiableState {
         return (NOTIFIABLE_STATES as readonly string[]).includes(state);
     }
 
@@ -93,7 +94,7 @@ export class TemperatureUtils {
      *                                           the "was offline" note to the text.
      *  - anything else                       → the reason for the state we moved into
      */
-    static getAlertReason(fromState: DevicesState, toState: DevicesState): AlertReason {
+    static getAlertReason(this: void, fromState: DevicesState, toState: DevicesState): AlertReason {
         if (toState === 'OFFLINE') return 'DEVICE_OFFLINE';
 
         if (fromState === 'OFFLINE' && !TemperatureUtils.shouldNotify(toState)) return 'DEVICE_RECOVERED';
@@ -116,7 +117,7 @@ export class TemperatureUtils {
     }
 
     /** Human-readable text stored on the alert and sent in notifications. */
-    static buildAlertReason(reasonCode: AlertReason, context: AlertReasonContext): string {
+    static buildAlertReason(this: void, reasonCode: AlertReason, context: AlertReasonContext): string {
         const { device, temperature, fromState } = context;
 
         const label =
@@ -163,11 +164,24 @@ export class TemperatureUtils {
                 return `${label} returned to normal range (${normalRange}).`;
             }
 
-            case 'DEVICE_OFFLINE':
-                return `Device stopped sending data. Last seen at ${formatDateTime(device.lastSeenAt)}.`;
+            case 'DEVICE_OFFLINE': {
+                // Which state and reading the device was in when it went silent matters to whoever reads this.
+                const lastReading =
+                    device.lastTemperature == null
+                        ? ''
+                        : ` Last reading ${TemperatureUtils.degrees(device.lastTemperature)}${
+                              fromState && TemperatureUtils.isTemperatureState(fromState) ? ` (${fromState})` : ''
+                          }.`;
 
-            case 'DEVICE_RECOVERED':
-                return 'Device resumed sending data.';
+                return `Device stopped sending data. Last seen at ${formatDateTime(device.lastSeenAt)}.${lastReading}`;
+            }
+
+            case 'DEVICE_RECOVERED': {
+                const nowReading =
+                    temperature === undefined ? '' : ` Temperature now ${TemperatureUtils.degrees(temperature)}.`;
+
+                return `${TemperatureUtils.resumedNotes(context).join(' ')}${nowReading}`;
+            }
 
             default: {
                 const unhandled: never = reasonCode;
@@ -190,12 +204,51 @@ export class TemperatureUtils {
         return TemperatureUtils.severityOf(fromState) > TemperatureUtils.severityOf(to) ? fromState : null;
     }
 
+    /**
+     * "Back after an outage" sentences: how long it was silent and the last reading before that.
+     * Without `occurredAt` (or when the row was already touched, so lastSeenAt is not earlier) the duration is
+     * simply left out instead of printing a wrong one.
+     */
+    private static resumedNotes(context: AlertReasonContext): string[] {
+        const { device, occurredAt } = context;
+
+        const silentMs = device.lastSeenAt && occurredAt ? occurredAt.getTime() - device.lastSeenAt.getTime() : 0;
+        const duration = silentMs > 0 ? ` for ${TemperatureUtils.formatDuration(silentMs)}` : '';
+
+        const notes = [
+            context.fromState === 'OFFLINE'
+                ? `Device resumed sending data after being offline${duration}.`
+                : 'Device resumed sending data.',
+        ];
+
+        if (device.lastTemperature != null) {
+            notes.push(`Last reading before that: ${TemperatureUtils.degrees(device.lastTemperature)}.`);
+        }
+
+        return notes;
+    }
+
+    /** 135 minutes -> "2 h 15 min". Days only appear for outages longer than 24 h. */
+    private static formatDuration(ms: number): string {
+        const totalMinutes = Math.floor(ms / 60_000);
+
+        if (totalMinutes < 1) return 'less than a minute';
+
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+
+        return [days > 0 && `${days} d`, hours > 0 && `${hours} h`, minutes > 0 && `${minutes} min`]
+            .filter(Boolean)
+            .join(' ');
+    }
+
     /** Extra sentences for the two situations that change what the reader should do. */
     private static withNotes(text: string, context: AlertReasonContext): string {
         const notes: string[] = [];
 
         if (context.fromState === 'OFFLINE') {
-            notes.push('Device resumed sending data after being offline.');
+            notes.push(...TemperatureUtils.resumedNotes(context));
         }
 
         if (context.pause) {
