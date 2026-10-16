@@ -6,3 +6,7 @@ export interface ColdStorage extends Timestamps {
     name: string;
     description: string | null;
 }
+
+export interface ListColdStorage extends ColdStorage {
+    location: string;
+}

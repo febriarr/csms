@@ -17,3 +17,6 @@ export const coldStorages = pgTable(
 
     (t) => [uniqueIndex('cold_storages_location_name_uidx').on(t.locationId, t.name)],
 );
+
+export type InsertColdStorage = typeof coldStorages.$inferInsert;
+export type SelectColdStorage = typeof coldStorages.$inferSelect;

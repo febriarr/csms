@@ -11,6 +11,9 @@ import { TemperatureModule } from './temperature/temperature.module';
 import { DivisionModule } from './division/division.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all_exceptions.filter';
+import { LocationModule } from './location/location.module';
+import { ColdStorageModule } from './cold_storage/cold_storage.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
     imports: [
@@ -38,6 +41,12 @@ import { AllExceptionsFilter } from './common/filters/all_exceptions.filter';
         TemperatureModule,
 
         DivisionModule,
+
+        LocationModule,
+
+        ColdStorageModule,
+
+        NotificationModule,
     ],
     controllers: [AppController],
     providers: [
