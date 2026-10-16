@@ -1,5 +1,5 @@
 import { InsertNotificationRecipient, SelectNotificationRecipient } from '@/database/schema';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
     CreateNotificationRecipientInput,
     NotificationRecipientQuery,
@@ -9,10 +9,9 @@ import {
 } from '@workspace/validator';
 import { NotificationRecipientRepository, RecipientRow } from './notification_recipient.repository';
 import { NotificationSubscriptionRepository, SubscriptionRow } from './notification_subscription.repository';
+import { BusinessRuleException, EntityNotFoundException } from '@/common/exception/app.exception';
 
 export type RecipientWithSubscriptions = RecipientRow & { subscriptions: SubscriptionRow[] };
-
-const RECIPIENT_NOT_FOUND = 'Penerima notifikasi tidak ditemukan';
 
 @Injectable()
 export class NotificationService {
@@ -40,7 +39,7 @@ export class NotificationService {
     async getRecipient(id: string): Promise<RecipientWithSubscriptions> {
         const row = await this.recipients.findById(id);
 
-        if (!row) throw new NotFoundException(RECIPIENT_NOT_FOUND);
+        if (!row) throw new EntityNotFoundException('[Notification Recipient', id);
 
         const subscriptions = await this.subscriptions.listByRecipientIds([id]);
 
@@ -56,7 +55,7 @@ export class NotificationService {
     async updateRecipient(id: string, input: UpdateNotificationRecipientInput): Promise<RecipientWithSubscriptions> {
         const existing = await this.recipients.findById(id);
 
-        if (!existing) throw new NotFoundException(RECIPIENT_NOT_FOUND);
+        if (!existing) throw new EntityNotFoundException('[Notification Recipient', id);
 
         const patch: Partial<InsertNotificationRecipient> = { ...input };
 
@@ -66,7 +65,7 @@ export class NotificationService {
             const target = input.target ?? existing.target;
             const issue = recipientTargetIssue(channel, target);
 
-            if (issue) throw new BadRequestException(issue);
+            if (issue) throw new BusinessRuleException(issue);
 
             patch.target = channel === 'EMAIL' ? target.toLowerCase() : target;
         }
@@ -80,13 +79,13 @@ export class NotificationService {
     async deleteRecipient(id: string): Promise<void> {
         const deleted = await this.recipients.destroy(id);
 
-        if (!deleted) throw new NotFoundException(RECIPIENT_NOT_FOUND);
+        if (!deleted) throw new EntityNotFoundException('[Notification Recipient', id);
     }
 
     async replaceSubscriptions(id: string, input: ReplaceSubscriptionsInput): Promise<RecipientWithSubscriptions> {
         const existing = await this.recipients.findById(id);
 
-        if (!existing) throw new NotFoundException(RECIPIENT_NOT_FOUND);
+        if (!existing) throw new EntityNotFoundException('[Notification Recipient', id);
 
         await this.subscriptions.replaceForRecipient(id, input.subscriptions);
 
