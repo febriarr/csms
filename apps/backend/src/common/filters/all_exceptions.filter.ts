@@ -4,8 +4,6 @@ import { ErrorResponse } from '../exception/error_response.type';
 import { mapException } from '../exception/error_mapper';
 import type { Request, Response } from 'express';
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
 /**
  * The single place every failed HTTP request ends up. `mapException` decides WHAT the client sees; this class only
  * logs and writes the response. Going through HttpAdapterHost keeps it independent of Express / Fastify.
@@ -59,9 +57,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
         httpAdapter.reply(response, body, mapped.statusCode);
     }
 
-    /** Only outside production and only for 5xx: what actually went wrong. */
+    /**
+     * Debug details are opt-IN: only when NODE_ENV is exactly "development", and only for 5xx.
+     *
+     * Read per request on purpose. A module-level `const` would be evaluated when this file is imported, which is
+     * BEFORE ConfigModule has loaded `.env` into process.env: with NODE_ENV defined only in `.env`, a production
+     * server would still send stack traces. Opt-in also means an unset NODE_ENV fails closed.
+     */
     private debugOf(exception: unknown, statusCode: number): ErrorResponse['debug'] {
-        if (IS_PRODUCTION || statusCode < 500) return undefined;
+        if (process.env.NODE_ENV !== 'development' || statusCode < 500) return undefined;
 
         if (exception instanceof Error) return { message: exception.message, stack: exception.stack };
 
@@ -78,18 +82,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
         }
     }
 
-    /** Stack plus the `cause` chain, so a Drizzle error shows the underlying PostgreSQL error too. */
+    /**
+     * What goes to the log: the call-site stack frames plus the `cause` chain, so a failed query shows the PostgreSQL
+     * error underneath. When there is a cause, the exception's OWN message is left out: Drizzle puts the SQL and the
+     * bound parameters in it (phone numbers, e-mail addresses, password hashes).
+     */
     private describe(exception: unknown): string {
         if (!(exception instanceof Error)) return String(exception);
 
-        const lines = [exception.stack ?? `${exception.name}: ${exception.message}`];
         let cause = (exception as { cause?: unknown }).cause;
+
+        const lines = [cause instanceof Error ? exception.name : `${exception.name}: ${exception.message}`];
 
         for (let depth = 0; depth < 5 && cause instanceof Error; depth++) {
             lines.push(`Caused by: ${cause.name}: ${cause.message}`);
             cause = (cause as { cause?: unknown }).cause;
         }
 
-        return lines.join('\n');
+        const frames = (exception.stack ?? '').split('\n').filter((line) => line.trimStart().startsWith('at '));
+
+        return [...lines, ...frames].join('\n');
     }
 }

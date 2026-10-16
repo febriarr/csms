@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ZodError } from 'zod';
 import { AppException } from './app.exception';
 import { CHECK_CONSTRAINTS, TABLE_LABELS, UNIQUE_CONSTRAINTS, type ConstraintRule } from './db_constraints';
 import { ErrorCode } from './error_codes';
@@ -28,11 +29,16 @@ const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'o
 
 /*  type guards */
 
+type ZodErrorLike = Error & { issues: { path: PropertyKey[]; message: string }[] };
+
 /**
- * zod errors are recognised by shape, not `instanceof`: in a monorepo the validator package and the backend can
- * end up with two copies of zod, and `instanceof` fails across copies. (zod 4's core class is named `$ZodError`.)
+ * `instanceof ZodError` is the normal path. The shape check is the fallback for the day the validator package and
+ * the backend resolve two different copies of zod (pnpm installs one copy per version): `instanceof` is then false
+ * and every validation error would silently turn into a 500. (zod 4's core class is named `$ZodError`.)
  */
-function isZodError(value: unknown): value is Error & { issues: { path: PropertyKey[]; message: string }[] } {
+function isZodError(value: unknown): value is ZodErrorLike {
+    if (value instanceof ZodError) return true;
+
     return (
         value instanceof Error &&
         /ZodError$/.test(value.name) &&
