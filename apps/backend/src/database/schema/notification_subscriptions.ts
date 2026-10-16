@@ -48,3 +48,6 @@ export const notificationSubscriptions = pgTable(
         ),
     ],
 );
+
+export type InsertNotificationSubscription = typeof notificationSubscriptions.$inferInsert;
+export type SelecttNotificationSubscription = typeof notificationSubscriptions.$inferSelect;

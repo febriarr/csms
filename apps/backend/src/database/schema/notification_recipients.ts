@@ -27,3 +27,6 @@ export const notificationRecipients = pgTable(
             .where(sql`${t.isActive}`),
     ],
 );
+
+export type SelectNotificationRecipient = typeof notificationRecipients.$inferSelect;
+export type InsertNotificationRecipient = typeof notificationRecipients.$inferInsert;
