@@ -1,5 +1,6 @@
 import { BaseRepository } from '@/common/abstracts/base.repository';
 import { DatabaseService } from '@/database/database.service';
+import { DatabaseTransaction } from '@/database/database.type';
 import {
     coldStorages,
     devices,
@@ -59,14 +60,23 @@ export class NotificationSubscriptionRepository extends BaseRepository<typeof no
             .orderBy(notificationSubscriptions.scope, targetName);
     }
 
+    /**
+     * Inserts subscriptions for a recipient. Pass `tx` to run inside a caller's transaction
+     * (e.g. creating the recipient and its subscriptions together). Empty list = nothing to do.
+     */
+    async createMany(recipientId: string, items: SubscriptionTarget[], tx?: DatabaseTransaction): Promise<void> {
+        if (items.length === 0) return;
+
+        await this.executor(tx)
+            .insert(notificationSubscriptions)
+            .values(items.map((item) => ({ ...item, recipientId })));
+    }
+
     /** The "Save" action: the given list replaces everything the recipient has now, atomically. */
     async replaceForRecipient(recipientId: string, items: SubscriptionTarget[]): Promise<void> {
         await this.withTransaction(async (tx) => {
             await tx.delete(notificationSubscriptions).where(eq(notificationSubscriptions.recipientId, recipientId));
-
-            if (items.length > 0) {
-                await tx.insert(notificationSubscriptions).values(items.map((item) => ({ ...item, recipientId })));
-            }
+            await this.createMany(recipientId, items, tx);
         });
     }
 }

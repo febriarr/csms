@@ -10,6 +10,7 @@ import {
     requiredText,
 } from "./common";
 import { NOTIFICATION_CHANNELS, type NotificationChannel } from "./constants";
+import { subscriptionListSchema } from "./notification_subscriptions.validator";
 
 /** Indonesian WhatsApp number in international format without "+" (62...). */
 const WHATSAPP_PATTERN = /^62\d{8,15}$/;
@@ -50,11 +51,23 @@ function normalizeTarget<T extends { channel?: NotificationChannel; target?: str
     return data.channel === "EMAIL" && data.target ? { ...data, target: data.target.toLowerCase() } : data;
 }
 
+/**
+ * One form creates the recipient AND its initial subscriptions. `subscriptions` is optional (default []),
+ * so a recipient can still be created first and subscribed later.
+ */
 export const createNotificationRecipientSchema = z
-    .object({ ...recipientShape, isActive: z.boolean().default(true) })
+    .object({
+        ...recipientShape,
+        isActive: z.boolean().default(true),
+        subscriptions: subscriptionListSchema.default([]),
+    })
     .superRefine(checkTarget)
     .transform(normalizeTarget);
 
+/**
+ * Deliberately has NO `subscriptions`: changing them goes through PUT /:id/subscriptions (replace),
+ * so an edit of the name or target can never wipe the subscription list by accident.
+ */
 export const updateNotificationRecipientSchema = z
     .object({ ...recipientShape, isActive: z.boolean() })
     .partial()

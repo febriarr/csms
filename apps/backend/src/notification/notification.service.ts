@@ -1,3 +1,4 @@
+import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
 import { InsertNotificationRecipient, SelectNotificationRecipient } from '@/database/schema';
 import { Injectable } from '@nestjs/common';
 import {
@@ -9,9 +10,10 @@ import {
 } from '@workspace/validator';
 import { NotificationRecipientRepository, RecipientRow } from './notification_recipient.repository';
 import { NotificationSubscriptionRepository, SubscriptionRow } from './notification_subscription.repository';
-import { BusinessRuleException, EntityNotFoundException } from '@/common/exception/app.exception';
 
 export type RecipientWithSubscriptions = RecipientRow & { subscriptions: SubscriptionRow[] };
+
+const recipientNotFound = (id: string) => new EntityNotFoundException('Penerima notifikasi', id);
 
 @Injectable()
 export class NotificationService {
@@ -39,15 +41,28 @@ export class NotificationService {
     async getRecipient(id: string): Promise<RecipientWithSubscriptions> {
         const row = await this.recipients.findById(id);
 
-        if (!row) throw new EntityNotFoundException('[Notification Recipient', id);
+        if (!row) throw recipientNotFound(id);
 
         const subscriptions = await this.subscriptions.listByRecipientIds([id]);
 
         return { ...row, subscriptions };
     }
 
+    /**
+     * Creates the recipient together with its initial subscriptions in ONE transaction: if a subscription is
+     * rejected (e.g. a target that no longer exists), the recipient is not created either, so there is never
+     * a half-saved recipient for the user to clean up.
+     */
     async createRecipient(input: CreateNotificationRecipientInput): Promise<RecipientWithSubscriptions> {
-        const created = await this.recipients.create(input);
+        const { subscriptions, ...recipient } = input;
+
+        const created = await this.recipients.withTransaction(async (tx) => {
+            const row = await this.recipients.create(recipient, tx);
+
+            await this.subscriptions.createMany(row.id, subscriptions, tx);
+
+            return row;
+        });
 
         return this.getRecipient(created.id);
     }
@@ -55,7 +70,7 @@ export class NotificationService {
     async updateRecipient(id: string, input: UpdateNotificationRecipientInput): Promise<RecipientWithSubscriptions> {
         const existing = await this.recipients.findById(id);
 
-        if (!existing) throw new EntityNotFoundException('[Notification Recipient', id);
+        if (!existing) throw recipientNotFound(id);
 
         const patch: Partial<InsertNotificationRecipient> = { ...input };
 
@@ -65,7 +80,7 @@ export class NotificationService {
             const target = input.target ?? existing.target;
             const issue = recipientTargetIssue(channel, target);
 
-            if (issue) throw new BusinessRuleException(issue);
+            if (issue) throw new ValidationException({ target: [issue] });
 
             patch.target = channel === 'EMAIL' ? target.toLowerCase() : target;
         }
@@ -79,13 +94,13 @@ export class NotificationService {
     async deleteRecipient(id: string): Promise<void> {
         const deleted = await this.recipients.destroy(id);
 
-        if (!deleted) throw new EntityNotFoundException('[Notification Recipient', id);
+        if (!deleted) throw recipientNotFound(id);
     }
 
     async replaceSubscriptions(id: string, input: ReplaceSubscriptionsInput): Promise<RecipientWithSubscriptions> {
         const existing = await this.recipients.findById(id);
 
-        if (!existing) throw new EntityNotFoundException('[Notification Recipient', id);
+        if (!existing) throw recipientNotFound(id);
 
         await this.subscriptions.replaceForRecipient(id, input.subscriptions);
 

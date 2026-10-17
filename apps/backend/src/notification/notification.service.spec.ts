@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationService } from './notification.service';
 import { NotificationRecipientRepository } from './notification_recipient.repository';
@@ -7,6 +7,8 @@ import { NotificationSubscriptionRepository } from './notification_subscription.
 describe('NotificationService', () => {
     let service: NotificationService;
 
+    const tx = { __tx: true };
+
     const recipients = {
         list: jest.fn(),
         findById: jest.fn(),
@@ -14,9 +16,11 @@ describe('NotificationService', () => {
         updateById: jest.fn(),
         destroy: jest.fn(),
         findForDevice: jest.fn(),
+        withTransaction: jest.fn(),
     };
     const subscriptions = {
         listByRecipientIds: jest.fn(),
+        createMany: jest.fn(),
         replaceForRecipient: jest.fn(),
     };
 
@@ -25,6 +29,7 @@ describe('NotificationService', () => {
     beforeEach(async () => {
         jest.resetAllMocks();
         subscriptions.listByRecipientIds.mockResolvedValue([]);
+        recipients.withTransaction.mockImplementation((callback: (t: unknown) => unknown) => callback(tx));
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -47,10 +52,49 @@ describe('NotificationService', () => {
         expect(result[1].subscriptions).toEqual([]);
     });
 
+    describe('createRecipient', () => {
+        const input = {
+            name: 'Budi',
+            channel: 'WHATSAPP' as const,
+            target: '628123456789',
+            isActive: true,
+            subscriptions: [{ scope: 'DIVISION' as const, divisionId: 'd1' }],
+        };
+
+        beforeEach(() => {
+            recipients.create.mockResolvedValue({ id: 'r1' });
+            recipients.findById.mockResolvedValue(whatsappRecipient);
+        });
+
+        it('creates the recipient and its subscriptions inside the same transaction', async () => {
+            await service.createRecipient(input);
+
+            expect(recipients.create).toHaveBeenCalledWith(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                expect.not.objectContaining({ subscriptions: expect.anything() }),
+                tx,
+            );
+            expect(subscriptions.createMany).toHaveBeenCalledWith('r1', input.subscriptions, tx);
+        });
+
+        it('works with no subscriptions (recipient first, subscribe later)', async () => {
+            await service.createRecipient({ ...input, subscriptions: [] });
+
+            expect(subscriptions.createMany).toHaveBeenCalledWith('r1', [], tx);
+        });
+
+        it('does not return a recipient when saving subscriptions fails (transaction rolls back)', async () => {
+            subscriptions.createMany.mockRejectedValue(new Error('foreign key violation'));
+
+            await expect(service.createRecipient(input)).rejects.toThrow('foreign key violation');
+            expect(recipients.findById).not.toHaveBeenCalled();
+        });
+    });
+
     it('re-validates target against the merged channel on a partial update', async () => {
         recipients.findById.mockResolvedValue(whatsappRecipient);
 
-        await expect(service.updateRecipient('r1', { channel: 'EMAIL' })).rejects.toBeInstanceOf(BadRequestException);
+        await expect(service.updateRecipient('r1', { channel: 'EMAIL' })).rejects.toBeInstanceOf(ValidationException);
         expect(recipients.updateById).not.toHaveBeenCalled();
     });
 
@@ -69,15 +113,15 @@ describe('NotificationService', () => {
         recipients.findById.mockResolvedValue(undefined);
         recipients.destroy.mockResolvedValue(undefined);
 
-        await expect(service.updateRecipient('x', { name: 'A' })).rejects.toBeInstanceOf(NotFoundException);
-        await expect(service.deleteRecipient('x')).rejects.toBeInstanceOf(NotFoundException);
+        await expect(service.updateRecipient('x', { name: 'A' })).rejects.toBeInstanceOf(EntityNotFoundException);
+        await expect(service.deleteRecipient('x')).rejects.toBeInstanceOf(EntityNotFoundException);
     });
 
     it('does not touch subscriptions when the recipient does not exist', async () => {
         recipients.findById.mockResolvedValue(undefined);
 
         await expect(service.replaceSubscriptions('x', { subscriptions: [] })).rejects.toBeInstanceOf(
-            NotFoundException,
+            EntityNotFoundException,
         );
         expect(subscriptions.replaceForRecipient).not.toHaveBeenCalled();
     });

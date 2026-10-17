@@ -33,27 +33,33 @@ function subscriptionKey(subscription: Subscription): string {
 }
 
 /**
- * "Save" action of the subscription screen: the complete list replaces what the recipient has now
- * (an empty list = unsubscribe from everything). Duplicates are rejected here instead of failing on the
+ * A complete list of subscriptions for ONE recipient. Shared by "create recipient" (initial list) and
+ * "replace subscriptions" (the Save action). Duplicates are rejected here instead of failing on the
  * unique constraint.
  */
+export const subscriptionListSchema = z
+    .array(createSubscriptionSchema)
+    .max(100, "Maksimal 100 langganan")
+    .superRefine((items, ctx) => {
+        const seen = new Set<string>();
+
+        items.forEach((item, index) => {
+            const key = subscriptionKey(item);
+
+            if (seen.has(key)) {
+                ctx.addIssue({ code: "custom", path: [index], message: "Langganan duplikat" });
+            }
+
+            seen.add(key);
+        });
+    });
+
+/**
+ * "Save" action of the subscription screen: the complete list replaces what the recipient has now
+ * (an empty list = unsubscribe from everything).
+ */
 export const replaceSubscriptionsSchema = z.object({
-    subscriptions: z
-        .array(createSubscriptionSchema)
-        .max(100, "Maksimal 100 langganan")
-        .superRefine((items, ctx) => {
-            const seen = new Set<string>();
-
-            items.forEach((item, index) => {
-                const key = subscriptionKey(item);
-
-                if (seen.has(key)) {
-                    ctx.addIssue({ code: "custom", path: [index], message: "Langganan duplikat" });
-                }
-
-                seen.add(key);
-            });
-        }),
+    subscriptions: subscriptionListSchema,
 });
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
