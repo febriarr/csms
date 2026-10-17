@@ -18,8 +18,30 @@ import { notificationLogs } from './notification_logs';
 import { notificationRecipients } from './notification_recipients';
 import { notificationSubscriptions } from './notification_subscriptions';
 import { temperatureLogs } from './temperature_logs';
-import { user } from './auth';
+import { account, session, user } from './auth';
 
+// User
+export const userRelations = relations(user, ({ many }) => ({
+    sessions: many(session),
+    accounts: many(account),
+    acknowledgedAlerts: many(alerts, { relationName: 'alert_acknowledged_by' }),
+    createdPauses: many(monitoringPauses, { relationName: 'pause_created_by' }),
+    endedPauses: many(monitoringPauses, { relationName: 'pause_ended_by' }),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+    user: one(user, {
+        fields: [session.userId],
+        references: [user.id],
+    }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+    user: one(user, {
+        fields: [account.userId],
+        references: [user.id],
+    }),
+}));
 /**ownership chain */
 
 export const divisionsRelations = relations(divisions, ({ many }) => ({

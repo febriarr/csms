@@ -11,3 +11,4 @@ export * from './notification_logs';
 export * from './notification_recipients';
 export * from './notification_subscriptions';
 export * from './temperature_logs';
+export * from './relations';
