@@ -1,5 +1,5 @@
 import { index, pgTable, real, text, uuid } from 'drizzle-orm/pg-core';
-import { timestamps, tstz } from './_helpers';
+import { pk, timestamps, tstz } from './_helpers';
 import { devices } from './devices';
 import { alertReasonEnum, deviceStateEnum } from './enums';
 import { user } from './auth';
@@ -8,7 +8,7 @@ import { user } from './auth';
 export const alerts = pgTable(
     'alerts',
     {
-        id: uuid('id').defaultRandom().primaryKey(),
+        id: pk(),
         deviceId: uuid('device_id')
             .notNull()
             .references(() => devices.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
