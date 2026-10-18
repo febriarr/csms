@@ -92,6 +92,7 @@
     --font-ibm-plex-sans: "IBM Plex Sans Variable", sans-serif;
     --font-oxanium: "Oxanium Variable", sans-serif;
     --font-jetbrains-mono: "JetBrains Mono Variable", monospace;
+    --header-height: 3rem;
 }
 
 .dark {

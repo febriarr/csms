@@ -1,15 +1,20 @@
-import { Navbar } from "@/components/navbar";
 import { Outlet } from "react-router";
+
+import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
+
+import { AppSidebar } from "@/components/app-sidebar";
+import HeaderDashboard from "@/components/header";
 
 export default function LayoutDefault() {
     return (
-        <>
-            <div className="typeset typeset-apps">
-                <Navbar />
-                <main className="bg-secondary pt-12 dark:bg-background">
+        <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+                <HeaderDashboard />
+                <main className="mt-(--header-height) min-h-screen flex-1 p-4">
                     <Outlet />
                 </main>
-            </div>
-        </>
+            </SidebarInset>
+        </SidebarProvider>
     );
 }

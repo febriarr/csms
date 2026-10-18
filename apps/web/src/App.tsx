@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Clock3, Thermometer, Wifi } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Thermometer, Wifi } from "lucide-react";
 
 import { Badge } from "@workspace/ui/components/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -101,7 +101,7 @@ export function Component() {
     const onlineCount = storageUnits.filter((storage) => storage.device === "Online").length;
 
     return (
-        <main className="container mx-auto space-y-6 px-4">
+        <main className="space-y-6">
             {/* Page header */}
             <header className="flex min-w-0 flex-col gap-1">
                 <div className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export function Component() {
             </section>
 
             {/* Storage cards */}
-            <section aria-labelledby="storage-heading" className="space-y-3">
+            {/* <section aria-labelledby="storage-heading" className="space-y-3">
                 <div>
                     <h2 id="storage-heading" className="text-sm font-medium">
                         Cold Storage
@@ -252,7 +252,7 @@ export function Component() {
                         </Card>
                     ))}
                 </div>
-            </section>
+            </section> */}
 
             {/* Latest telemetry */}
             <section aria-labelledby="telemetry-heading" className="space-y-3">
