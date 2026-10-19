@@ -127,7 +127,7 @@ function NavParent({ item, pathname }: { item: NavItem; pathname: string }) {
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="mr-0 pr-0">
                         {children.map((child) => (
                             <SubItem key={child.path} item={child} pathname={pathname} />
                         ))}
@@ -168,7 +168,7 @@ function SubItem({ item, pathname }: { item: NavItem; pathname: string }) {
                     </SidebarMenuSubButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="mr-0 pr-0">
                         {item.children.map((child) => (
                             <SubItem key={child.path} item={child} pathname={pathname} />
                         ))}

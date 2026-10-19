@@ -1,7 +1,16 @@
 import { AlertTriangle, CheckCircle2, Thermometer, Wifi } from "lucide-react";
+import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Badge } from "@workspace/ui/components/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+    type ChartConfig,
+} from "@workspace/ui/components/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 
 const storageUnits = [
@@ -44,46 +53,58 @@ const storageUnits = [
 ];
 
 const telemetry = [
-    {
-        id: 1,
-        storage: "Cold Storage A",
-        temperature: "-18.4°C",
-        humidity: "68%",
-        state: "Normal",
-        time: "14:32:18",
-    },
-    {
-        id: 2,
-        storage: "Cold Storage B",
-        temperature: "-17.2°C",
-        humidity: "71%",
-        state: "Warning",
-        time: "14:32:12",
-    },
-    {
-        id: 3,
-        storage: "Cold Storage C",
-        temperature: "-20.1°C",
-        humidity: "65%",
-        state: "Normal",
-        time: "14:32:09",
-    },
-    {
-        id: 4,
-        storage: "Cold Storage D",
-        temperature: "-16.8°C",
-        humidity: "73%",
-        state: "Critical",
-        time: "14:31:58",
-    },
+    { id: 1, storage: "Cold Storage A", temperature: "-18.4°C", humidity: "68%", state: "Normal", time: "14:32:18" },
+    { id: 2, storage: "Cold Storage B", temperature: "-17.2°C", humidity: "71%", state: "Warning", time: "14:32:12" },
+    { id: 3, storage: "Cold Storage C", temperature: "-20.1°C", humidity: "65%", state: "Normal", time: "14:32:09" },
+    { id: 4, storage: "Cold Storage D", temperature: "-16.8°C", humidity: "73%", state: "Critical", time: "14:31:58" },
 ];
 
-function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+const WARNING_AT = -17.5;
+const CRITICAL_AT = -17.0;
+
+const times = [
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+];
+
+const series = {
+    a: [-18.2, -18.5, -18.3, -18.6, -18.4, -18.1, -18.3, -18.5, -18.2, -18.4, -18.6, -18.4],
+    b: [-18.0, -17.9, -17.8, -17.9, -17.6, -17.7, -17.5, -17.4, -17.5, -17.3, -17.3, -17.2],
+    c: [-20.2, -20.0, -20.3, -20.1, -19.9, -20.2, -20.1, -20.3, -20.0, -20.2, -20.1, -20.1],
+    d: [-18.1, -18.0, -17.8, -17.6, -17.4, -17.5, -17.2, -17.0, -17.1, -16.9, -16.9, -16.8],
+};
+
+const trend = times.map((time, i) => ({
+    time,
+    a: series.a[i],
+    b: series.b[i],
+    c: series.c[i],
+    d: series.d[i],
+}));
+
+const chartConfig = {
+    a: { label: "Cold Storage A", color: "var(--chart-1)" },
+    b: { label: "Cold Storage B", color: "var(--chart-2)" },
+    c: { label: "Cold Storage C", color: "var(--chart-3)" },
+    d: { label: "Cold Storage D", color: "var(--chart-4)" },
+} satisfies ChartConfig;
+
+function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" {
     switch (status) {
         case "Normal":
-            return "default";
+            return "success";
         case "Warning":
-            return "secondary";
+            return "warning";
         case "Critical":
             return "destructive";
         default:
@@ -93,11 +114,8 @@ function getStatusVariant(status: string): "default" | "secondary" | "destructiv
 
 export function Component() {
     const normalCount = storageUnits.filter((storage) => storage.status === "Normal").length;
-
     const warningCount = storageUnits.filter((storage) => storage.status === "Warning").length;
-
     const criticalCount = storageUnits.filter((storage) => storage.status === "Critical").length;
-
     const onlineCount = storageUnits.filter((storage) => storage.device === "Online").length;
 
     return (
@@ -108,7 +126,7 @@ export function Component() {
                     <h1 className="truncate font-heading text-xl font-medium">Monitoring 18-OCT-2026</h1>
 
                     <Badge variant="outline" className="gap-1.5">
-                        <span aria-hidden="true" className="size-1.5 rounded-full bg-emerald-500" />
+                        <span aria-hidden="true" className="size-1.5 rounded-full bg-success" />
                         Live
                     </Badge>
                 </div>
@@ -130,13 +148,10 @@ export function Component() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Total Storage</CardTitle>
-
-                            <Thermometer aria-hidden="true" className="size-4 text-sky-500" />
+                            <Thermometer aria-hidden="true" className="size-4 text-chart-1" />
                         </CardHeader>
-
                         <CardContent>
                             <div className="text-2xl font-semibold">{storageUnits.length}</div>
-
                             <p className="text-xs text-muted-foreground">monitored units</p>
                         </CardContent>
                     </Card>
@@ -144,13 +159,10 @@ export function Component() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Normal</CardTitle>
-
-                            <CheckCircle2 aria-hidden="true" className="size-4 text-green-500" />
+                            <CheckCircle2 aria-hidden="true" className="size-4 text-success" />
                         </CardHeader>
-
                         <CardContent>
                             <div className="text-2xl font-semibold">{normalCount}</div>
-
                             <p className="text-xs text-muted-foreground">operating normally</p>
                         </CardContent>
                     </Card>
@@ -158,13 +170,10 @@ export function Component() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Warning</CardTitle>
-
-                            <AlertTriangle aria-hidden="true" className="size-4 text-amber-500" />
+                            <AlertTriangle aria-hidden="true" className="size-4 text-warning" />
                         </CardHeader>
-
                         <CardContent>
                             <div className="text-2xl font-semibold">{warningCount}</div>
-
                             <p className="text-xs text-muted-foreground">require attention</p>
                         </CardContent>
                     </Card>
@@ -172,15 +181,12 @@ export function Component() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Devices Online</CardTitle>
-
-                            <Wifi aria-hidden="true" className="size-4 text-blue-500" />
+                            <Wifi aria-hidden="true" className="size-4 text-chart-2" />
                         </CardHeader>
-
                         <CardContent>
                             <div className="text-2xl font-semibold">
                                 {onlineCount}/{storageUnits.length}
                             </div>
-
                             <p className="text-xs text-muted-foreground">
                                 {criticalCount > 0 ? `${criticalCount} critical condition` : "all systems connected"}
                             </p>
@@ -189,70 +195,72 @@ export function Component() {
                 </div>
             </section>
 
-            {/* Storage cards */}
-            {/* <section aria-labelledby="storage-heading" className="space-y-3">
+            {/* Temperature trend */}
+            <section aria-labelledby="trend-heading" className="space-y-3">
                 <div>
-                    <h2 id="storage-heading" className="text-sm font-medium">
-                        Cold Storage
+                    <h2 id="trend-heading" className="text-sm font-medium">
+                        Temperature Trend
                     </h2>
 
-                    <p className="text-sm text-muted-foreground">Current temperature and device status.</p>
+                    <p className="text-sm text-muted-foreground">Readings per storage unit since 09:00.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    {storageUnits.map((storage) => (
-                        <Card key={storage.id}>
-                            <CardHeader className="pb-3">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <CardTitle className="truncate text-sm font-medium">{storage.name}</CardTitle>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-sm font-medium">All cold storage</CardTitle>
+                        <CardDescription>
+                            Dashed lines mark the warning ({WARNING_AT}°C) and critical ({CRITICAL_AT}°C) thresholds.
+                        </CardDescription>
+                    </CardHeader>
 
-                                        <p className="mt-1 text-xs text-muted-foreground">Target {storage.target}°C</p>
-                                    </div>
+                    <CardContent>
+                        <ChartContainer config={chartConfig} className="aspect-auto h-72 w-full">
+                            <LineChart accessibilityLayer data={trend} margin={{ left: 4, right: 12, top: 8 }}>
+                                <CartesianGrid vertical={false} />
 
-                                    <Badge variant={getStatusVariant(storage.status)} className="shrink-0">
-                                        {storage.status}
-                                    </Badge>
-                                </div>
-                            </CardHeader>
+                                <XAxis
+                                    dataKey="time"
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={8}
+                                    minTickGap={24}
+                                />
 
-                            <CardContent className="space-y-5">
-                                <div className="flex items-end justify-between">
-                                    <div>
-                                        <div className="font-mono text-3xl font-semibold tracking-tight">
-                                            {storage.temperature.toFixed(1)}°C
-                                        </div>
+                                <YAxis
+                                    domain={[-21, -16]}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={8}
+                                    width={44}
+                                    tickFormatter={(value: number) => `${value}°`}
+                                />
 
-                                        <p className="mt-1 text-xs text-muted-foreground">Current temperature</p>
-                                    </div>
+                                <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
 
-                                    <Thermometer aria-hidden="true" className="size-5 text-muted-foreground" />
-                                </div>
+                                <ReferenceLine
+                                    y={WARNING_AT}
+                                    stroke="var(--warning)"
+                                    strokeDasharray="4 4"
+                                    strokeWidth={1.5}
+                                />
+                                <ReferenceLine
+                                    y={CRITICAL_AT}
+                                    stroke="var(--destructive)"
+                                    strokeDasharray="4 4"
+                                    strokeWidth={1.5}
+                                />
 
-                                <div className="grid grid-cols-2 divide-x rounded-md border bg-muted/30">
-                                    <div className="px-3 py-2">
-                                        <p className="text-xs text-muted-foreground">Device</p>
+                                <Line dataKey="a" type="monotone" stroke="var(--color-a)" strokeWidth={2} dot={false} />
+                                <Line dataKey="b" type="monotone" stroke="var(--color-b)" strokeWidth={2} dot={false} />
+                                <Line dataKey="c" type="monotone" stroke="var(--color-c)" strokeWidth={2} dot={false} />
+                                <Line dataKey="d" type="monotone" stroke="var(--color-d)" strokeWidth={2} dot={false} />
 
-                                        <p className="mt-1 flex items-center gap-1.5 text-xs font-medium">
-                                            <span aria-hidden="true" className="size-1.5 rounded-full bg-emerald-500" />
-                                            {storage.device}
-                                        </p>
-                                    </div>
-
-                                    <div className="px-3 py-2 pl-4">
-                                        <p className="text-xs text-muted-foreground">Updated</p>
-
-                                        <p className="mt-1 flex items-center gap-1.5 text-xs font-medium">
-                                            <Clock3 aria-hidden="true" className="size-3.5 text-muted-foreground" />
-                                            {storage.updated}
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </section> */}
+                                <ChartLegend content={<ChartLegendContent />} />
+                            </LineChart>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
+            </section>
 
             {/* Latest telemetry */}
             <section aria-labelledby="telemetry-heading" className="space-y-3">
@@ -280,15 +288,11 @@ export function Component() {
                             {telemetry.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="font-medium">{item.storage}</TableCell>
-
                                     <TableCell className="font-mono">{item.temperature}</TableCell>
-
                                     <TableCell className="font-mono">{item.humidity}</TableCell>
-
                                     <TableCell>
                                         <Badge variant={getStatusVariant(item.state)}>{item.state}</Badge>
                                     </TableCell>
-
                                     <TableCell className="text-right font-mono text-xs text-muted-foreground">
                                         {item.time}
                                     </TableCell>
