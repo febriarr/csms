@@ -22,7 +22,8 @@
         "db:migrate": "drizzle-kit migrate",
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio",
-        "db:custom": "drizzle-kit generate --custom"
+        "db:custom": "drizzle-kit generate --custom",
+        "db:seed": "tsx src/database/seed.ts"
     },
     "dependencies": {
         "@better-auth/drizzle-adapter": "^1.7.7",
@@ -31,9 +32,9 @@
         "@nestjs/core": "^11.0.1",
         "@nestjs/platform-express": "^11.0.1",
         "@thallesp/nestjs-better-auth": "^2.8.0",
-        "better-auth": "^1.7.7",
-        "@workspace/validator": "workspace:*",
         "@workspace/shared": "workspace:*",
+        "@workspace/validator": "workspace:*",
+        "better-auth": "^1.7.7",
         "drizzle-orm": "^0.45.4",
         "pg": "^8.23.1",
         "reflect-metadata": "^0.2.2",
@@ -66,6 +67,7 @@
         "ts-loader": "^9.5.2",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
+        "tsx": "^4.23.15",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.20.0"
     },
