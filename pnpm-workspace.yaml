@@ -8,4 +8,12 @@ allowBuilds:
     msw: false
     unrs-resolver: true
 catalog:
-    zod: ^4.6.5
+    zod: ^4.6.6
+overrides:
+    "@esbuild-kit/core-utils>esbuild": ">=0.25.0"
+    "tsup>esbuild": ">=0.28.1"
+    "bundle-require>esbuild": ">=0.28.1"
+permissions:
+  '@tanstack/react-table':
+    build: false
+    skills: false
