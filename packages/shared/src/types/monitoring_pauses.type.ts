@@ -13,10 +13,10 @@ export interface MonitoringPause extends Timestamps {
     kind: PauseKind;
     startsAt: Date;
     endsAt: Date | null;
-    maxPullDownMinutes: number;
+    maxPulldownMinutes: number;
     note: string | null;
-    createdBy: string;
-    endedBy: string;
+    createdBy: string | null;
+    endedBy: string | null;
 }
 
 export interface MonitoringPauseView extends MonitoringPause {
