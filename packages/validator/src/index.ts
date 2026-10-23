@@ -11,3 +11,4 @@ export * from "./notification_recipients.validator";
 export * from "./notification_subscriptions.validator";
 export * from "./alerts.validator";
 export * from "./reports.validator";
+export * from "./auth.validator";

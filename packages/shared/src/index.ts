@@ -4,3 +4,7 @@ export * from "./types/locations.type";
 export * from "./types/notification.type";
 export * from "./types/alerts.type";
 export * from "./types/devices.type";
+export * from "./types/user.type";
+export * from "./types/diagnostics.type";
+export * from "./types/monitoring_pauses.type";
+export * from "./types/api.type";
