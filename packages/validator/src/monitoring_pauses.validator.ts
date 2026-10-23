@@ -21,7 +21,7 @@ export const createPauseSchema = z
             .min(0, "Batas waktu pull-down tidak boleh negatif")
             .max(MAX_PULLDOWN_MINUTES, `Batas waktu pull-down maksimal ${MAX_PULLDOWN_MINUTES} menit`)
             .default(0),
-        note: optionalText("Catatan", 500),
+        note: optionalText("Catatan", 500).optional(),
     })
     .superRefine((data, ctx) => {
         const targets = [data.deviceId, data.coldStorageId].filter(Boolean).length;
@@ -53,7 +53,7 @@ export const createPauseSchema = z
  */
 export const endPauseSchema = z.object({
     endsAt: isoDateTime("Waktu selesai").optional(),
-    note: optionalText("Catatan", 500),
+    note: optionalText("Catatan", 500).optional(),
 });
 
 export const pauseQuerySchema = z.object({
