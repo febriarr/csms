@@ -58,3 +58,6 @@ export const monitoringPauses = pgTable(
         check('monitoring_pauses_pulldown_chk', sql`${t.maxPulldownMinutes} >= 0`),
     ],
 );
+
+export type SelectMonitoringPause = typeof monitoringPauses.$inferSelect;
+export type InsertMonitoringPause = typeof monitoringPauses.$inferInsert;
