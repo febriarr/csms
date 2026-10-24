@@ -35,3 +35,6 @@ export const notificationLogs = pgTable(
             .where(sql`${t.status} <> 'SUCCESS'`),
     ],
 );
+
+export type SelectNotificationLog = typeof notificationLogs.$inferSelect;
+export type InsertNotificationLog = typeof notificationLogs.$inferInsert;
