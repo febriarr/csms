@@ -17,3 +17,7 @@ permissions:
   '@tanstack/react-table':
     build: false
     skills: false
+  '@whiskeysockets/baileys':
+    build: true
+  protobufjs:
+    build: true
