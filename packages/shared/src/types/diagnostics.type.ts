@@ -1,5 +1,3 @@
-import type { Timestamps } from "./timestamp.type";
-
 export type ResetReason = "BROWNOUT" | "PANIC" | "WATCHDOG" | "UNKNOWN";
 
 export interface ResetReport {
@@ -35,6 +33,11 @@ export interface DiagnosticTrendPoint {
     avgRssi: number | null;
 }
 
+export interface DiagnosticTrendReport extends DiagnosticRange {
+    device: { id: string; code: string; name: string };
+    points: DiagnosticTrendPoint[];
+}
+
 export interface DiagnosticRange {
     from: string;
     to: string;
@@ -44,15 +47,14 @@ export interface DiagnosticSummaryReport extends DiagnosticRange {
     items: DiagnosticSummaryItem[];
 }
 
-export interface DiagnosticLogItem extends Timestamps {
-    id: string;
+export interface DiagnosticLogItem {
+    id: number;
     deviceId: string;
     sensorFailCount: number;
     wifiFailCount: number;
     httpFailCount: number;
-    rssi: number;
-
-    resetReason: ResetReason;
+    rssi: number | null;
+    resetReason: "BROWNOUT" | "PANIC" | "WATCHDOG" | "UNKNOWN" | null;
     resetReasonCode: number | null;
     lastRssi: number | null;
     lastSensorFailCount: number | null;

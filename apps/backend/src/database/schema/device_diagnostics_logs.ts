@@ -46,3 +46,6 @@ export const deviceDiagnosticsLogs = pgTable(
         ),
     ],
 );
+
+export type InsertDeviceDiagnostic = typeof deviceDiagnosticsLogs.$inferInsert;
+export type SelectDeviceDiagnostic = typeof deviceDiagnosticsLogs.$inferSelect;
