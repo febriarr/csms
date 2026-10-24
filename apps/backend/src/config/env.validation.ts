@@ -21,6 +21,14 @@ const envSchema = z.object({
         .string()
         .optional()
         .transform((v) => (v ? v : undefined)),
+
+    DEVICE_API_KEY: z.string().min(16),
+
+    WHATSAPP_ENABLED: z
+        .enum(['true', 'false'])
+        .default('false')
+        .transform((v) => v === 'true'),
+    WHATSAPP_AUTH_DIR: z.string().min(1).default('.baileys_auth'),
 });
 
 export type Env = z.infer<typeof envSchema>;
