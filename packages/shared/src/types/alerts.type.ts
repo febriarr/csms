@@ -9,7 +9,7 @@ export interface Alert extends Timestamps {
     reasonCode: AlertReason;
     reason: string | null;
     temperature: number | null;
-    occuredAt: Date;
+    occurredAt: Date;
     acknowledgedAt: Date | null;
     acknowledgedBy: string | null;
 }
@@ -18,5 +18,5 @@ export interface ListAlert extends Alert {
     deviceCode: string;
     deviceName: string;
     acknowledgedByName: string | null;
-    coldStorage: string;
+    coldStorageName: string;
 }
