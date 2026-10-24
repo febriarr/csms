@@ -18,8 +18,8 @@ export const navLinks: NavItem[] = [
         path: "/dashboard/monitoring",
         icon: Activity,
         children: [
-            { title: "Alerts", path: "/dashboard/monitoring/alerts" },
             { title: "Live", path: "/dashboard/monitoring/live" },
+            { title: "Alerts", path: "/dashboard/monitoring/alerts" },
             { title: "Monitoring Pauses", path: "/dashboard/monitoring/monitoring-pauses" },
         ],
     },
@@ -66,3 +66,21 @@ export const navLinks: NavItem[] = [
         ],
     },
 ];
+
+/** Halaman pertama yang bisa dibuka dari sebuah item: turun lewat anak pertama sampai ketemu item tanpa anak. */
+export function getFirstLeafPath(item: NavItem): string {
+    const first = item.children?.[0];
+    return first ? getFirstLeafPath(first) : item.path;
+}
+
+/**
+ * Item yang hanya parent (punya children) tidak punya halaman sendiri. Daftar ini dipakai router untuk
+ * me-redirect path parent ke halaman anak pertamanya, supaya crumb parent di breadcrumb bisa diklik.
+ */
+export function getParentRedirects(items: NavItem[] = navLinks): { path: string; to: string }[] {
+    return items.flatMap((item) =>
+        item.children?.length
+            ? [{ path: item.path, to: getFirstLeafPath(item) }, ...getParentRedirects(item.children)]
+            : []
+    );
+}

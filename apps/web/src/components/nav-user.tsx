@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, Monitor, Moon, Sun, UserIcon } from "lucide-react";
+import { ChevronsUpDown, Loader2, LogOut, Monitor, Moon, Sun, UserIcon } from "lucide-react";
 import { Link } from "react-router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
@@ -19,14 +19,8 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@workspace/ui/components/sidebar";
 
 import { useTheme } from "@/components/theme-provider";
-
-// TODO: ganti dengan session Better Auth (authClient.useSession())
-const dummyUser = {
-    name: "Super Admin",
-    username: "superadmin",
-    role: "super_admin",
-    image: "",
-};
+import { useAuth } from "@/modules/auth/auth.context";
+import { useLogout } from "@/modules/auth/hooks";
 
 function getInitials(name: string) {
     return name
@@ -40,11 +34,20 @@ function getInitials(name: string) {
 export function NavUser() {
     const { isMobile } = useSidebar();
     const { theme, setTheme } = useTheme();
-    const user = dummyUser;
+    const { user } = useAuth();
+    const logout = useLogout();
 
-    const handleLogout = () => {
-        // TODO: await authClient.signOut(); lalu navigate("/login")
-        console.log("logout");
+    // Right after logout the session is cleared a moment before <RequireAuth> redirects to /login.
+    if (!user) return null;
+
+    const username = user.username ?? user.email;
+
+    const handleLogout = (event: Event) => {
+        // Keep the menu open while the request runs so the loading state and any error stay visible.
+        event.preventDefault();
+        if (logout.isPending) return;
+        // On success the session cache is cleared and <RequireAuth> redirects to /login.
+        logout.mutate();
     };
 
     return (
@@ -58,7 +61,7 @@ export function NavUser() {
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <UserAvatar name={user.name} image={user.image} />
-                            <UserInfo name={user.name} username={user.username} />
+                            <UserInfo name={user.name} username={username} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -72,7 +75,7 @@ export function NavUser() {
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <UserAvatar name={user.name} image={user.image} />
-                                <UserInfo name={user.name} username={user.username} />
+                                <UserInfo name={user.name} username={username} />
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -117,10 +120,15 @@ export function NavUser() {
                         </DropdownMenuGroup>
 
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
-                            <LogOut />
-                            Sign Out
+                        <DropdownMenuItem variant="destructive" disabled={logout.isPending} onSelect={handleLogout}>
+                            {logout.isPending ? <Loader2 className="animate-spin" /> : <LogOut />}
+                            {logout.isPending ? "Signing out..." : "Sign Out"}
                         </DropdownMenuItem>
+                        {logout.error && (
+                            <p role="alert" className="px-2 pb-1.5 text-xs text-destructive">
+                                {logout.error.message}
+                            </p>
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
@@ -128,7 +136,7 @@ export function NavUser() {
     );
 }
 
-function UserAvatar({ name, image }: { name: string; image?: string }) {
+function UserAvatar({ name, image }: { name: string; image?: string | null }) {
     return (
         <Avatar className="size-8 rounded-lg">
             {image ? <AvatarImage src={image} alt={name} /> : null}

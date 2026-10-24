@@ -16,13 +16,13 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { navLinks, type NavItem } from "./nav-links";
 import { useBreadcrumbLabels } from "@/lib/breadcrumb-store";
 
-/* indeks navLinks: path → judul & apakah punya anak */
+/* indeks navLinks: path → judul */
 
-const navIndex = new Map<string, { title: string; hasChildren: boolean }>();
+const navTitles = new Map<string, string>();
 
 (function index(items: NavItem[]) {
     for (const item of items) {
-        navIndex.set(item.path, { title: item.title, hasChildren: !!item.children?.length });
+        navTitles.set(item.path, item.title);
         if (item.children) index(item.children);
     }
 })(navLinks);
@@ -45,22 +45,26 @@ interface Crumb {
     path: string;
     /** null = segmen ID yang namanya belum diisi (tampilkan skeleton) */
     label: string | null;
-    linkable: boolean;
 }
 
+/**
+ * Semua crumb kecuali yang terakhir adalah link. Path parent di navLinks (Settings, Master Data, ...) tidak punya
+ * halaman sendiri, jadi router me-redirect-nya ke halaman anak pertama (lihat getParentRedirects).
+ */
 function buildCrumbs(pathname: string, labels: Record<string, string>): Crumb[] {
     const segments = pathname.split("/").filter(Boolean);
 
     return segments.map((segment, i) => {
         const path = "/" + segments.slice(0, i + 1).join("/");
-        const nav = navIndex.get(path);
 
-        if (labels[path]) return { path, label: labels[path], linkable: true };
-        if (path === "/dashboard") return { path, label: "Dashboard", linkable: true };
-        // parent yang punya anak = hanya teks, karena halamannya belum tentu ada
-        if (nav) return { path, label: nav.title, linkable: !nav.hasChildren };
-        if (isIdSegment(segment)) return { path, label: null, linkable: true };
-        return { path, label: extraTitles[segment] ?? humanize(segment), linkable: true };
+        if (labels[path]) return { path, label: labels[path] };
+        if (path === "/dashboard") return { path, label: "Dashboard" };
+
+        const title = navTitles.get(path);
+        if (title) return { path, label: title };
+
+        if (isIdSegment(segment)) return { path, label: null };
+        return { path, label: extraTitles[segment] ?? humanize(segment) };
     });
 }
 
@@ -71,8 +75,8 @@ export function AppBreadcrumb() {
 
     if (crumbs.length === 0) return null;
 
-    const current = crumbs[crumbs.length - 1];
-    const backTarget = [...crumbs.slice(0, -1)].reverse().find((c) => c.linkable);
+    const current = crumbs[crumbs.length - 1]!;
+    const backTarget = crumbs.length > 1 ? crumbs[crumbs.length - 2] : undefined;
 
     return (
         <>
@@ -106,14 +110,12 @@ export function AppBreadcrumb() {
                                         <Skeleton className="h-4 w-24" />
                                     ) : isLast ? (
                                         <BreadcrumbPage className="max-w-48 truncate">{crumb.label}</BreadcrumbPage>
-                                    ) : crumb.linkable ? (
+                                    ) : (
                                         <BreadcrumbLink asChild>
                                             <Link to={crumb.path} className="truncate">
                                                 {crumb.label}
                                             </Link>
                                         </BreadcrumbLink>
-                                    ) : (
-                                        <span className="truncate text-muted-foreground">{crumb.label}</span>
                                     )}
                                 </BreadcrumbItem>
                                 {!isLast && <BreadcrumbSeparator />}
