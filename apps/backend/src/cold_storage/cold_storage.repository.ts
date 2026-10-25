@@ -65,7 +65,7 @@ export class ColdStorageRepository extends BaseRepository<typeof coldStorages> {
                 division: divisions.name,
             })
             .from(coldStorages)
-            .innerJoin(locations, eq(coldStorages.id, locations.id))
+            .innerJoin(locations, eq(coldStorages.locationId, locations.id))
             .innerJoin(divisions, eq(locations.divisionId, divisions.id))
             .where(and(...conditions));
     }
