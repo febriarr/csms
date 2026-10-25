@@ -20,6 +20,7 @@ import { AlertModule } from './alert/alert.module';
 import { DiagnosticModule } from './diagnostic/diagnostic.module';
 import { DeviceEventModule } from './event/device_event.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UserModule } from './user/user.module';
 
 @Module({
     imports: [
@@ -67,6 +68,8 @@ import { ScheduleModule } from '@nestjs/schedule';
         DiagnosticModule,
 
         DeviceEventModule,
+
+        UserModule,
     ],
     providers: [
         {
