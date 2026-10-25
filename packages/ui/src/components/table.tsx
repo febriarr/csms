@@ -2,9 +2,11 @@ import { cn } from "../lib/utils";
 import * as React from "react";
 import { createPortal } from "react-dom";
 
+const tableContainerClassName = "relative w-full min-w-0 overflow-x-auto";
+
 function Table({ className, ...props }: React.ComponentProps<"table">) {
     return (
-        <div data-slot="table-container" className="relative w-full overflow-x-auto">
+        <div data-slot="table-container" className={tableContainerClassName}>
             <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
         </div>
     );
@@ -16,8 +18,13 @@ interface TableHeaderProps extends React.ComponentProps<"thead"> {
 
 function TableHeader({ className, sticky = true, ...props }: TableHeaderProps) {
     const theadRef = React.useRef<HTMLTableSectionElement>(null);
+
     const cloneRef = React.useRef<HTMLDivElement>(null);
+
+    const cloneInnerRef = React.useRef<HTMLDivElement>(null);
+
     const colgroupRef = React.useRef<HTMLTableColElement>(null);
+
     const [mounted, setMounted] = React.useState(false);
 
     React.useEffect(() => {
@@ -26,48 +33,45 @@ function TableHeader({ className, sticky = true, ...props }: TableHeaderProps) {
     }, []);
 
     React.useEffect(() => {
-        if (!mounted || !sticky) return;
+        if (!mounted || !sticky) {
+            return;
+        }
 
         const thead = theadRef.current;
         const clone = cloneRef.current;
+        const cloneInner = cloneInnerRef.current;
         const colgroup = colgroupRef.current;
-        if (!thead || !clone || !colgroup) return;
+
+        if (!thead || !clone || !cloneInner || !colgroup) {
+            return;
+        }
 
         const container = thead.closest<HTMLElement>("[data-slot='table-container']");
-        if (!container) return;
+
+        if (!container) {
+            return;
+        }
+
+        const table = thead.closest<HTMLTableElement>("table");
+
+        if (!table) {
+            return;
+        }
 
         const getHeaderHeight = () => {
             const raw = getComputedStyle(document.documentElement).getPropertyValue("--header-height").trim();
+
             if (raw.endsWith("rem")) {
-                return parseFloat(raw) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+                const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+                return parseFloat(raw) * rootFontSize;
             }
+
             return parseFloat(raw) || 0;
         };
 
-        const table = thead.closest("table");
-
-        const sync = () => {
-            if (!table) return;
-
-            const headerHeight = getHeaderHeight();
-            const containerRect = container.getBoundingClientRect();
-            const theadRect = thead.getBoundingClientRect();
-            const tableRect = table.getBoundingClientRect();
-
-            const hasReachedStickyPosition = theadRect.top <= headerHeight;
-
-            const theadHeight = theadRect.height;
-
-            const isSticky = hasReachedStickyPosition && tableRect.bottom > headerHeight;
-
-            clone.style.top = `${headerHeight}px`;
-            clone.style.left = `${containerRect.left}px`;
-            clone.style.width = `${containerRect.width}px`;
-
-            const cloneTable = clone.querySelector("table") as HTMLElement;
-            cloneTable.style.width = `${table.offsetWidth}px`;
-
-            const ths = Array.from(thead.querySelectorAll("th"));
+        const syncColumnWidths = () => {
+            const ths = Array.from(thead.querySelectorAll<HTMLTableCellElement>("th"));
 
             while (colgroup.children.length < ths.length) {
                 colgroup.appendChild(document.createElement("col"));
@@ -78,58 +82,113 @@ function TableHeader({ className, sticky = true, ...props }: TableHeaderProps) {
             }
 
             ths.forEach((th, index) => {
-                const col = colgroup.children[index] as HTMLElement;
+                const col = colgroup.children[index] as HTMLTableColElement;
+
                 col.style.width = `${th.getBoundingClientRect().width}px`;
             });
+        };
 
-            cloneTable.style.transform = `translateX(-${container.scrollLeft}px)`;
+        const syncHorizontalPosition = () => {
+            cloneInner.style.transform = `translate3d(-${container.scrollLeft}px, 0, 0)`;
+        };
 
-            // Tambahkan efek dorong (push-up) saat bagian bawah tabel mulai melewati batas atas
+        const sync = () => {
+            const headerHeight = getHeaderHeight();
+
+            const containerRect = container.getBoundingClientRect();
+
+            const theadRect = thead.getBoundingClientRect();
+
+            const tableRect = table.getBoundingClientRect();
+
+            const theadHeight = theadRect.height;
+            const tableWidth = table.offsetWidth;
+
+            const hasReachedStickyPosition = theadRect.top <= headerHeight;
+
+            const isSticky = hasReachedStickyPosition && tableRect.bottom > headerHeight;
+
+            clone.style.top = `${headerHeight}px`;
+            clone.style.left = `${containerRect.left}px`;
+            clone.style.width = `${container.clientWidth}px`;
+            clone.style.height = `${theadHeight}px`;
+            clone.style.overflow = "hidden";
+
+            cloneInner.style.width = `${tableWidth}px`;
+            cloneInner.style.height = `${theadHeight}px`;
+
+            syncColumnWidths();
+            syncHorizontalPosition();
+
             if (isSticky) {
-                clone.style.visibility = "visible";
-                thead.style.visibility = "hidden";
-
-                // Hitung jika tabel hampir habis di bagian atas layar
                 const pushUpAmount = Math.min(0, tableRect.bottom - (headerHeight + theadHeight));
-                clone.style.transform = `translateX(-${container.scrollLeft}px) translateY(${pushUpAmount}px)`;
+
+                clone.style.transform = `translate3d(0, ${pushUpAmount}px, 0)`;
+
+                clone.style.visibility = "visible";
+
+                thead.style.visibility = "hidden";
             } else {
+                clone.style.transform = "translate3d(0, 0, 0)";
+
                 clone.style.visibility = "hidden";
+
                 thead.style.visibility = "visible";
-                clone.style.transform = `translateX(-${container.scrollLeft}px) translateY(0px)`;
             }
         };
 
         let ticking = false;
-        const onScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    sync();
-                    ticking = false;
-                });
-                ticking = true;
+
+        const scheduleSync = () => {
+            if (ticking) {
+                return;
             }
+
+            ticking = true;
+
+            requestAnimationFrame(() => {
+                sync();
+                ticking = false;
+            });
+        };
+
+        const handleWindowScroll = () => {
+            scheduleSync();
+        };
+
+        const handleContainerScroll = () => {
+            syncHorizontalPosition();
         };
 
         const resizeObserver = new ResizeObserver(() => {
-            onScroll();
+            scheduleSync();
         });
-        resizeObserver.observe(container);
-        if (table) resizeObserver.observe(table);
 
-        window.addEventListener("scroll", onScroll);
-        container.addEventListener("scroll", sync);
-        window.addEventListener("resize", onScroll);
+        resizeObserver.observe(container);
+        resizeObserver.observe(table);
+        resizeObserver.observe(thead);
+
+        window.addEventListener("scroll", handleWindowScroll, { passive: true });
+
+        window.addEventListener("resize", scheduleSync);
+
+        container.addEventListener("scroll", handleContainerScroll, { passive: true });
+
         sync();
 
         return () => {
-            window.removeEventListener("scroll", onScroll);
-            container.removeEventListener("scroll", sync);
-            window.removeEventListener("resize", onScroll);
+            window.removeEventListener("scroll", handleWindowScroll);
+
+            window.removeEventListener("resize", scheduleSync);
+
+            container.removeEventListener("scroll", handleContainerScroll);
+
             resizeObserver.disconnect();
+
+            thead.style.visibility = "visible";
         };
     }, [mounted, sticky]);
 
-    // Jika sticky false, langsung render thead biasa tanpa portal
     if (!sticky) {
         return (
             <thead ref={theadRef} data-slot="table-header" className={cn("[&_tr]:border-b", className)} {...props} />
@@ -141,16 +200,25 @@ function TableHeader({ className, sticky = true, ...props }: TableHeaderProps) {
               <div
                   ref={cloneRef}
                   aria-hidden="true"
-                  style={{ visibility: "hidden" }}
                   className="pointer-events-none fixed z-40 overflow-hidden bg-background"
+                  style={{
+                      visibility: "hidden",
+                      contain: "paint",
+                  }}
               >
-                  <table
-                      className="caption-bottom text-sm"
-                      style={{ tableLayout: "fixed", borderCollapse: "collapse" }}
-                  >
-                      <colgroup ref={colgroupRef} />
-                      <thead className={cn("[&_tr]:border-b", className)}>{props.children}</thead>
-                  </table>
+                  <div ref={cloneInnerRef} className="absolute top-0 left-0 h-full">
+                      <table
+                          className="caption-bottom text-sm"
+                          style={{
+                              tableLayout: "fixed",
+                              borderCollapse: "collapse",
+                          }}
+                      >
+                          <colgroup ref={colgroupRef} />
+
+                          <thead className={cn("[&_tr]:border-b", className)}>{props.children}</thead>
+                      </table>
+                  </div>
               </div>,
               document.body
           )
@@ -159,6 +227,7 @@ function TableHeader({ className, sticky = true, ...props }: TableHeaderProps) {
     return (
         <>
             {clonePortal}
+
             <thead ref={theadRef} data-slot="table-header" className={cn("[&_tr]:border-b", className)} {...props} />
         </>
     );
@@ -182,10 +251,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     return (
         <tr
             data-slot="table-row"
-            className={cn(
-                "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-                className
-            )}
+            className={cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className)}
             {...props}
         />
     );
@@ -220,4 +286,4 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
     );
 }
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
