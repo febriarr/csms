@@ -110,7 +110,6 @@ export const createDeviceSchema = z
 
 export const updateDeviceSchema = z
     .object({
-        code: requiredText("Kode device", 50).optional(),
         name: requiredText("Nama device", 100).optional(),
         coldStorageId: idSchema.optional(),
         pointLabel: optionalText("Titik", 100),
