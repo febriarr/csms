@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type FormEvent } from "react";
+import { useState, type ComponentProps, type SyntheticEvent } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { DeviceView } from "@workspace/shared";
@@ -141,7 +141,7 @@ function DeviceForm({ device, defaultColdStorageId, onCancel, onSuccess }: Devic
     const hasFieldError = Object.keys(errors).some((field) => field !== "_root");
     const rootError = errors._root ?? (serverError && !hasFieldError ? getDeviceErrorMessage(serverError) : undefined);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
         if (mutation.isPending) return;
 
@@ -197,7 +197,7 @@ function DeviceForm({ device, defaultColdStorageId, onCancel, onSuccess }: Devic
                             name="code"
                             defaultValue={device?.code ?? ""}
                             error={errors.code}
-                            disabled={true}
+                            disabled={!!device}
                         />
                         <TextField
                             label="Name"

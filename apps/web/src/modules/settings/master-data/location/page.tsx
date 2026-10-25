@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SyntheticEvent } from "react";
 import { Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 
 import { ErrorCode, type ErrorResponse, type Location } from "@workspace/shared";
@@ -267,7 +267,7 @@ function LocationForm({
         clientErrors._root ??
         (serverError && !nameError && !divisionError && !descriptionError ? getErrorMessage(serverError) : undefined);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
         if (mutation.isPending) return;
 

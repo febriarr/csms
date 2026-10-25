@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { ErrorCode, type Division, type ErrorResponse } from "@workspace/shared";
@@ -180,7 +180,7 @@ function DivisionForm({ division, onDone }: { division: Division | null; onDone:
         (serverError?.code === ErrorCode.DIVISION_NAME_TAKEN ? getErrorMessage(serverError) : undefined);
     const rootError = clientErrors._root ?? (serverError && !nameError ? getErrorMessage(serverError) : undefined);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
         if (mutation.isPending) return;
 

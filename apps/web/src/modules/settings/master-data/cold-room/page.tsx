@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SyntheticEvent } from "react";
 import { Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 
 import { ErrorCode, type ColdStorage, type ErrorResponse, type ListColdStorage } from "@workspace/shared";
@@ -294,7 +294,7 @@ function ColdStorageForm({
         clientErrors._root ??
         (serverError && !nameError && !locationError && !descriptionError ? getErrorMessage(serverError) : undefined);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();
         if (mutation.isPending) return;
 
