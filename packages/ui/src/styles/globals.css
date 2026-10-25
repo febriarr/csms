@@ -160,6 +160,10 @@
     }
 }
 
+.wrapper-table {
+    @apply overflow-hidden rounded-lg border bg-card;
+}
+
 .typeset-apps {
     --typeset-font-body: var(--font-ibm-plex-sans);
     --typeset-font-heading: var(--font-oxanium);

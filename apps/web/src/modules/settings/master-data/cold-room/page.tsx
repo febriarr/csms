@@ -146,7 +146,7 @@ export function Component() {
                     </Select>
                 </div>
 
-                <div className="rounded-lg border bg-card">
+                <div className="wrapper-table">
                     <Table>
                         <TableHeader>
                             <TableRow>

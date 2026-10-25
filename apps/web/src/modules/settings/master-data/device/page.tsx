@@ -197,7 +197,7 @@ export function Component() {
                     </DropdownMenu>
                 </div>
 
-                <div className="rounded-lg border bg-card">
+                <div className="wrapper-table">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
     columnVisibilityFeature,
     createColumnHelper,
@@ -86,6 +87,18 @@ function StateBadge({ state }: { state: string }) {
     );
 }
 
+/**
+ * Two levels of emphasis in the table:
+ * - foreground (default): what is scanned while monitoring (name, cold room, thresholds, live temperature, badges)
+ * - muted: context and metadata (code, location, division, point, firmware, heartbeat, timestamps, empty "-")
+ */
+function Muted({ children }: { children: ReactNode }) {
+    return <span className="text-muted-foreground">{children}</span>;
+}
+
+/** Nullable text: the value in muted color, or a muted dash when empty. */
+const mutedOrDash = (value: string | null | undefined) => <Muted>{value ?? "-"}</Muted>;
+
 // the first generic is the registered features, the second is the row type.
 const columnHelper = createColumnHelper<typeof deviceTableFeatures, DeviceView>();
 
@@ -123,23 +136,31 @@ export function getDeviceColumns(onAction: (action: DeviceAction, device: Device
         columnHelper.accessor("code", {
             header: LABELS.code,
             enableHiding: false,
-            cell: (info) => <span className="font-mono text-xs">{info.getValue()}</span>,
+            cell: (info) => <span className="font-mono text-xs text-muted-foreground">{info.getValue()}</span>,
         }),
         columnHelper.accessor("name", {
             header: LABELS.name,
             cell: (info) => <span className="font-medium">{info.getValue()}</span>,
         }),
+        // foreground: the cold room is the main "where" of a device
         columnHelper.accessor("coldStorageName", { header: LABELS.coldStorageName }),
-        columnHelper.accessor("locationName", { header: LABELS.locationName }),
-        columnHelper.accessor("divisionName", { header: LABELS.divisionName }),
+        columnHelper.accessor("locationName", {
+            header: LABELS.locationName,
+            cell: (info) => <Muted>{info.getValue()}</Muted>,
+        }),
+        columnHelper.accessor("divisionName", {
+            header: LABELS.divisionName,
+            cell: (info) => <Muted>{info.getValue()}</Muted>,
+        }),
         columnHelper.accessor("pointLabel", {
             header: LABELS.pointLabel,
-            cell: (info) => info.getValue() ?? "-",
+            cell: (info) => mutedOrDash(info.getValue()),
         }),
         columnHelper.accessor("defrostThreshold", {
             header: LABELS.defrostThreshold,
-            cell: (info) => formatTemperature(info.getValue()),
+            cell: (info) => <Muted>{formatTemperature(info.getValue())}</Muted>,
         }),
+        // foreground: warning & critical thresholds drive the alerts
         columnHelper.accessor("warningThreshold", {
             header: LABELS.warningThreshold,
             cell: (info) => formatTemperature(info.getValue()),
@@ -150,31 +171,32 @@ export function getDeviceColumns(onAction: (action: DeviceAction, device: Device
         }),
         columnHelper.accessor("heartbeatIntervalSeconds", {
             header: LABELS.heartbeatIntervalSeconds,
-            cell: (info) => `${info.getValue()} s`,
+            cell: (info) => <Muted>{info.getValue()} s</Muted>,
         }),
         columnHelper.accessor("firmwareVersion", {
             header: LABELS.firmwareVersion,
-            cell: (info) => info.getValue() ?? "-",
+            cell: (info) => mutedOrDash(info.getValue()),
         }),
         columnHelper.accessor("state", {
             header: LABELS.state,
             cell: (info) => <StateBadge state={info.getValue()} />,
         }),
+        // foreground when there is a reading (live data), muted dash when empty
         columnHelper.accessor("lastTemperature", {
             header: LABELS.lastTemperature,
-            cell: (info) => formatTemperature(info.getValue()),
+            cell: (info) => (info.getValue() == null ? <Muted>-</Muted> : formatTemperature(info.getValue())),
         }),
         columnHelper.accessor("lastSeenAt", {
             header: LABELS.lastSeenAt,
-            cell: (info) => formatDateTime(info.getValue()),
+            cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
         }),
         columnHelper.accessor("lastRecordedAt", {
             header: LABELS.lastRecordedAt,
-            cell: (info) => formatDateTime(info.getValue()),
+            cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
         }),
         columnHelper.accessor("stateChangedAt", {
             header: LABELS.stateChangedAt,
-            cell: (info) => formatDateTime(info.getValue()),
+            cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
         }),
         columnHelper.accessor((row) => row.monitoring.status, {
             id: "monitoringStatus",
@@ -198,11 +220,11 @@ export function getDeviceColumns(onAction: (action: DeviceAction, device: Device
         }),
         columnHelper.accessor("createdAt", {
             header: LABELS.createdAt,
-            cell: (info) => formatDateTime(info.getValue()),
+            cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
         }),
         columnHelper.accessor("updatedAt", {
             header: LABELS.updatedAt,
-            cell: (info) => formatDateTime(info.getValue()),
+            cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
         }),
     ]);
 }

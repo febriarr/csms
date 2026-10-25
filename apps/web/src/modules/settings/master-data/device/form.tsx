@@ -197,7 +197,7 @@ function DeviceForm({ device, defaultColdStorageId, onCancel, onSuccess }: Devic
                             name="code"
                             defaultValue={device?.code ?? ""}
                             error={errors.code}
-                            disabled={disabled}
+                            disabled={true}
                         />
                         <TextField
                             label="Name"

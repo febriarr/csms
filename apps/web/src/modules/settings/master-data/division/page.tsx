@@ -71,7 +71,7 @@ export function Component() {
                     </Button>
                 </div>
 
-                <div className="rounded-lg border bg-card">
+                <div className="wrapper-table">
                     <Table>
                         <TableHeader>
                             <TableRow>
