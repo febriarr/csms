@@ -43,9 +43,12 @@ describe('AlertService.acknowledge', () => {
 });
 
 describe('AlertService.findAll', () => {
-    it('should wrap the page with the paging numbers', async () => {
-        const page = await setup({ total: 45 }).findAll({ page: 2, pageSize: 20 });
+    it('should wrap the page with the paging metadata', async () => {
+        const result = await setup({ total: 45 }).findAll({ page: 2, pageSize: 20 });
 
-        expect(page).toEqual({ items: [], page: 2, pageSize: 20, totalItems: 45, totalPages: 3 });
+        expect(result).toEqual({
+            data: [],
+            metadata: { page: 2, pageSize: 20, totalItems: 45, totalPages: 3 },
+        });
     });
 });

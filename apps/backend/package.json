@@ -90,7 +90,9 @@
             "^.+\\.(t|j)s$": "ts-jest"
         },
         "moduleNameMapper": {
-            "^@/(.*)$": "<rootDir>/$1"
+            "^@/(.*)$": "<rootDir>/$1",
+            "^@nestjs/config$": "<rootDir>/../test/stubs/nestjs-config.stub.ts",
+            "^@nestjs/schedule$": "<rootDir>/../test/stubs/nestjs-schedule.stub.ts"
         },
         "collectCoverageFrom": [
             "**/*.(t|j)s"

@@ -8,3 +8,4 @@ export * from "./types/user.type";
 export * from "./types/diagnostics.type";
 export * from "./types/monitoring_pauses.type";
 export * from "./types/api.type";
+export * from "./types/temperature.type";

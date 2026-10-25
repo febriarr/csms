@@ -40,6 +40,7 @@ export function createAuth(o: CreateAuthOptions) {
             database: {
                 generateId: () => uuidv7(),
             },
+            cookiePrefix: 'csms',
         },
     });
 }

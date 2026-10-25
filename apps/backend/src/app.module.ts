@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Env, validateEnv } from './config/env.validation';
@@ -9,11 +7,19 @@ import { DatabaseService } from './database/database.service';
 import { createAuth } from './auth/auth';
 import { TemperatureModule } from './temperature/temperature.module';
 import { DivisionModule } from './division/division.module';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all_exceptions.filter';
 import { LocationModule } from './location/location.module';
 import { ColdStorageModule } from './cold_storage/cold_storage.module';
 import { NotificationModule } from './notification/notification.module';
+import { DeviceModule } from './device/device.module';
+import { TransformInterceptor } from './common/interceptors/api_response.interceptor';
+import { MonitoringPauseModule } from './monitoring_pause/monitoring_pause.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { AlertModule } from './alert/alert.module';
+import { DiagnosticModule } from './diagnostic/diagnostic.module';
+import { DeviceEventModule } from './event/device_event.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
@@ -21,6 +27,8 @@ import { NotificationModule } from './notification/notification.module';
             isGlobal: true,
             validate: validateEnv,
         }),
+
+        ScheduleModule.forRoot(),
 
         DatabaseModule,
 
@@ -47,13 +55,27 @@ import { NotificationModule } from './notification/notification.module';
         ColdStorageModule,
 
         NotificationModule,
+
+        DeviceModule,
+
+        MonitoringPauseModule,
+
+        WhatsappModule,
+
+        AlertModule,
+
+        DiagnosticModule,
+
+        DeviceEventModule,
     ],
-    controllers: [AppController],
     providers: [
-        AppService,
         {
             provide: APP_FILTER,
             useClass: AllExceptionsFilter,
+        },
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: TransformInterceptor,
         },
     ],
 })

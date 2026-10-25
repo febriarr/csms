@@ -26,7 +26,6 @@ export class AlertRepository extends BaseRepository<typeof alerts> {
     async findPage(query: AlertQuery): Promise<{
         items: ListAlert[];
         total: number;
-        totalPages: number;
     }> {
         const where = this.buildWhere(query);
 
@@ -61,7 +60,6 @@ export class AlertRepository extends BaseRepository<typeof alerts> {
                 ...names,
             })),
             total,
-            totalPages: Math.ceil(total / query.pageSize),
         };
     }
 

@@ -21,3 +21,6 @@ export const temperatureLogs = pgTable(
     },
     (t) => [primaryKey({ columns: [t.deviceId, t.recordedAt] })],
 );
+
+export type InsertTemperature = typeof temperatureLogs.$inferInsert;
+export type SelectTemperature = typeof temperatureLogs.$inferSelect;

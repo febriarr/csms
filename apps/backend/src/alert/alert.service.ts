@@ -11,7 +11,7 @@ export class AlertService {
     constructor(private readonly repo: AlertRepository) {}
 
     async findAll(query: AlertQuery): Promise<WithMetadata<ListAlert[]>> {
-        const { items, total, totalPages } = await this.repo.findPage(query);
+        const { items, total } = await this.repo.findPage(query);
 
         return {
             data: items,
@@ -19,7 +19,7 @@ export class AlertService {
                 page: query.page,
                 pageSize: query.pageSize,
                 totalItems: total,
-                totalPages,
+                totalPages: Math.ceil(total / query.pageSize),
             },
         };
     }

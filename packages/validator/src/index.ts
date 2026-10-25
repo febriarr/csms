@@ -12,3 +12,4 @@ export * from "./notification_subscriptions.validator";
 export * from "./alerts.validator";
 export * from "./reports.validator";
 export * from "./auth.validator";
+export * from "./temperature.validator";
