@@ -23,7 +23,7 @@ console.log(
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
-        <ThemeProvider>
+        <ThemeProvider defaultTheme="system">
             <QueryClientProvider client={queryClient}>
                 <TooltipProvider>
                     <AuthProvider>

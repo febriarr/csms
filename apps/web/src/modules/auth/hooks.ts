@@ -1,11 +1,11 @@
 import { queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
-import type { ErrorResponse } from "@workspace/shared";
-import type { LoginInput } from "@workspace/validator";
+import type { ErrorResponse, User } from "@workspace/shared";
+import type { ChangePasswordInput, LoginInput, UpdateProfileInput } from "@workspace/validator";
 
 import { isErrorResponse } from "@/lib/api-error";
 
-import { fetchCurrentUser, signInWithUsername, signOut } from "./auth.api";
+import { changeOwnPassword, fetchCurrentUser, signInWithUsername, signOut, updateOwnProfile } from "./auth.api";
 import type { LoginResult } from "./auth.type";
 
 export const authKeys = {
@@ -58,5 +58,27 @@ export function useLogout() {
             }
         },
         onSuccess: () => clearSession(queryClient),
+    });
+}
+
+export function useUpdateProfile() {
+    const queryClient = useQueryClient();
+
+    return useMutation<{ name: string }, ErrorResponse, UpdateProfileInput>({
+        mutationFn: updateOwnProfile,
+        // Patch the cached user instead of refetching, so the sidebar and drawer show the new name right away.
+        // The name comes from what was submitted, not from the response body, so a differently shaped response
+        // can never blank out `user.name`.
+        onSuccess: (_data, { name }) =>
+            queryClient.setQueryData(authKeys.session, (user: User | null | undefined) =>
+                user ? { ...user, name } : user
+            ),
+    });
+}
+
+export function useChangePassword() {
+    // The backend ends the other sessions and keeps this one, so there is no cache to touch.
+    return useMutation<void, ErrorResponse, ChangePasswordInput>({
+        mutationFn: changeOwnPassword,
     });
 }

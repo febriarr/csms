@@ -1,5 +1,5 @@
-import { ChevronsUpDown, Loader2, LogOut, Monitor, Moon, Sun, UserIcon } from "lucide-react";
-import { Link } from "react-router";
+import { ChevronsUpDown, KeyRound, Loader2, LogOut, Monitor, Moon, Pencil, Sun, UserIcon } from "lucide-react";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import {
@@ -18,24 +18,23 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@workspace/ui/components/sidebar";
 
+import { ChangeNameDialog } from "@/components/change-name-dialog";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { getInitials, ProfileDrawer } from "@/components/profile-drawer";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/modules/auth/auth.context";
 import { useLogout } from "@/modules/auth/hooks";
 
-function getInitials(name: string) {
-    return name
-        .split(" ")
-        .map((part) => part[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase();
-}
+type ActivePanel = "profile" | "name" | "password" | null;
 
 export function NavUser() {
     const { isMobile } = useSidebar();
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
     const logout = useLogout();
+    // Drawer and dialogs live outside the dropdown content: if they were inside, they would unmount as soon as
+    // the menu closes.
+    const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
     // Right after logout the session is cleared a moment before <RequireAuth> redirects to /login.
     if (!user) return null;
@@ -50,89 +49,106 @@ export function NavUser() {
         logout.mutate();
     };
 
-    return (
-        <SidebarMenu>
-            <SidebarMenuItem>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton
-                            size="lg"
-                            tooltip={user.name}
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                            <UserAvatar name={user.name} image={user.image} />
-                            <UserInfo name={user.name} username={username} />
-                            <ChevronsUpDown className="ml-auto size-4" />
-                        </SidebarMenuButton>
-                    </DropdownMenuTrigger>
+    const panelProps = (panel: Exclude<ActivePanel, null>) => ({
+        open: activePanel === panel,
+        onOpenChange: (open: boolean) => setActivePanel(open ? panel : null),
+    });
 
-                    <DropdownMenuContent
-                        className="min-w-56 rounded-lg"
-                        side={isMobile ? "bottom" : "right"}
-                        align="end"
-                        sideOffset={8}
-                    >
-                        <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+    return (
+        <>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <SidebarMenuButton
+                                size="lg"
+                                tooltip={user.name}
+                                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                            >
                                 <UserAvatar name={user.name} image={user.image} />
                                 <UserInfo name={user.name} username={username} />
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                                <ChevronsUpDown className="ml-auto size-4" />
+                            </SidebarMenuButton>
+                        </DropdownMenuTrigger>
 
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem asChild>
-                                <Link to="/dashboard/profile">
+                        <DropdownMenuContent
+                            className="min-w-56 rounded-lg"
+                            side={isMobile ? "bottom" : "right"}
+                            align="end"
+                            sideOffset={8}
+                        >
+                            <DropdownMenuLabel className="p-0 font-normal">
+                                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                    <UserAvatar name={user.name} image={user.image} />
+                                    <UserInfo name={user.name} username={username} />
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onSelect={() => setActivePanel("profile")}>
                                     <UserIcon />
                                     Profile
-                                </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setActivePanel("name")}>
+                                    <Pencil />
+                                    Change Name
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setActivePanel("password")}>
+                                    <KeyRound />
+                                    Change Password
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger>
+                                        {theme === "dark" ? <Moon /> : theme === "light" ? <Sun /> : <Monitor />}
+                                        Theme
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuRadioGroup
+                                            value={theme}
+                                            onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
+                                        >
+                                            <DropdownMenuRadioItem value="light" onSelect={(e) => e.preventDefault()}>
+                                                <Sun />
+                                                Light
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="dark" onSelect={(e) => e.preventDefault()}>
+                                                <Moon />
+                                                Dark
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="system" onSelect={(e) => e.preventDefault()}>
+                                                <Monitor />
+                                                System
+                                            </DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                        <DropdownMenuSeparator />
+                                        <div className="px-2 py-1.5 font-mono text-xs text-muted-foreground">
+                                            Press <kbd className="rounded bg-muted px-1">d</kbd> to toggle dark mode.
+                                        </div>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            </DropdownMenuGroup>
+
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem variant="destructive" disabled={logout.isPending} onSelect={handleLogout}>
+                                {logout.isPending ? <Loader2 className="animate-spin" /> : <LogOut />}
+                                {logout.isPending ? "Signing out..." : "Sign Out"}
                             </DropdownMenuItem>
+                            {logout.error && (
+                                <p role="alert" className="px-2 pb-1.5 text-xs text-destructive">
+                                    {logout.error.message}
+                                </p>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </SidebarMenuItem>
+            </SidebarMenu>
 
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                    {theme === "dark" ? <Moon /> : theme === "light" ? <Sun /> : <Monitor />}
-                                    Theme
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                    <DropdownMenuRadioGroup
-                                        value={theme}
-                                        onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
-                                    >
-                                        <DropdownMenuRadioItem value="light" onSelect={(e) => e.preventDefault()}>
-                                            <Sun />
-                                            Light
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="dark" onSelect={(e) => e.preventDefault()}>
-                                            <Moon />
-                                            Dark
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="system" onSelect={(e) => e.preventDefault()}>
-                                            <Monitor />
-                                            System
-                                        </DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                    <DropdownMenuSeparator />
-                                    <div className="px-2 py-1.5 font-mono text-xs text-muted-foreground">
-                                        Press <kbd className="rounded bg-muted px-1">d</kbd> to toggle dark mode.
-                                    </div>
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                        </DropdownMenuGroup>
-
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" disabled={logout.isPending} onSelect={handleLogout}>
-                            {logout.isPending ? <Loader2 className="animate-spin" /> : <LogOut />}
-                            {logout.isPending ? "Signing out..." : "Sign Out"}
-                        </DropdownMenuItem>
-                        {logout.error && (
-                            <p role="alert" className="px-2 pb-1.5 text-xs text-destructive">
-                                {logout.error.message}
-                            </p>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </SidebarMenuItem>
-        </SidebarMenu>
+            <ProfileDrawer {...panelProps("profile")} />
+            <ChangeNameDialog {...panelProps("name")} currentName={user.name} />
+            <ChangePasswordDialog {...panelProps("password")} />
+        </>
     );
 }
 

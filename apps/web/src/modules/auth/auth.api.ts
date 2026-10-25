@@ -1,5 +1,5 @@
 import type { User } from "@workspace/shared";
-import type { LoginInput } from "@workspace/validator";
+import type { ChangePasswordInput, LoginInput, UpdateProfileInput } from "@workspace/validator";
 
 import { http } from "@/lib/http-client";
 
@@ -27,4 +27,18 @@ export async function signInWithUsername(input: LoginInput): Promise<LoginResult
 
 export async function signOut(): Promise<void> {
     await http.post(`${AUTH_PATH}/sign-out`, {}, authRequest);
+}
+
+/**
+ * Own-account endpoints of the NestJS `UserController` (not Better Auth's `/auth/*`). The target account is
+ * always the caller's session, so no id is sent. Unlike the calls above, a 401 here really means the session
+ * expired, so the global handler stays on.
+ */
+export async function updateOwnProfile(input: UpdateProfileInput): Promise<{ name: string }> {
+    const { data } = await http.patch<{ name: string }>("/user/me", input);
+    return data;
+}
+
+export async function changeOwnPassword(input: ChangePasswordInput): Promise<void> {
+    await http.patch("/user/me/password", input);
 }
