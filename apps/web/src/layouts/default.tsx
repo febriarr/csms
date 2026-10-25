@@ -9,7 +9,7 @@ export default function LayoutDefault() {
     return (
         <SidebarProvider>
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="min-w-0">
                 <HeaderDashboard />
                 <main className="mt-(--header-height) min-h-screen flex-1 p-4">
                     <Outlet />
