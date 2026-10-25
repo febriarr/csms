@@ -9,6 +9,7 @@ import { RouterProvider } from "react-router";
 import { router } from "./routes/router.tsx";
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { AuthProvider } from "@/modules/auth/auth-provider";
+import { Toaster } from "@workspace/ui/components/sonner";
 
 console.log(
     "%c[CSMS]%c [Cold Storage Monitoring System]\n%c[version]%c [2.0.0]\n%c[Report Issue]%c https://github.com/febriarr/csms",
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
                 <TooltipProvider>
                     <AuthProvider>
                         <RouterProvider router={router} />
+                        <Toaster position="top-right" theme="dark" />
                     </AuthProvider>
                 </TooltipProvider>
             </QueryClientProvider>
