@@ -13,13 +13,25 @@ export default defineConfig({
     },
     build: {
         rollupOptions: {
-            output: {
-                banner: `/*!
-                          * CSMS
-                          * Copyright (c) 2026 Febri Ardiansyah
-                          * Licensed under the MIT License
-                          */`,
-            },
+            plugins: [
+                {
+                    name: "csms-banner",
+
+                    generateBundle(_, bundle) {
+                        for (const chunk of Object.values(bundle)) {
+                            if (chunk.type !== "chunk") continue;
+
+                            chunk.code = `/*!
+ * CSMS
+ * Copyright (c) 2026 Febri Ardiansyah
+ * Licensed under the MIT License
+ */
+
+${chunk.code}`;
+                        }
+                    },
+                },
+            ],
         },
     },
 });
