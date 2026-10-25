@@ -11,9 +11,9 @@ export default function LayoutDefault() {
             <AppSidebar />
             <SidebarInset className="min-w-0">
                 <HeaderDashboard />
-                <main className="mt-(--header-height) min-h-screen flex-1 p-4">
+                <div className="mt-(--header-height) min-h-screen flex-1 p-4">
                     <Outlet />
-                </main>
+                </div>
             </SidebarInset>
         </SidebarProvider>
     );

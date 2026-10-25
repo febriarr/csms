@@ -100,7 +100,7 @@ export function Component() {
                     </Button>
                 </div>
 
-                <div className="flex flex-col gap-2 lg:flex-row">
+                <div className="flex max-w-lg flex-col gap-2 lg:flex-row">
                     <InputGroup className="flex-1">
                         <InputGroupInput
                             value={search}
@@ -112,38 +112,40 @@ export function Component() {
                             <Search />
                         </InputGroupAddon>
                     </InputGroup>
-                    <Select
-                        value={divisionFilter}
-                        onValueChange={(value) => {
-                            setDivisionFilter(value);
-                            setLocationFilter(ALL); // the old location may not belong to the new division
-                        }}
-                    >
-                        <SelectTrigger className="w-full lg:w-52" aria-label="Filter by division">
-                            <SelectValue placeholder="All divisions" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value={ALL}>All divisions</SelectItem>
-                            {divisions.data?.map((division) => (
-                                <SelectItem key={division.id} value={division.id}>
-                                    {division.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger className="w-full lg:w-52" aria-label="Filter by location">
-                            <SelectValue placeholder="All locations" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value={ALL}>All locations</SelectItem>
-                            {filterLocations.data?.map((location) => (
-                                <SelectItem key={location.id} value={location.id}>
-                                    {location.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                        <Select
+                            value={divisionFilter}
+                            onValueChange={(value) => {
+                                setDivisionFilter(value);
+                                setLocationFilter(ALL); // the old location may not belong to the new division
+                            }}
+                        >
+                            <SelectTrigger className="w-full" aria-label="Filter by division">
+                                <SelectValue placeholder="All divisions" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All divisions</SelectItem>
+                                {divisions.data?.map((division) => (
+                                    <SelectItem key={division.id} value={division.id}>
+                                        {division.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={locationFilter} onValueChange={setLocationFilter}>
+                            <SelectTrigger className="w-full" aria-label="Filter by location">
+                                <SelectValue placeholder="All locations" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All locations</SelectItem>
+                                {filterLocations.data?.map((location) => (
+                                    <SelectItem key={location.id} value={location.id}>
+                                        {location.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="wrapper-table">

@@ -99,7 +99,7 @@ export function Component() {
                     </Button>
                 </div>
 
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex max-w-sm flex-col gap-2 sm:flex-row">
                     <InputGroup className="flex-1">
                         <InputGroupInput
                             value={search}
@@ -112,7 +112,7 @@ export function Component() {
                         </InputGroupAddon>
                     </InputGroup>
                     <Select value={divisionFilter} onValueChange={setDivisionFilter}>
-                        <SelectTrigger className="w-full sm:w-56" aria-label="Filter by division">
+                        <SelectTrigger aria-label="Filter by division">
                             <SelectValue placeholder="All divisions" />
                         </SelectTrigger>
                         <SelectContent>
