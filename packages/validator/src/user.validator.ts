@@ -31,6 +31,15 @@ export const changePasswordInput = z
         message: "Password baru harus berbeda dari password lama",
     });
 
+/** Query string of the user list. Values arrive as strings, so numbers are coerced. */
+export const listUsersQuery = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(10),
+    search: z.string().trim().optional(),
+    role: roleSchema.optional(),
+});
+
+export type ListUsersQuery = z.infer<typeof listUsersQuery>;
 export type UpdateProfileInput = z.infer<typeof updateProfileInput>;
 export type ChangePasswordInput = z.infer<typeof changePasswordInput>;
 

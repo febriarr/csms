@@ -1,13 +1,27 @@
 import { Auth } from '@/auth/auth';
-import { BusinessRuleException } from '@/common/exception/app.exception';
 import { ZodValidationPipe } from '@/common/pipes/zod_validation.pipe';
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req } from '@nestjs/common';
-import { AuthService, Roles, Session, type UserSession } from '@thallesp/nestjs-better-auth';
+import {
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Post,
+    Query,
+    Req,
+} from '@nestjs/common';
+import { AuthService, Roles } from '@thallesp/nestjs-better-auth';
+import type { PaginationMeta } from '@workspace/shared';
 import {
     changePasswordInput,
     type ChangePasswordInput,
     createUserInput,
     type CreateUserInput,
+    listUsersQuery,
+    type ListUsersQuery,
     updateProfileInput,
     type UpdateProfileInput,
     updateRoleInput,
@@ -19,12 +33,14 @@ import { fromNodeHeaders } from 'better-auth/node';
 import type { Request } from 'express';
 
 /**
- * Two groups of endpoints:
+ * Three groups of endpoints:
  *
  * - `me` routes: any signed-in user changes their own name or password. No @Roles, the default auth guard
  *   is enough, and the target is always the caller's own session, never an id from the request.
  * - the rest: super admins managing other users. Every call goes through Better Auth's admin plugin with the
  *   caller's own headers, so the plugin checks the caller's permission (see `ac` / `roles`) on top of @Roles.
+ * - the list (`GET /user`): returns `{ data, metadata }` and leaves the `{ success, data, metadata }` envelope
+ *   to the response interceptor (see ApiSuccessResponse / WithMetadata).
  *
  * The `me` routes must stay above the `:id` ones, or "me" would be matched as an id.
  */
@@ -60,6 +76,55 @@ export class UserController {
             },
             headers: fromNodeHeaders(req.headers),
         });
+    }
+
+    /**
+     * Paginated user list, newest first. `search` matches the display name (the admin plugin can only search
+     * `name` and `email`, and the email here is a placeholder), `role` filters by exact role.
+     */
+    @Roles(['super_admin'])
+    @Get()
+    async list(@Query(new ZodValidationPipe(listUsersQuery)) query: ListUsersQuery, @Req() req: Request) {
+        const { page, pageSize, search, role } = query;
+
+        const { users, total } = await this.authService.api.listUsers({
+            query: {
+                limit: pageSize,
+                offset: (page - 1) * pageSize,
+                sortBy: 'createdAt',
+                sortDirection: 'desc',
+                ...(search ? ({ searchValue: search, searchField: 'name', searchOperator: 'contains' } as const) : {}),
+                ...(role ? ({ filterField: 'role', filterValue: role, filterOperator: 'eq' } as const) : {}),
+            },
+            headers: fromNodeHeaders(req.headers),
+        });
+
+        // The admin plugin types its users as `UserWithRole`, which does not know the columns the username plugin
+        // adds. They are on the rows at runtime (listUsers returns the raw user rows), so only the type is widened.
+        const listed = users as Array<
+            (typeof users)[number] & { username?: string | null; displayUsername?: string | null }
+        >;
+
+        const metadata: PaginationMeta = {
+            page,
+            pageSize,
+            totalItems: total,
+            totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        };
+
+        return {
+            // only what the list screen needs: no email (placeholder), no ban details, no image
+            data: listed.map((user) => ({
+                id: user.id,
+                name: user.name,
+                username: user.username,
+                displayUsername: user.displayUsername,
+                role: user.role,
+                banned: user.banned ?? false,
+                createdAt: user.createdAt,
+            })),
+            metadata,
+        };
     }
 
     @Roles(['super_admin'])
@@ -106,11 +171,7 @@ export class UserController {
         @Param('id', ParseUUIDPipe) id: string,
         @Body(new ZodValidationPipe(updateRoleInput)) input: UpdateRoleInput,
         @Req() req: Request,
-        @Session() session: UserSession,
     ) {
-        if (session.user.id === id) {
-            throw new BusinessRuleException('Tidak bisa mengubah role akun sendiri');
-        }
         const { user } = await this.authService.api.setRole({
             body: { userId: id, role: input.role },
             headers: fromNodeHeaders(req.headers),
