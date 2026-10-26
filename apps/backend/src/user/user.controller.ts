@@ -3,6 +3,8 @@ import { ZodValidationPipe } from '@/common/pipes/zod_validation.pipe';
 import {
     Body,
     Controller,
+    Delete,
+    ForbiddenException,
     Get,
     HttpCode,
     HttpStatus,
@@ -13,7 +15,7 @@ import {
     Query,
     Req,
 } from '@nestjs/common';
-import { AuthService, Roles } from '@thallesp/nestjs-better-auth';
+import { AuthService, Roles, Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import type { PaginationMeta } from '@workspace/shared';
 import {
     changePasswordInput,
@@ -39,6 +41,7 @@ import type { Request } from 'express';
  *   is enough, and the target is always the caller's own session, never an id from the request.
  * - the rest: super admins managing other users. Every call goes through Better Auth's admin plugin with the
  *   caller's own headers, so the plugin checks the caller's permission (see `ac` / `roles`) on top of @Roles.
+ *   A super admin cannot change the role of, or delete, their own account (the system could end up without one).
  * - the list (`GET /user`): returns `{ data, metadata }` and leaves the `{ success, data, metadata }` envelope
  *   to the response interceptor (see ApiSuccessResponse / WithMetadata).
  *
@@ -171,12 +174,32 @@ export class UserController {
         @Param('id', ParseUUIDPipe) id: string,
         @Body(new ZodValidationPipe(updateRoleInput)) input: UpdateRoleInput,
         @Req() req: Request,
+        @Session() session: UserSession,
     ) {
+        if (session.user.id === id) throw new ForbiddenException('Tidak bisa mengubah role akun sendiri');
+
         const { user } = await this.authService.api.setRole({
             body: { userId: id, role: input.role },
             headers: fromNodeHeaders(req.headers),
         });
 
         return { id: user.id, role: user.role };
+    }
+
+    /** Removes the user together with their sessions and accounts (Better Auth admin plugin). */
+    @Roles(['super_admin'])
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Req() req: Request,
+        @Session() session: UserSession,
+    ): Promise<void> {
+        if (session.user.id === id) throw new ForbiddenException('Tidak bisa menghapus akun sendiri');
+
+        await this.authService.api.removeUser({
+            body: { userId: id },
+            headers: fromNodeHeaders(req.headers),
+        });
     }
 }
