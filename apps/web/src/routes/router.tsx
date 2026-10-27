@@ -16,6 +16,12 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <Navigate to="/dashboard" replace /> },
                     { path: "/dashboard", lazy: () => import("@/App") },
+
+                    {
+                        path: "/dashboard/monitoring/monitoring-pauses",
+                        lazy: () => import("@/modules/monitoring/monitoring-pauses/page"),
+                    },
+
                     {
                         path: "/dashboard/settings/master-data/division",
                         lazy: () => import("@/modules/settings/master-data/division/page"),
