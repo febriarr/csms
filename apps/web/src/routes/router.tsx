@@ -37,6 +37,10 @@ export const router = createBrowserRouter([
                         path: "/dashboard/settings/users",
                         lazy: () => import("@/modules/settings/users/page"),
                     },
+                    {
+                        path: "/dashboard/settings/notifications",
+                        lazy: () => import("@/modules/settings/notification/page"),
+                    },
 
                     // Parent menus (Settings, Master Data, ...) have no page of their own: send them to their
                     // first child so their breadcrumb link doesn't land on a 404.
