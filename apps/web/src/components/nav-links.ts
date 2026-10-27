@@ -51,16 +51,6 @@ export const navLinks: NavItem[] = [
             {
                 title: "Notifications",
                 path: "/dashboard/settings/notifications",
-                children: [
-                    {
-                        title: "Notification Recipient",
-                        path: "/dashboard/settings/notifications/notification-recipient",
-                    },
-                    {
-                        title: "Notification Subscription",
-                        path: "/dashboard/settings/notifications/notification-subscription",
-                    },
-                ],
             },
             { title: "Users", path: "/dashboard/settings/users" },
         ],
