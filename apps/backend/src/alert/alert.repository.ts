@@ -4,7 +4,7 @@ import { DatabaseService } from '@/database/database.service';
 import { DatabaseTransaction } from '@/database/database.type';
 import { alerts, coldStorages, devices, InserAlert, SelectAlert, user } from '@/database/schema';
 import { Injectable } from '@nestjs/common';
-import { and, count, desc, eq, getTableColumns, gte, isNull, lt, SQL } from 'drizzle-orm';
+import { and, count, desc, eq, getTableColumns, gte, isNotNull, isNull, lt, SQL } from 'drizzle-orm';
 import type { AlertQuery } from '@workspace/validator';
 import type { ListAlert } from '@workspace/shared';
 
@@ -87,6 +87,11 @@ export class AlertRepository extends BaseRepository<typeof alerts> {
             query.coldStorageId ? eq(devices.coldStorageId, query.coldStorageId) : undefined,
             query.toState ? eq(alerts.toState, query.toState) : undefined,
             query.reasonCode ? eq(alerts.reasonCode, query.reasonCode) : undefined,
+            query.acknowledged === undefined
+                ? undefined
+                : query.acknowledged
+                  ? isNotNull(alerts.acknowledgedAt)
+                  : isNull(alerts.acknowledgedAt),
             range ? gte(alerts.occurredAt, range.from) : undefined,
             range ? lt(alerts.occurredAt, range.to) : undefined,
         );
