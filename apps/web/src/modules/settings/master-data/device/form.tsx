@@ -76,8 +76,8 @@ const same = (a: unknown, b: unknown) => {
 function getChanges(device: DeviceView, data: UpdateDeviceInput, raw: Record<string, string>): UpdateDeviceInput {
     const changes: Record<string, unknown> = {};
 
+    // `code` is not here on purpose: it cannot be edited (the update schema has no such field)
     for (const key of [
-        "code",
         "name",
         "coldStorageId",
         "warningThreshold",

@@ -18,6 +18,10 @@ export const router = createBrowserRouter([
                     { path: "/dashboard", lazy: () => import("@/App") },
 
                     {
+                        path: "/dashboard/monitoring/live",
+                        lazy: () => import("@/modules/monitoring/live/page"),
+                    },
+                    {
                         path: "/dashboard/monitoring/monitoring-pauses",
                         lazy: () => import("@/modules/monitoring/monitoring-pauses/page"),
                     },
