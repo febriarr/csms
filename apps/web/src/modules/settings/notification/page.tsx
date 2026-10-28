@@ -7,10 +7,10 @@ import type { NotificationRecipientWithSubscriptions } from "@workspace/shared";
 import { Button } from "@workspace/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@workspace/ui/components/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { NOTIFICATION_CHANNELS, type NotificationChannel } from "@workspace/validator";
 
+import { TableStatusRows } from "@/components/table-status-rows";
 import { useDebounced } from "@/lib/use-debounced";
 import { useDivisions } from "@/modules/settings/master-data/division/hooks";
 
@@ -151,40 +151,16 @@ export function Component() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {recipients.isPending &&
-                                Array.from({ length: 4 }).map((_, row) => (
-                                    <TableRow key={row}>
-                                        {Array.from({ length: columnCount }).map((__, cell) => (
-                                            <TableCell key={cell}>
-                                                <Skeleton className="h-4 w-full min-w-12" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-
-                            {recipients.isError && (
-                                <TableRow>
-                                    <TableCell colSpan={columnCount} className="py-8 text-center">
-                                        <p className="mb-3 text-sm text-muted-foreground">{recipients.error.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => void recipients.refetch()}>
-                                            Retry
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                            {recipients.isSuccess && recipients.data.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columnCount}
-                                        className="py-8 text-center text-sm text-muted-foreground"
-                                    >
-                                        {isFiltered
-                                            ? "Tidak ada penerima yang cocok dengan filter."
-                                            : "Belum ada penerima notifikasi."}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            <TableStatusRows
+                                query={recipients}
+                                columnCount={columnCount}
+                                isEmpty={recipients.data?.length === 0}
+                                emptyMessage={
+                                    isFiltered
+                                        ? "Tidak ada penerima yang cocok dengan filter."
+                                        : "Belum ada penerima notifikasi."
+                                }
+                            />
 
                             {recipients.isSuccess &&
                                 table.getRowModel().rows.map((row) => (

@@ -15,9 +15,9 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@workspace/ui/components/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 
+import { TableStatusRows } from "@/components/table-status-rows";
 import { useDebounced } from "@/lib/use-debounced";
 import { useColdStorages } from "@/modules/settings/master-data/cold-room/hooks";
 import { useDivisions } from "@/modules/settings/master-data/division/hooks";
@@ -214,40 +214,14 @@ export function Component() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {devices.isPending &&
-                                Array.from({ length: 4 }).map((_, row) => (
-                                    <TableRow key={row}>
-                                        {Array.from({ length: columnCount }).map((__, cell) => (
-                                            <TableCell key={cell}>
-                                                <Skeleton className="h-4 w-full min-w-12" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-
-                            {devices.isError && (
-                                <TableRow>
-                                    <TableCell colSpan={columnCount} className="py-8 text-center">
-                                        <p className="mb-3 text-sm text-muted-foreground">{devices.error.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => void devices.refetch()}>
-                                            Retry
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                            {devices.isSuccess && devices.data.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columnCount}
-                                        className="py-8 text-center text-sm text-muted-foreground"
-                                    >
-                                        {isFiltered
-                                            ? "Tidak ada device yang cocok dengan filter."
-                                            : "Belum ada device."}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            <TableStatusRows
+                                query={devices}
+                                columnCount={columnCount}
+                                isEmpty={devices.data?.length === 0}
+                                emptyMessage={
+                                    isFiltered ? "Tidak ada device yang cocok dengan filter." : "Belum ada device."
+                                }
+                            />
 
                             {devices.isSuccess &&
                                 table.getRowModel().rows.map((row) => (

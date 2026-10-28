@@ -7,11 +7,11 @@ import type { MonitoringPauseView, PauseTimeline } from "@workspace/shared";
 import { Button } from "@workspace/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@workspace/ui/components/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { PAUSE_KINDS, type PauseKind } from "@workspace/validator";
 
+import { TableStatusRows } from "@/components/table-status-rows";
 import { useDebounced } from "@/lib/use-debounced";
 
 import { getPauseColumns, pauseTableFeatures, type PauseAction } from "./columns";
@@ -173,38 +173,14 @@ export function Component() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {pauses.isPending &&
-                                Array.from({ length: 4 }).map((_, row) => (
-                                    <TableRow key={row}>
-                                        {Array.from({ length: columnCount }).map((__, cell) => (
-                                            <TableCell key={cell}>
-                                                <Skeleton className="h-4 w-full min-w-12" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-
-                            {pauses.isError && (
-                                <TableRow>
-                                    <TableCell colSpan={columnCount} className="py-8 text-center">
-                                        <p className="mb-3 text-sm text-muted-foreground">{pauses.error.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => void pauses.refetch()}>
-                                            Retry
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                            {pauses.isSuccess && rows.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columnCount}
-                                        className="py-8 text-center text-sm text-muted-foreground"
-                                    >
-                                        {isFiltered ? "Tidak ada pause yang cocok dengan filter." : EMPTY_MESSAGES[tab]}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            <TableStatusRows
+                                query={pauses}
+                                columnCount={columnCount}
+                                isEmpty={rows.length === 0}
+                                emptyMessage={
+                                    isFiltered ? "Tidak ada pause yang cocok dengan filter." : EMPTY_MESSAGES[tab]
+                                }
+                            />
 
                             {pauses.isSuccess &&
                                 table.getRowModel().rows.map((row) => (

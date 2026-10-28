@@ -12,11 +12,11 @@ import {
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 
+import { DeviceStateBadge } from "@/components/device-state-badge";
 import { formatTemperature } from "@/lib/format";
 import { formatDateTime } from "@/lib/format-date-time";
 
 import { reasonLabel } from "./constants";
-import { StateBadge } from "./state-badge";
 
 export type AlertAction = "view" | "acknowledge";
 
@@ -36,7 +36,10 @@ type ColumnOptions = {
     acknowledgingId?: string;
 };
 
-export function getAlertColumns(onAction: (action: AlertAction, alert: ListAlert) => void, options: ColumnOptions = {}) {
+export function getAlertColumns(
+    onAction: (action: AlertAction, alert: ListAlert) => void,
+    options: ColumnOptions = {}
+) {
     return columnHelper.columns([
         columnHelper.display({
             id: "actions",
@@ -92,9 +95,9 @@ export function getAlertColumns(onAction: (action: AlertAction, alert: ListAlert
             header: "State",
             cell: ({ row }) => (
                 <div className="flex items-center gap-1.5">
-                    <StateBadge state={row.original.fromState} />
+                    <DeviceStateBadge state={row.original.fromState} />
                     <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
-                    <StateBadge state={row.original.toState} />
+                    <DeviceStateBadge state={row.original.toState} />
                 </div>
             ),
         }),

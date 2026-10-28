@@ -1,26 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTable } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import type { ListAlert } from "@workspace/shared";
-import { Button } from "@workspace/ui/components/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { ALERT_REASONS, DEVICE_STATES, type AlertReason, type DeviceState } from "@workspace/validator";
 
+import { DateRangeFilter, toDayString, type DayRange } from "@/components/date-range-filter";
+import { TablePagination } from "@/components/table-pagination";
+import { TableStatusRows } from "@/components/table-status-rows";
+import { stateMeta } from "@/lib/device-state";
+import { useClampPage } from "@/lib/use-clamp-page";
+import { useScrollToTop } from "@/lib/use-scroll-to-top";
 import { useColdStorages } from "@/modules/settings/master-data/cold-room/hooks";
 import { useDevices } from "@/modules/settings/master-data/device/hooks";
 
 import { alertTableFeatures, getAlertColumns, type AlertAction } from "./columns";
-import { ACK_FILTERS, ACK_LABELS, acknowledgedParam, reasonLabel, stateMeta, type AckFilter } from "./constants";
-import { DateRangeFilter, toDayString, type DayRange } from "./date-range-filter";
+import { ACK_FILTERS, ACK_LABELS, acknowledgedParam, reasonLabel, type AckFilter } from "./constants";
 import { getAlertErrorMessage } from "./errors";
 import { useAcknowledgeAlert, useAlerts } from "./hooks";
 import { AlertViewDialog } from "./view-dialog";
-import { useScrollToTop } from "@/lib/use-scroll-to-top";
 
 const ALL = "all";
 const PAGE_SIZE = 20;
@@ -60,11 +61,7 @@ export function Component() {
     const filterDevices = useDevices({ coldStorageId });
 
     // After acknowledging the last row of the last page, fall back to the new last page.
-    const totalPages = metadata?.totalPages;
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (totalPages && page > totalPages) setPage(totalPages);
-    }, [page, totalPages]);
+    useClampPage(page, metadata?.totalPages, setPage);
 
     const {
         mutate: acknowledgeMutate,
@@ -167,7 +164,7 @@ export function Component() {
                             <SelectItem value={ALL}>All devices</SelectItem>
                             {filterDevices.data?.map((device) => (
                                 <SelectItem key={device.id} value={device.id}>
-                                    {device.name} -<span className="text-muted-foreground">{device.pointLabel}</span>
+                                    {device.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -221,42 +218,18 @@ export function Component() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {alerts.isPending &&
-                                Array.from({ length: 4 }).map((_, row) => (
-                                    <TableRow key={row}>
-                                        {Array.from({ length: columnCount }).map((__, cell) => (
-                                            <TableCell key={cell}>
-                                                <Skeleton className="h-4 w-full min-w-12" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-
-                            {alerts.isError && (
-                                <TableRow>
-                                    <TableCell colSpan={columnCount} className="py-8 text-center">
-                                        <p className="mb-3 text-sm text-muted-foreground">{alerts.error.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => void alerts.refetch()}>
-                                            Retry
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                            {alerts.isSuccess && alerts.data.data.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columnCount}
-                                        className="py-8 text-center text-sm text-muted-foreground"
-                                    >
-                                        {isFiltered
-                                            ? "Tidak ada alert yang cocok dengan filter."
-                                            : ackFilter === "OPEN"
-                                              ? "Tidak ada alert yang perlu ditangani."
-                                              : "Belum ada alert."}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            <TableStatusRows
+                                query={alerts}
+                                columnCount={columnCount}
+                                isEmpty={alerts.data?.data.length === 0}
+                                emptyMessage={
+                                    isFiltered
+                                        ? "Tidak ada alert yang cocok dengan filter."
+                                        : ackFilter === "OPEN"
+                                          ? "Tidak ada alert yang perlu ditangani."
+                                          : "Belum ada alert."
+                                }
+                            />
 
                             {alerts.isSuccess &&
                                 table.getRowModel().rows.map((row) => (
@@ -272,33 +245,7 @@ export function Component() {
                     </Table>
                 </div>
 
-                {metadata && metadata.totalPages > 1 && (
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm text-muted-foreground">
-                            Halaman {metadata.page} dari {metadata.totalPages} · {metadata.totalItems} alert
-                        </p>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={metadata.page <= 1}
-                                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                            >
-                                <ChevronLeft />
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={metadata.page >= metadata.totalPages}
-                                onClick={() => setPage((current) => current + 1)}
-                            >
-                                Next
-                                <ChevronRight />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <TablePagination metadata={metadata} itemLabel="alert" onPageChange={setPage} />
 
                 <AlertViewDialog
                     alert={viewing}

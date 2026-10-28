@@ -19,6 +19,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 
 import { formatDateTime } from "@/lib/format-date-time";
+import { DeviceStateBadge } from "@/components/device-state-badge";
 import { formatTemperature, humanizeEnum } from "@/lib/format";
 
 export type DeviceAction = "view" | "edit" | "delete";
@@ -78,14 +79,6 @@ const STATE_STYLES: Record<string, string> = {
     DEFROST: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
     OFFLINE: "text-muted-foreground",
 };
-
-function StateBadge({ state }: { state: string }) {
-    return (
-        <Badge variant="outline" className={STATE_STYLES[state.toUpperCase()]}>
-            {humanizeEnum(state)}
-        </Badge>
-    );
-}
 
 /**
  * Two levels of emphasis in the table:
@@ -179,7 +172,7 @@ export function getDeviceColumns(onAction: (action: DeviceAction, device: Device
         }),
         columnHelper.accessor("state", {
             header: LABELS.state,
-            cell: (info) => <StateBadge state={info.getValue()} />,
+            cell: (info) => <DeviceStateBadge state={info.getValue()} />,
         }),
         // foreground when there is a reading (live data), muted dash when empty
         columnHelper.accessor("lastTemperature", {

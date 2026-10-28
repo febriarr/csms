@@ -1,21 +1,17 @@
 import type { DeviceView } from "@workspace/shared";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
-import { Field, FieldLabel } from "@workspace/ui/components/field";
-import { Input } from "@workspace/ui/components/input";
 
+import { DetailSections, type DetailEntry, type DetailSection } from "@/components/detail-sections";
 import { formatDateTime } from "@/lib/format-date-time";
 import { formatTemperature, humanizeEnum } from "@/lib/format";
-
-type Entry = [label: string, value: string];
-type Section = { title: string; entries: Entry[] };
 
 const text = (value: string | null | undefined) => value || "-";
 
 /** deletedAt and deletedBy are intentionally left out. */
-function getSections(device: DeviceView): Section[] {
+function getSections(device: DeviceView): DetailSection[] {
     const { monitoring } = device;
 
-    const status: Entry[] = [
+    const status: DetailEntry[] = [
         ["State", humanizeEnum(device.state)],
         ["State changed at", formatDateTime(device.stateChangedAt)],
         ["Last seen at", formatDateTime(device.lastSeenAt)],
@@ -85,22 +81,7 @@ export function DeviceViewDialog({ device, onOpenChange }: DeviceViewDialogProps
                         </DialogHeader>
 
                         <div className="flex flex-col gap-6 overflow-y-auto">
-                            {getSections(device).map((section) => (
-                                <section key={section.title} className="flex flex-col gap-3">
-                                    <h3 className="text-sm font-medium">{section.title}</h3>
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        {section.entries.map(([label, value]) => {
-                                            const id = `view-${label.toLowerCase().replace(/\W+/g, "-")}`;
-                                            return (
-                                                <Field key={label}>
-                                                    <FieldLabel htmlFor={id}>{label}</FieldLabel>
-                                                    <Input id={id} value={value} disabled />
-                                                </Field>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
-                            ))}
+                            <DetailSections sections={getSections(device)} idPrefix="view" />
                         </div>
                     </>
                 )}

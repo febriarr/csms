@@ -7,8 +7,8 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useColdStorages } from "@/modules/settings/master-data/cold-room/hooks";
 import { useDivisions } from "@/modules/settings/master-data/division/hooks";
 import { useLocations } from "@/modules/settings/master-data/location/hooks";
-
-import { getDisplayState, STATE_ORDER, type DisplayState } from "./constants";
+import { STATE_ORDER, type DisplayState } from "@/lib/device-state";
+import { getDisplayState } from "./constants";
 import { DeviceCard } from "./device-card";
 import { useLiveDevices } from "./hooks";
 import type { SeriesPoint } from "./recent.api";

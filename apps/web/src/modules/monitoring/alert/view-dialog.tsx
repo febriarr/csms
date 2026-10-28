@@ -11,18 +11,16 @@ import {
     DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Field, FieldLabel } from "@workspace/ui/components/field";
-import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 
+import { DetailSections, type DetailSection } from "@/components/detail-sections";
+import { stateMeta } from "@/lib/device-state";
 import { formatTemperature } from "@/lib/format";
 import { formatDateTime } from "@/lib/format-date-time";
 
-import { reasonLabel, stateMeta } from "./constants";
+import { reasonLabel } from "./constants";
 
-type Entry = [label: string, value: string];
-type Section = { title: string; entries: Entry[] };
-
-function getSections(alert: ListAlert): Section[] {
+function getSections(alert: ListAlert): DetailSection[] {
     return [
         {
             title: "Alert",
@@ -71,23 +69,7 @@ export function AlertViewDialog({ alert, onOpenChange, onAcknowledge, acknowledg
                         </DialogHeader>
 
                         <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
-                            {getSections(alert).map((section) => (
-                                <section key={section.title} className="flex flex-col gap-3">
-                                    <h3 className="text-sm font-medium">{section.title}</h3>
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        {section.entries.map(([label, value]) => {
-                                            const id = `alert-${label.toLowerCase().replace(/\W+/g, "-")}`;
-
-                                            return (
-                                                <Field key={label}>
-                                                    <FieldLabel htmlFor={id}>{label}</FieldLabel>
-                                                    <Input id={id} value={value} disabled />
-                                                </Field>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
-                            ))}
+                            <DetailSections sections={getSections(alert)} idPrefix="alert" />
 
                             <Field>
                                 <FieldLabel htmlFor="alert-reason">Reason</FieldLabel>

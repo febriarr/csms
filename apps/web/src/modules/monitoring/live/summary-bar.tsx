@@ -2,7 +2,8 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { STATE_META, STATE_ORDER, type DisplayState } from "./constants";
+import { STATE_META, STATE_ORDER, type DisplayState } from "@/lib/device-state";
+
 import type { StreamStatus } from "./hooks";
 
 export type StateFilter = DisplayState | "PAUSED" | "ALL";
@@ -67,7 +68,7 @@ export function SummaryBar({ counts, total, paused, value, onChange, stream }: S
                     aria-pressed={value === "PAUSED"}
                     onClick={() => onChange(value === "PAUSED" ? "ALL" : "PAUSED")}
                 >
-                    <span aria-hidden className="size-2 rounded-full bg-sky-500" />
+                    <span aria-hidden className="size-2 rounded-full bg-orange-500" />
                     Paused
                     <span className="font-mono text-xs text-muted-foreground">{paused}</span>
                 </Button>

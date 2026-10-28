@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTable, type ColumnVisibilityState } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Plus, Search, SlidersHorizontal } from "lucide-react";
+import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 import type { UserRole } from "@workspace/shared";
@@ -15,11 +15,14 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@workspace/ui/components/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { userRoles } from "@workspace/validator";
 
+import { TablePagination } from "@/components/table-pagination";
+import { TableStatusRows } from "@/components/table-status-rows";
+import { useClampPage } from "@/lib/use-clamp-page";
 import { useDebounced } from "@/lib/use-debounced";
+import { useScrollToTop } from "@/lib/use-scroll-to-top";
 import { useAuth } from "@/modules/auth/auth.context";
 
 import { columnLabels, getUserColumns, userTableFeatures, type UserAction } from "./columns";
@@ -61,11 +64,7 @@ export function Component() {
     const isFiltered = query.search !== undefined || query.role !== undefined;
 
     // After deleting the last row of the last page, fall back to the new last page.
-    const totalPages = metadata?.totalPages;
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (totalPages && page > totalPages) setPage(totalPages);
-    }, [page, totalPages]);
+    useClampPage(page, metadata?.totalPages, setPage);
 
     const currentUserId = currentUser?.id;
     const columns = useMemo(
@@ -86,10 +85,12 @@ export function Component() {
 
     const closeDialog = () => setDialog(null);
 
+    const topRef = useScrollToTop<HTMLDivElement>(page);
+
     return (
         <>
             <title>Users</title>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" ref={topRef}>
                 <div className="flex items-center justify-between gap-2">
                     <div>
                         <h1 className="font-heading text-xl font-semibold">Users</h1>
@@ -186,38 +187,14 @@ export function Component() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {users.isPending &&
-                                Array.from({ length: 4 }).map((_, row) => (
-                                    <TableRow key={row}>
-                                        {Array.from({ length: columnCount }).map((__, cell) => (
-                                            <TableCell key={cell}>
-                                                <Skeleton className="h-4 w-full min-w-12" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-
-                            {users.isError && (
-                                <TableRow>
-                                    <TableCell colSpan={columnCount} className="py-8 text-center">
-                                        <p className="mb-3 text-sm text-muted-foreground">{users.error.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => void users.refetch()}>
-                                            Retry
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-
-                            {users.isSuccess && users.data.data.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columnCount}
-                                        className="py-8 text-center text-sm text-muted-foreground"
-                                    >
-                                        {isFiltered ? "Tidak ada user yang cocok dengan filter." : "Belum ada user."}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            <TableStatusRows
+                                query={users}
+                                columnCount={columnCount}
+                                isEmpty={users.data?.data.length === 0}
+                                emptyMessage={
+                                    isFiltered ? "Tidak ada user yang cocok dengan filter." : "Belum ada user."
+                                }
+                            />
 
                             {users.isSuccess &&
                                 table.getRowModel().rows.map((row) => (
@@ -233,33 +210,7 @@ export function Component() {
                     </Table>
                 </div>
 
-                {metadata && metadata.totalPages > 1 && (
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm text-muted-foreground">
-                            Halaman {metadata.page} dari {metadata.totalPages} · {metadata.totalItems} user
-                        </p>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={metadata.page <= 1}
-                                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                            >
-                                <ChevronLeft />
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={metadata.page >= metadata.totalPages}
-                                onClick={() => setPage((current) => current + 1)}
-                            >
-                                Next
-                                <ChevronRight />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <TablePagination metadata={metadata} itemLabel="user" onPageChange={setPage} />
 
                 <UserViewDialog
                     user={dialog?.mode === "view" ? dialog.user : null}
