@@ -114,16 +114,6 @@ export class DeviceService {
     }
 
     private monitoringOf(suppressing: SuppressingPause | undefined): DeviceMonitoring {
-        if (!suppressing) return { status: 'ACTIVE', pause: null };
-
-        return {
-            status: suppressing.phase,
-            pause: {
-                id: suppressing.pauseId,
-                kind: suppressing.kind,
-                startsAt: suppressing.startsAt,
-                endsAt: suppressing.endsAt,
-            },
-        };
+        return this.pauses.toMonitoring(suppressing);
     }
 }

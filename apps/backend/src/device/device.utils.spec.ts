@@ -1,3 +1,4 @@
+import { DeviceMonitoring } from '@workspace/shared';
 import { aDevice } from './device.fixture';
 import { DeviceUtils } from './device.utils';
 
@@ -27,7 +28,18 @@ describe('DeviceUtils.toUpdateEvent', () => {
     it('should copy what the live screen needs and add the pause flag', () => {
         const device = aDevice({ state: 'WARNING', lastTemperature: -12 });
 
-        expect(DeviceUtils.toUpdateEvent(device, true)).toEqual({
+        const monitoring: DeviceMonitoring = {
+            status: 'PULLING_DOWN',
+            pause: {
+                id: 'pause-1',
+                kind: 'MACHINE_OFF',
+                startsAt: new Date('2026-10-15T00:00:00.000Z'),
+                endsAt: new Date('2026-10-15T01:00:00.000Z'),
+                phase: 'PULLING_DOWN',
+            },
+        };
+
+        expect(DeviceUtils.toUpdateEvent(device, monitoring)).toEqual({
             id: 'device-1',
             code: 'FRZ-01',
             name: 'Freezer 1',
@@ -37,7 +49,27 @@ describe('DeviceUtils.toUpdateEvent', () => {
             lastTemperature: -12,
             lastSeenAt: device.lastSeenAt,
             stateChangedAt: device.stateChangedAt,
-            paused: true,
+            monitoring,
         });
+    });
+
+    it('should preserve PULLING_DOWN in live event', () => {
+        const device = aDevice({ state: 'WARNING', lastTemperature: -12 });
+
+        const monitoring: DeviceMonitoring = {
+            status: 'PULLING_DOWN',
+            pause: {
+                id: 'pause-1',
+                kind: 'MACHINE_OFF',
+                startsAt: new Date('2026-10-15T00:00:00.000Z'),
+                endsAt: new Date('2026-10-15T01:00:00.000Z'),
+                phase: 'PULLING_DOWN',
+            },
+        };
+
+        const event = DeviceUtils.toUpdateEvent(device, monitoring);
+
+        expect(event.monitoring.status).toBe('PULLING_DOWN');
+        expect(event.monitoring.pause?.id).toBe('pause-1');
     });
 });

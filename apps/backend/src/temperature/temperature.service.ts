@@ -160,13 +160,25 @@ export class TemperatureService {
             lastRecordedAt: recordedAt,
         };
 
-        const paused = await this.pauses.isPaused(device.id, recordedAt, tx);
+        const suppressing = await this.pauses.findSuppressing([device.id], recordedAt, tx);
 
-        if (paused || !device.isActive) return { ack, event: DeviceUtils.toUpdateEvent(afterReading, paused) };
+        const monitoring = this.pauses.toMonitoring(suppressing.get(device.id));
+
+        if (monitoring.status !== 'ACTIVE' || !device.isActive) {
+            return {
+                ack,
+                event: DeviceUtils.toUpdateEvent(afterReading, monitoring),
+            };
+        }
 
         const newState = TemperatureUtils.getTemperatureState(device, input.temperature);
 
-        if (newState === device.state) return { ack, event: DeviceUtils.toUpdateEvent(afterReading, false) };
+        if (newState === device.state) {
+            return {
+                ack,
+                event: DeviceUtils.toUpdateEvent(afterReading, monitoring),
+            };
+        }
 
         // If a planned pause only just stopped suppressing, say so in the alert: "still too warm after the
         // machine-off period" tells the reader something "exceeded critical threshold" does not.
@@ -226,8 +238,12 @@ export class TemperatureService {
         return {
             ack,
             event: DeviceUtils.toUpdateEvent(
-                { ...afterReading, state: newState, stateChangedAt: changed?.stateChangedAt ?? now },
-                false,
+                {
+                    ...afterReading,
+                    state: newState,
+                    stateChangedAt: changed?.stateChangedAt ?? now,
+                },
+                monitoring,
             ),
         };
     }

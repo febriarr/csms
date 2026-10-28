@@ -44,6 +44,7 @@ export interface DeviceMonitoring {
         kind: PauseKind;
         startsAt: Date;
         endsAt: Date | null;
+        phase: SuppressionPhase;
     } | null;
 }
 
@@ -66,8 +67,8 @@ export type DeviceUpdateEvent = {
     lastTemperature: number | null;
     lastSeenAt: Date | null;
     stateChangedAt: Date;
-    /** True while a planned pause suppresses alerts for this device. */
-    paused: boolean;
+
+    monitoring: DeviceMonitoring;
 };
 
 export const DEVICE_UPDATE_EVENT = "device-update";

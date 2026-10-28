@@ -3,7 +3,13 @@ import { DatabaseTransaction } from '@/database/database.type';
 import { Injectable } from '@nestjs/common';
 import type { CreatePauseInput, EndPauseInput, PauseQuery } from '@workspace/validator';
 import { MonitoringPauseRepository } from './monitoring_pause.repository';
-import type { ExpiredPause, MonitoringPauseView, PauseTimeline, SuppressingPause } from '@workspace/shared';
+import type {
+    DeviceMonitoring,
+    ExpiredPause,
+    MonitoringPauseView,
+    PauseTimeline,
+    SuppressingPause,
+} from '@workspace/shared';
 
 @Injectable()
 export class MonitoringPauseService {
@@ -101,8 +107,12 @@ export class MonitoringPauseService {
     }
 
     /** For a list of devices at once; a device that is both PAUSED and PULLING_DOWN reports PAUSED. */
-    async findSuppressing(deviceIds: string[], at: Date): Promise<Map<string, SuppressingPause>> {
-        const rows = await this.repo.findSuppressing(deviceIds, at);
+    async findSuppressing(
+        deviceIds: string[],
+        at: Date,
+        tx?: DatabaseTransaction,
+    ): Promise<Map<string, SuppressingPause>> {
+        const rows = await this.repo.findSuppressing(deviceIds, at, tx);
         const byDevice = new Map<string, SuppressingPause>();
 
         for (const row of rows) {
@@ -134,5 +144,25 @@ export class MonitoringPauseService {
         if (pause.startsAt > now) return 'SCHEDULED';
 
         return pause.endsAt === null || pause.endsAt > now ? 'ACTIVE' : 'ENDED';
+    }
+
+    toMonitoring(suppressing?: SuppressingPause): DeviceMonitoring {
+        if (!suppressing) {
+            return {
+                status: 'ACTIVE',
+                pause: null,
+            };
+        }
+
+        return {
+            status: suppressing.phase,
+            pause: {
+                id: suppressing.pauseId,
+                kind: suppressing.kind,
+                startsAt: suppressing.startsAt,
+                endsAt: suppressing.endsAt,
+                phase: suppressing.phase,
+            },
+        };
     }
 }

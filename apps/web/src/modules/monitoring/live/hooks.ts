@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { DEVICE_UPDATE_EVENT, type DeviceMonitoring, type DeviceUpdateEvent, type DeviceView } from "@workspace/shared";
+import { DEVICE_UPDATE_EVENT, type DeviceUpdateEvent, type DeviceView } from "@workspace/shared";
 import type { DeviceQuery } from "@workspace/validator";
 
 import { http } from "@/lib/http-client";
@@ -89,13 +89,6 @@ export function useRecentReadings(deviceIds: string[]) {
 
 /** The event always carries the current values of the device, so it simply replaces what the list had. */
 function applyEvent(device: DeviceView, event: DeviceUpdateEvent): DeviceView {
-    // `paused` is true for both a running pause and the pull-down time after it
-    const monitoring: DeviceMonitoring = event.paused
-        ? device.monitoring.status === "ACTIVE"
-            ? { status: "PAUSED", pause: null }
-            : device.monitoring
-        : { status: "ACTIVE", pause: null };
-
     return {
         ...device,
         state: event.state,
@@ -103,7 +96,7 @@ function applyEvent(device: DeviceView, event: DeviceUpdateEvent): DeviceView {
         lastTemperature: event.lastTemperature,
         lastSeenAt: event.lastSeenAt,
         stateChangedAt: event.stateChangedAt,
-        monitoring,
+        monitoring: event.monitoring,
     };
 }
 

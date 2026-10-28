@@ -1,11 +1,11 @@
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { STATE_META, STATE_ORDER, type DisplayState } from "./constants";
 import type { StreamStatus } from "./hooks";
-import { Badge } from "@workspace/ui/components/badge";
 
-export type StateFilter = DisplayState | "ALL";
+export type StateFilter = DisplayState | "PAUSED" | "ALL";
 
 /** These four are always shown (a zero is information too); the others only when some device is in that state. */
 const ALWAYS_SHOWN: readonly DisplayState[] = ["CRITICAL", "WARNING", "OFFLINE", "NORMAL"];
@@ -24,12 +24,13 @@ const STREAM_LABELS: Record<StreamStatus, { label: string; dot: string; text: st
 type SummaryBarProps = {
     counts: Record<DisplayState, number>;
     total: number;
+    paused: number;
     value: StateFilter;
     onChange: (value: StateFilter) => void;
     stream: StreamStatus;
 };
 
-export function SummaryBar({ counts, total, value, onChange, stream }: SummaryBarProps) {
+export function SummaryBar({ counts, total, paused, value, onChange, stream }: SummaryBarProps) {
     const states = STATE_ORDER.filter((state) => ALWAYS_SHOWN.includes(state) || counts[state] > 0);
     const connection = STREAM_LABELS[stream];
 
@@ -59,6 +60,17 @@ export function SummaryBar({ counts, total, value, onChange, stream }: SummaryBa
                         <span className="font-mono text-xs text-muted-foreground">{counts[state]}</span>
                     </Button>
                 ))}
+
+                <Button
+                    size="sm"
+                    variant={value === "PAUSED" ? "secondary" : "outline"}
+                    aria-pressed={value === "PAUSED"}
+                    onClick={() => onChange(value === "PAUSED" ? "ALL" : "PAUSED")}
+                >
+                    <span aria-hidden className="size-2 rounded-full bg-sky-500" />
+                    Paused
+                    <span className="font-mono text-xs text-muted-foreground">{paused}</span>
+                </Button>
             </div>
 
             <Badge variant="outline" asChild>

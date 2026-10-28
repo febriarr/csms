@@ -124,7 +124,11 @@ export class DeviceOfflineService {
         if (!updated) return false;
 
         // after the commit: a subscriber must never see a state that was rolled back
-        this.events.publish(DeviceUtils.toUpdateEvent(updated, await this.pauses.isPaused(updated.id, now)));
+        const suppressing = await this.pauses.findSuppressing([updated.id], now);
+
+        const monitoring = this.pauses.toMonitoring(suppressing.get(updated.id));
+
+        this.events.publish(DeviceUtils.toUpdateEvent(updated, monitoring));
 
         return true;
     }

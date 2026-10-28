@@ -45,17 +45,47 @@ export function Component() {
     // The counts ignore the state filter, so the chips keep showing the whole picture of the selected place.
     const counts = useMemo(() => {
         const result = Object.fromEntries(STATE_ORDER.map((state) => [state, 0])) as Record<DisplayState, number>;
-        for (const device of devices) result[getDisplayState(device)] += 1;
+
+        for (const device of devices) {
+            if (device.monitoring.status === "PAUSED") continue;
+
+            result[getDisplayState(device)] += 1;
+        }
 
         return result;
+    }, [devices]);
+
+    const monitoringCounts = useMemo(() => {
+        let paused = 0;
+
+        for (const device of devices) {
+            if (device.monitoring.status === "PAUSED") {
+                paused += 1;
+                continue;
+            }
+        }
+
+        return { paused };
     }, [devices]);
 
     // most urgent first, then by name, so a problem is always at the top of the grid
     const visible = useMemo(
         () =>
             devices
-                .map((device) => ({ device, state: getDisplayState(device) }))
-                .filter((item) => stateFilter === "ALL" || item.state === stateFilter)
+                .map((device) => ({
+                    device,
+                    state: getDisplayState(device),
+                    isPaused: device.monitoring.status === "PAUSED",
+                }))
+                .filter((item) => {
+                    if (stateFilter === "ALL") return true;
+
+                    if (stateFilter === "PAUSED") {
+                        return item.isPaused;
+                    }
+
+                    return !item.isPaused && item.state === stateFilter;
+                })
                 .sort((a, b) => rank(a.state) - rank(b.state) || a.device.name.localeCompare(b.device.name))
                 .map((item) => item.device),
         [devices, stateFilter]
@@ -145,6 +175,7 @@ export function Component() {
                 <SummaryBar
                     counts={counts}
                     total={devices.length}
+                    paused={monitoringCounts.paused}
                     value={stateFilter}
                     onChange={setStateFilter}
                     stream={streamStatus}

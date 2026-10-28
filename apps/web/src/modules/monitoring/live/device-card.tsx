@@ -57,17 +57,21 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
     const heartbeatMs = device.heartbeatIntervalSeconds * 1000;
     const trend = dim ? null : trendOf(points);
     const { monitoring } = device;
+    const isPaused = monitoring.status === "PAUSED";
 
     return (
         <article
             aria-label={`${device.name}: ${meta.label}`}
             className={cn(
                 "relative flex flex-col gap-3 overflow-hidden rounded-xl border bg-card py-4 pr-4 pl-5 text-card-foreground",
-                meta.card
+                isPaused ? "border-orange-500/50" : meta.card
             )}
         >
             {/* the state as a color, readable from across the room */}
-            <span aria-hidden className={cn("absolute inset-y-0 left-0 w-1", meta.strip)} />
+            <span
+                aria-hidden
+                className={cn("absolute inset-y-0 left-0 w-1", isPaused ? "bg-orange-500" : meta.strip)}
+            />
 
             <header className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -78,17 +82,19 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
                     </p>
                 </div>
 
-                <Badge variant="outline" className={cn("shrink-0 gap-1.5", meta.badge)}>
-                    <span
-                        aria-hidden
-                        className={cn(
-                            "size-1.5 rounded-full",
-                            meta.dot,
-                            state === "CRITICAL" && "motion-safe:animate-pulse"
-                        )}
-                    />
-                    {meta.label}
-                </Badge>
+                {!isPaused && (
+                    <Badge variant="outline" className={cn("shrink-0 gap-1.5", meta.badge)}>
+                        <span
+                            aria-hidden
+                            className={cn(
+                                "size-1.5 rounded-full",
+                                meta.dot,
+                                state === "CRITICAL" && "motion-safe:animate-pulse"
+                            )}
+                        />
+                        {meta.label}
+                    </Badge>
+                )}
             </header>
 
             <p
@@ -110,54 +116,79 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
                 </Badge>
             )}
 
-            <div className="flex items-end justify-between gap-2">
-                <div>
-                    <div
-                        className={cn(
-                            "font-mono text-3xl leading-none font-semibold tabular-nums",
-                            dim
-                                ? "text-muted-foreground"
-                                : state === "CRITICAL" || state === "WARNING"
-                                  ? meta.text
-                                  : "text-foreground"
-                        )}
-                    >
-                        {reading == null ? "—" : formatTemperature(reading)}
+            {isPaused ? (
+                <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 text-center">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                        <Pause className="size-5 text-muted-foreground" />
                     </div>
-                    {dim && reading != null && <p className="mt-1 text-xs text-muted-foreground">Last known reading</p>}
+
+                    <p className="mt-3 font-medium">Monitoring Paused</p>
+
+                    <p className="mt-1 text-xs text-muted-foreground">Temperature monitoring is temporarily paused.</p>
+
+                    {monitoring.pause && (
+                        <div className="mt-3 flex items-center gap-2">
+                            <Badge variant="outline">{humanizeEnum(monitoring.pause.kind)}</Badge>
+                            <span className="text-xs text-muted-foreground">
+                                for <Elapsed date={monitoring.pause.startsAt} className="font-mono" />
+                            </span>
+                        </div>
+                    )}
                 </div>
+            ) : (
+                <>
+                    <div className="flex items-end justify-between gap-2">
+                        <div>
+                            <div
+                                className={cn(
+                                    "font-mono text-3xl leading-none font-semibold tabular-nums",
+                                    dim
+                                        ? "text-muted-foreground"
+                                        : state === "CRITICAL" || state === "WARNING"
+                                          ? meta.text
+                                          : "text-foreground"
+                                )}
+                            >
+                                {reading == null ? "—" : formatTemperature(reading)}
+                            </div>
+                            {dim && reading != null && (
+                                <p className="mt-1 text-xs text-muted-foreground">Last known reading</p>
+                            )}
+                        </div>
 
-                {trend !== null && <TrendChip delta={trend} />}
-            </div>
+                        {trend !== null && <TrendChip delta={trend} />}
+                    </div>
 
-            <ThresholdBar
-                value={reading}
-                defrost={device.defrostThreshold}
-                warning={device.warningThreshold}
-                critical={device.criticalThreshold}
-                dim={dim}
-            />
+                    <ThresholdBar
+                        value={reading}
+                        defrost={device.defrostThreshold}
+                        warning={device.warningThreshold}
+                        critical={device.criticalThreshold}
+                        dim={dim}
+                    />
 
-            <Sparkline
-                points={points}
-                warning={device.warningThreshold}
-                critical={device.criticalThreshold}
-                gapMs={Math.max(heartbeatMs * 3, 60_000)}
-                tone={dim ? "text-muted-foreground" : meta.text}
-            />
+                    <Sparkline
+                        points={points}
+                        warning={device.warningThreshold}
+                        critical={device.criticalThreshold}
+                        gapMs={Math.max(heartbeatMs * 3, 60_000)}
+                        tone={dim ? "text-muted-foreground" : meta.text}
+                    />
 
-            <footer className="flex items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                    <Clock className="size-3" />
-                    <TimeAgo date={device.lastSeenAt} staleAfterMs={dim ? undefined : heartbeatMs * 2} />
-                </span>
+                    <footer className="flex items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                            <Clock className="size-3" />
+                            <TimeAgo date={device.lastSeenAt} staleAfterMs={dim ? undefined : heartbeatMs * 2} />
+                        </span>
 
-                {state !== "INACTIVE" && (
-                    <span>
-                        {meta.label} for <Elapsed date={device.stateChangedAt} className="font-mono" />
-                    </span>
-                )}
-            </footer>
+                        {state !== "INACTIVE" && (
+                            <span>
+                                {meta.label} for <Elapsed date={device.stateChangedAt} className="font-mono" />
+                            </span>
+                        )}
+                    </footer>
+                </>
+            )}
         </article>
     );
 });

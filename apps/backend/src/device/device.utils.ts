@@ -1,6 +1,6 @@
 import type { SelectDevices } from '@/database/schema';
 import { OFFLINE_AFTER_MISSED_HEARTBEATS } from './device.constant';
-import { DeviceUpdateEvent } from '@workspace/shared';
+import { DeviceMonitoring, DeviceUpdateEvent } from '@workspace/shared';
 
 export class DeviceUtils {
     private constructor() {}
@@ -24,7 +24,6 @@ export class DeviceUtils {
 
     /** The live-update payload for a device row. `paused` comes from the pause check, not from the row. */
     static toUpdateEvent(
-        this: void,
         device: Pick<
             SelectDevices,
             | 'id'
@@ -37,7 +36,7 @@ export class DeviceUtils {
             | 'lastSeenAt'
             | 'stateChangedAt'
         >,
-        paused: boolean,
+        monitoring: DeviceMonitoring,
     ): DeviceUpdateEvent {
         return {
             id: device.id,
@@ -49,7 +48,7 @@ export class DeviceUtils {
             lastTemperature: device.lastTemperature,
             lastSeenAt: device.lastSeenAt,
             stateChangedAt: device.stateChangedAt,
-            paused,
+            monitoring,
         };
     }
 }
