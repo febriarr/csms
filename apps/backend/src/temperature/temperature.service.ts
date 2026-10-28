@@ -11,12 +11,13 @@ import { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.serv
 import { NotificationUtils } from '@/notification/notification.utils';
 import { NotificationOutboxService } from '@/notification/notification_outbox.service';
 import { Injectable } from '@nestjs/common';
-import type { TelemetryInput, TemperatureReportQuery } from '@workspace/validator';
+import type { RecentReadingsQuery, TelemetryInput, TemperatureReportQuery } from '@workspace/validator';
 import { TemperatureRepository } from './temperature.repository';
 import { TemperatureUtils } from './temperature.utils';
 import {
     DeviceWithPlace,
     IngestOutcome,
+    RecentReading,
     ReportDevice,
     TelemetryAck,
     TemperatureReading,
@@ -92,6 +93,21 @@ export class TemperatureService {
                 totalPages: Math.ceil(total / query.pageSize),
             },
         };
+    }
+
+    /** Recent readings of several devices at once, for the sparklines of the live page. Oldest first. */
+    async findRecent(query: RecentReadingsQuery): Promise<Record<string, RecentReading[]>> {
+        const since = new Date(Date.now() - query.minutes * 60_000);
+        const rows = await this.temperatures.findRecentPerMinute(query.deviceIds, since);
+
+        // every requested device gets a key, also when it has no readings in the period
+        const result: Record<string, RecentReading[]> = Object.fromEntries(query.deviceIds.map((id) => [id, []]));
+
+        for (const row of rows) {
+            result[row.deviceId]?.push({ recordedAt: row.bucket, temperature: row.temperature });
+        }
+
+        return result;
     }
 
     /** Reports also cover soft-deleted devices: their history is audit data. */

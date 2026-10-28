@@ -28,3 +28,6 @@ export type IngestOutcome = {
     ack: TelemetryAck;
     event: DeviceUpdateEvent | null;
 };
+
+/** One point of a sparkline: the average of the readings in one minute. */
+export type RecentReading = Pick<Temperature, "recordedAt" | "temperature">;

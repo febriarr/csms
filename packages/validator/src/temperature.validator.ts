@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idSchema } from "./common";
 
 /** A device clock this far ahead is wrong; accepting it would freeze the device's state (see isNewest). */
 export const MAX_CLOCK_AHEAD_MS = 5 * 60_000;
@@ -49,5 +50,35 @@ export const telemetrySchema = z
             ctx.addIssue({ code: "custom", path: ["timestamp"], message: "Timestamp is too old" });
         }
     });
+/** One request carries a UUID per device in the query string, so the list is capped to keep the URL short. */
+const MAX_RECENT_DEVICES = 100;
+
+export const recentReadingsQuerySchema = z.object({
+    // "id1,id2,id3" -> ["id1", "id2", "id3"], without blanks and duplicates
+    deviceIds: z
+        .string()
+        .transform((value) => [
+            ...new Set(
+                value
+                    .split(",")
+                    .map((id) => id.trim())
+                    .filter(Boolean)
+            ),
+        ])
+        .pipe(
+            z
+                .array(idSchema)
+                .min(1, "Pilih minimal satu device")
+                .max(MAX_RECENT_DEVICES, `Maksimal ${MAX_RECENT_DEVICES} device`)
+        ),
+    minutes: z.coerce
+        .number({ message: "Rentang waktu harus berupa angka" })
+        .int("Rentang waktu harus bilangan bulat")
+        .min(10, "Rentang waktu minimal 10 menit")
+        .max(360, "Rentang waktu maksimal 360 menit")
+        .default(180),
+});
+
+export type RecentReadingsQuery = z.infer<typeof recentReadingsQuerySchema>;
 
 export type TelemetryInput = z.infer<typeof telemetrySchema>;

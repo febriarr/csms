@@ -1,6 +1,8 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, StreamableFile, UseGuards } from '@nestjs/common';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import {
+    type RecentReadingsQuery,
+    recentReadingsQuerySchema,
     temperatureExportQuerySchema,
     temperatureReportQuerySchema,
     type TemperatureExportQuery,
@@ -34,6 +36,11 @@ export class TemperatureController {
     @Get('report')
     findReport(@Query(new ZodValidationPipe(temperatureReportQuerySchema)) query: TemperatureReportQuery) {
         return this.temperatureService.findReport(query);
+    }
+
+    @Get('recent')
+    findRecent(@Query(new ZodValidationPipe(recentReadingsQuerySchema)) query: RecentReadingsQuery) {
+        return this.temperatureService.findRecent(query);
     }
 
     @Get('report/export')
