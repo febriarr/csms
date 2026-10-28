@@ -8,9 +8,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { formatTemperature, humanizeEnum } from "@/lib/format";
 
 import { STATE_META } from "@/lib/device-state";
-
 import { getDisplayState } from "./constants";
-
 import type { SeriesPoint } from "./recent.api";
 import { Sparkline } from "./sparkline";
 import { ThresholdBar } from "./threshold-bar";

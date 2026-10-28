@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { TableCell, TableRow } from "@workspace/ui/components/table";
+import { EmptyState } from "./empty-state";
 
 /** The part of a TanStack Query result this component needs, so any `useQuery` result fits. */
 type QueryState = {
@@ -65,7 +66,7 @@ export function TableStatusRows({
             {query.isSuccess && isEmpty && (
                 <TableRow>
                     <TableCell colSpan={columnCount} className="py-8 text-center text-sm text-muted-foreground">
-                        {emptyMessage}
+                        <EmptyState description={emptyMessage} />
                     </TableCell>
                 </TableRow>
             )}
