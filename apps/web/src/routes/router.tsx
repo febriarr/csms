@@ -22,6 +22,10 @@ export const router = createBrowserRouter([
                         lazy: () => import("@/modules/monitoring/live/page"),
                     },
                     {
+                        path: "/dashboard/monitoring/alerts",
+                        lazy: () => import("@/modules/monitoring/alert/page"),
+                    },
+                    {
                         path: "/dashboard/monitoring/monitoring-pauses",
                         lazy: () => import("@/modules/monitoring/monitoring-pauses/page"),
                     },
