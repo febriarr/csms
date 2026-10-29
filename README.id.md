@@ -126,6 +126,36 @@ Status dihitung dari threshold device tersebut:
 
 Deteksi offline berjalan setiap 30 detik. Setelah API menyala, deteksi menunggu 2 menit supaya restart tidak membanjiri orang dengan pesan offline palsu.
 
+## Cara kerjanya
+
+```mermaid
+flowchart LR
+    D["Device"] -->|"POST /api/temperature"| API["API"]
+
+    subgraph TX["Satu transaksi database"]
+        API --> R["Simpan data suhu"]
+        R --> S{"Status berubah?"}
+        S -->|"ya"| A["Catat alert"]
+        A --> O["Masukkan pesan ke antrean (outbox)"]
+    end
+
+    API -->|"setelah commit"| E["Event SSE"] --> UI["Dashboard"]
+    O --> W["Dispatcher"] --> WA["WhatsApp"]
+    J["Job offline, tiap 30 detik"] --> A
+```
+
+1. API mengunci baris device, jadi dua data dari device yang sama diproses satu per satu.
+2. Data suhu selalu disimpan, bahkan saat monitoring pause, karena itu data audit. Pengiriman ulang data yang sama berhenti di sini sebagai duplikat.
+3. Data yang terlambat (lebih lama dari data terbaru) disimpan sebagai riwayat dan tidak mengubah apa pun.
+4. Kalau device aktif dan tidak ada pause yang menahan alert, status baru dibandingkan dengan status tersimpan. Hanya perubahan status yang membuat alert.
+5. Alert dan pesan notifikasinya disimpan dalam satu transaksi, jadi alert tidak mungkin ada tanpa pesannya. Pesan dibuat untuk alert `WARNING`, `CRITICAL`, dan offline, satu per penerima yang berlangganan.
+6. Setelah commit, status baru dikirim ke dashboard lewat SSE. Transaksi yang di-rollback tidak pernah dipublikasikan.
+7. Dispatcher mengambil pesan yang masih pending dan mengirimnya lewat WhatsApp. Pesan yang gagal dicoba ulang sampai 5 kali (setelah 0, 30, 120, 300, dan 600 detik), dan pesan yang masih pending setelah 60 menit ditandai gagal.
+
+Pause menghentikan alert suhu, tapi tidak deteksi offline. Device yang diam saat pause tetap dilaporkan, karena artinya ada gangguan sungguhan seperti kabel lepas atau jaringan putus.
+
+Dispatcher dan stream SSE sama-sama berjalan di dalam satu proses API. Untuk saat ini jalankan satu instance saja. Menjalankan beberapa instance butuh row locking untuk dispatcher dan Redis untuk event live, dan itulah alasan keduanya ada di roadmap.
+
 ## Testing
 
 ```bash
@@ -146,12 +176,13 @@ Selesai:
 
 Berikutnya:
 
-- [ ] Notifikasi email (schema dan penerima sudah ada, pengirimnya belum)
-- [ ] MQTT untuk menerima telemetry dari device
-- [ ] Redis untuk caching dan pub/sub
-- [ ] WebSocket untuk menggantikan SSE
-- [ ] Multi-tenancy, agar entitas dan cabang lain bisa memakai satu deployment
-- [ ] Fitur tambahan sesuai kebutuhan operasional harian
+- [ ] Notifikasi email (schema dan recipient sudah tersedia, sender belum)
+- [ ] MQTT untuk penerimaan telemetry dari device
+- [ ] Remote device management, termasuk update firmware dan kontrol perangkat untuk maintenance
+- [ ] Multi-tenancy dan deployment multi-instance
+- [ ] Redis untuk distribusi event antar instance dan caching
+- [ ] Evaluasi WebSocket jika diperlukan komunikasi realtime dua arah
+- [ ] Fitur tambahan berdasarkan kebutuhan operasional sehari-hari
 
 ## Lisensi
 

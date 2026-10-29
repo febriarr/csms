@@ -126,6 +126,36 @@ The state is worked out from the thresholds of that device:
 
 Offline detection runs every 30 seconds. It waits 2 minutes after the API starts, so a restart does not flood people with false offline messages.
 
+## How it works
+
+```mermaid
+flowchart LR
+    D["Device"] -->|"POST /api/temperature"| API["API"]
+
+    subgraph TX["One database transaction"]
+        API --> R["Store reading"]
+        R --> S{"State changed?"}
+        S -->|"yes"| A["Record alert"]
+        A --> O["Queue messages (outbox)"]
+    end
+
+    API -->|"after commit"| E["SSE event"] --> UI["Dashboard"]
+    O --> W["Dispatcher"] --> WA["WhatsApp"]
+    J["Offline job, every 30 s"] --> A
+```
+
+1. The API locks the device row, so two readings from one device are handled one after the other.
+2. The reading is always stored, even during a monitoring pause, because it is audit data. A retry of the same reading stops here as a duplicate.
+3. A late reading (older than the newest one) is kept as history and changes nothing else.
+4. If the device is active and no pause is suppressing alerts, the new state is compared with the stored one. Only a change creates an alert.
+5. The alert and its notification messages are saved in the same transaction, so an alert cannot exist without its messages. Messages are queued for `WARNING`, `CRITICAL` and offline alerts, one per subscribed recipient.
+6. After the commit, the new state is pushed to the dashboard over SSE. Nothing is published for a transaction that rolled back.
+7. The dispatcher picks up pending messages and sends them through WhatsApp. A failed message is retried up to 5 times (after 0, 30, 120, 300 and 600 seconds), and a message still pending after 60 minutes is marked failed.
+
+A pause stops temperature alerts but not offline detection. A device that goes silent during a pause is still reported, because that means a real fault such as a lost cable or network.
+
+The dispatcher and the SSE stream both live inside one API process. Run a single instance for now. Running several needs row locking for the dispatcher and Redis for the live events, which is why both are on the roadmap.
+
 ## Testing
 
 ```bash
@@ -147,10 +177,11 @@ Done:
 Next:
 
 - [ ] Email notifications (the schema and recipients exist, the sender does not)
-- [ ] MQTT for receiving device telemetry
-- [ ] Redis for caching and pub/sub
-- [ ] WebSocket to replace SSE
-- [ ] Multi-tenancy, so other entities and branches can use one deployment
+- [ ] MQTT for device telemetry ingestion
+- [ ] Remote device management, including firmware updates and maintenance controls
+- [ ] Multi-tenancy and multi-instance deployment
+- [ ] Redis for cross-instance event distribution and caching
+- [ ] Evaluate WebSocket if bidirectional realtime communication is needed
 - [ ] More features driven by day-to-day operations
 
 ## License
