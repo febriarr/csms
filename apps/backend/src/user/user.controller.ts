@@ -136,6 +136,16 @@ export class UserController {
     async create(@Body(new ZodValidationPipe(createUserInput)) input: CreateUserInput, @Req() req: Request) {
         const username = input.username.toLowerCase();
 
+        const images = [
+            'https://pub-ed50815cb6224b8d8c84f55474767c07.r2.dev/profile/profile-user-1.png',
+            'https://cdn.febriardiansyah.my.id/profile/profile-user-2.png',
+            'https://cdn.febriardiansyah.my.id/profile/profile-user-3.png',
+            'https://cdn.febriardiansyah.my.id/profile/profile-user-4.png',
+            'https://cdn.febriardiansyah.my.id/profile/profile-user-5.png',
+        ];
+
+        const image = images[Math.floor(Math.random() * images.length)];
+
         const { user } = await this.authService.api.createUser({
             body: {
                 // sign-in is by username; the email only exists because Better Auth requires one
@@ -143,7 +153,7 @@ export class UserController {
                 password: input.password,
                 name: input.name,
                 role: input.role,
-                data: { username, displayUsername: input.username },
+                data: { username, displayUsername: input.username, image },
             },
             headers: fromNodeHeaders(req.headers),
         });

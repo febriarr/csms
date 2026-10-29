@@ -8,11 +8,12 @@ import { Database } from './database.type';
 
 const seedUsers = [
     {
-        name: 'Super Admin',
-        username: 'admin',
-        email: 'admin@csms.local',
+        name: 'Febri Ardiansyah',
+        username: 'febri',
+        email: 'superadmin@csms.local',
         password: process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMe123!',
         role: 'super_admin' as const,
+        image: 'https://cdn.febriardiansyah.my.id/profile/profile-user-1.png',
     },
 ];
 
@@ -46,9 +47,11 @@ async function main() {
                 email: u.email,
                 password: u.password,
                 role: u.role,
+
                 data: {
                     username: u.username,
                     displayUsername: u.username,
+                    image: u.image,
                 },
             },
         });
