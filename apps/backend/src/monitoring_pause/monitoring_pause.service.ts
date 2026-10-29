@@ -8,6 +8,7 @@ import type {
     ExpiredPause,
     MonitoringPauseView,
     PauseTimeline,
+    ReportPauseEvent,
     SuppressingPause,
 } from '@workspace/shared';
 
@@ -130,6 +131,14 @@ export class MonitoringPauseService {
         tx?: DatabaseTransaction,
     ): Promise<ExpiredPause | null> {
         return this.repo.findJustExpired(target, at, tx);
+    }
+
+    /** The pauses that touched a device in `[from, to)`, oldest first. For the temperature report. */
+    findForReport(
+        target: { deviceId: string; coldStorageId: string },
+        range: { from: Date; to: Date },
+    ): Promise<ReportPauseEvent[]> {
+        return this.repo.findOverlapping(target, range);
     }
 
     private async getView(id: string): Promise<MonitoringPauseView> {

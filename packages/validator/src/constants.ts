@@ -25,6 +25,25 @@ export type SubscriptionScope = (typeof SUBSCRIPTION_SCOPES)[number];
 export const PAUSE_KINDS = ["MAINTENANCE", "MACHINE_OFF"] as const;
 export type PauseKind = (typeof PAUSE_KINDS)[number];
 
+/**
+ * How ONE reading classifies against its device's thresholds. Unlike DEVICE_STATES it has no OFFLINE: a device
+ * that sends a reading is not offline.
+ */
+export const TEMPERATURE_STATES = ["NORMAL", "DEFROST", "WARNING", "CRITICAL"] as const;
+export type TemperatureState = (typeof TEMPERATURE_STATES)[number];
+
+/**
+ * Whether the alert logic looked at a stored reading and, when it did not, why. This is what explains "above the
+ * threshold, but no alert" in a report:
+ *   EVALUATED        the reading went through the normal state / alert rules
+ *   PAUSED           a planned pause (maintenance, machine off) was running
+ *   PULLING_DOWN     the pause had ended and the machine was still given time to cool down
+ *   DEVICE_INACTIVE  monitoring is switched off for the device
+ *   LATE_ARRIVAL     older than the device's newest reading: kept as history only
+ */
+export const READING_EVALUATIONS = ["EVALUATED", "PAUSED", "PULLING_DOWN", "DEVICE_INACTIVE", "LATE_ARRIVAL"] as const;
+export type ReadingEvaluation = (typeof READING_EVALUATIONS)[number];
+
 /** Reports may only look at this many days at a time (shared so the UI date picker can enforce it too). */
 export const MAX_REPORT_RANGE_DAYS = 30;
 

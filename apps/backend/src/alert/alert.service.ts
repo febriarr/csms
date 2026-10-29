@@ -4,7 +4,7 @@ import { InserAlert, SelectAlert } from '@/database/schema';
 import { Injectable } from '@nestjs/common';
 import type { AlertQuery } from '@workspace/validator';
 import { AlertRepository } from './alert.repository';
-import type { ListAlert, WithMetadata } from '@workspace/shared';
+import type { ListAlert, ReportAlertEvent, WithMetadata } from '@workspace/shared';
 
 @Injectable()
 export class AlertService {
@@ -22,6 +22,11 @@ export class AlertService {
                 totalPages: Math.ceil(total / query.pageSize),
             },
         };
+    }
+
+    /** The alerts of one device in `[from, to)`, oldest first. For the temperature report, which needs all of them. */
+    findForReport(deviceId: string, range: { from: Date; to: Date }): Promise<ReportAlertEvent[]> {
+        return this.repo.findForReport(deviceId, range);
     }
 
     /**

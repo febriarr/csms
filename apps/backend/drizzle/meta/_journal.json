@@ -15,6 +15,13 @@
       "when": 1791975841039,
       "tag": "0001_seed_divisions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793272980787,
+      "tag": "0002_damp_metal_master",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,8 @@ import {
     NOTIFIABLE_STATES,
     TemperatureState,
     type AlertReasonContext,
+    type EvaluationInput,
+    type EvaluationResult,
     type NotifiableState,
     type PauseKind,
     type TemperatureThresholds,
@@ -78,6 +80,30 @@ export class TemperatureUtils {
 
     static shouldNotify(this: void, state: DevicesState): state is NotifiableState {
         return (NOTIFIABLE_STATES as readonly string[]).includes(state);
+    }
+
+    /** "maintenance" / "machine-off period": the words alert texts and reports use for a kind of pause. */
+    static pauseLabel(this: void, kind: PauseKind): string {
+        return TemperatureUtils.PAUSE_LABEL[kind];
+    }
+
+    /* - reading evaluation */
+
+    /**
+     * Whether the alert logic looks at a reading that is the device's newest one, and if not, why. A planned pause
+     * (or its pull-down) wins over a switched-off device because it names the pause behind the decision.
+     * Late arrivals never get here: they are known before the reading is even stored.
+     */
+    static getEvaluation(this: void, input: EvaluationInput): EvaluationResult {
+        const { isActive, monitoring } = input;
+
+        if (monitoring.status !== 'ACTIVE') {
+            return { evaluation: monitoring.status, pauseId: monitoring.pause?.id ?? null };
+        }
+
+        if (!isActive) return { evaluation: 'DEVICE_INACTIVE', pauseId: null };
+
+        return { evaluation: 'EVALUATED', pauseId: null };
     }
 
     /*  alert reason */

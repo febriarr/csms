@@ -1,4 +1,4 @@
-import type { DevicesState, SelectDevices } from '../database/schema';
+import type { DevicesState, ReadingEvaluation, SelectDevices } from '../database/schema';
 
 /* states */
 
@@ -26,6 +26,23 @@ export type TemperatureThresholds = {
     defrostThreshold: number | null;
     warningThreshold: number;
     criticalThreshold: number;
+};
+
+/* reading evaluation */
+
+/**
+ * What decides whether the alert logic looks at a reading that is the device's newest one. Declared here (instead of
+ * importing DeviceMonitoring) so the rule stays a plain function of plain values.
+ */
+export type EvaluationInput = {
+    isActive: boolean;
+    monitoring: { status: 'ACTIVE' | 'PAUSED' | 'PULLING_DOWN'; pause: { id: string } | null };
+};
+
+export type EvaluationResult = {
+    evaluation: ReadingEvaluation;
+    /** The pause behind PAUSED / PULLING_DOWN, otherwise null. */
+    pauseId: string | null;
 };
 
 /* alert reason */

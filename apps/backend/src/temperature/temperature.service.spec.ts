@@ -1,15 +1,16 @@
 import type { AlertService } from '@/alert/alert.service';
-import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
+import { EntityNotFoundException } from '@/common/exception/app.exception';
 import type { InserAlert } from '@/database/schema';
 import type { DeviceRepository } from '@/device/device.repository';
 import { aDevice } from '@/device/device.fixture';
 import type { DiagnosticService } from '@/diagnostic/diagnostic.service';
 import type { DeviceEventService } from '@/event/device_event.service';
 import type { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
+import type { SuppressingPause } from '@workspace/shared';
 import type { NotificationOutboxService } from '@/notification/notification_outbox.service';
 import { TemperatureService } from './temperature.service';
 import type { TemperatureRepository } from './temperature.repository';
-import type { DeviceUpdateEvent, DeviceWithPlace, ExpiredPause, TemperatureReading } from '@workspace/shared';
+import type { DeviceUpdateEvent, DeviceWithPlace, ExpiredPause } from '@workspace/shared';
 import type { TelemetryInput } from '@workspace/validator';
 
 const TX = { tx: true };
@@ -17,11 +18,24 @@ const TX = { tx: true };
 type Options = {
     device?: DeviceWithPlace | null;
     stored?: boolean;
-    paused?: boolean;
+    /** The pause suppressing alerts at the reading's moment, if any. */
+    suppressing?: SuppressingPause | null;
     expiredPause?: ExpiredPause | null;
     failAlertRecord?: boolean;
-    page?: { items: TemperatureReading[]; total: number };
 };
+
+const PAUSE_ID = 'pause-1';
+
+function aSuppressingPause(phase: SuppressingPause['phase'] = 'PAUSED'): SuppressingPause {
+    return {
+        deviceId: 'device-1',
+        pauseId: PAUSE_ID,
+        kind: 'MACHINE_OFF',
+        startsAt: new Date('2026-10-14T20:00:00.000Z'),
+        endsAt: null,
+        phase,
+    };
+}
 
 /** Fakes for every collaborator, plus a record of what the service did and in which order. */
 function setup(options: Options = {}) {
@@ -35,7 +49,8 @@ function setup(options: Options = {}) {
     const diagnosticCalls: unknown[] = [];
     const enqueued: { alertId: string; deviceId: string; message: string }[] = [];
     const published: { event: DeviceUpdateEvent; afterCommit: boolean }[] = [];
-    const pageCalls: unknown[][] = [];
+    const stored: Record<string, unknown>[] = [];
+    const evaluations: { evaluation: string; pauseId: string | null }[] = [];
     let alertInput: unknown;
 
     const temperatures = {
@@ -45,15 +60,17 @@ function setup(options: Options = {}) {
 
             return result;
         },
-        insertIgnoreDuplicate: () => {
+        insertIgnoreDuplicate: (row: Record<string, unknown>) => {
             calls.push('store');
+            stored.push(row);
 
             return Promise.resolve(options.stored ?? true);
         },
-        findPage: (...args: unknown[]) => {
-            pageCalls.push(args);
+        markEvaluation: (_deviceId: string, _at: Date, values: { evaluation: string; pauseId: string | null }) => {
+            calls.push('mark');
+            evaluations.push(values);
 
-            return Promise.resolve(options.page ?? { items: [], total: 0 });
+            return Promise.resolve();
         },
     };
 
@@ -74,7 +91,15 @@ function setup(options: Options = {}) {
     };
 
     const pauses = {
-        isPaused: () => Promise.resolve(options.paused ?? false),
+        findSuppressing: () =>
+            Promise.resolve(new Map(options.suppressing ? [[options.suppressing.deviceId, options.suppressing]] : [])),
+        toMonitoring: (suppressing?: SuppressingPause) =>
+            suppressing
+                ? {
+                      status: suppressing.phase,
+                      pause: { ...suppressing, id: suppressing.pauseId },
+                  }
+                : { status: 'ACTIVE', pause: null },
         findJustExpired: () => Promise.resolve(options.expiredPause ?? null),
     };
 
@@ -128,7 +153,8 @@ function setup(options: Options = {}) {
         diagnosticCalls,
         enqueued,
         published,
-        pageCalls,
+        stored,
+        evaluations,
         alertInput: () => alertInput,
     };
 }
@@ -172,7 +198,7 @@ describe('TemperatureService.ingest: accepting a reading', () => {
         expect(published.length).toBe(1);
         expect(published[0].event.state).toBe('NORMAL');
         expect(published[0].event.lastTemperature).toBe(-21.5);
-        expect(published[0].event.paused).toBe(false);
+        expect(published[0].event.monitoring.status).toBe('ACTIVE');
     });
 
     it('should treat a retry of the same moment as a successful duplicate and do nothing else', async () => {
@@ -290,15 +316,15 @@ describe('TemperatureService.ingest: state changes', () => {
 
 describe('TemperatureService.ingest: when alerts must not be raised', () => {
     it('should keep storing readings during a planned pause but change no state and raise no alert', async () => {
-        const { service, calls, alerts, states, enqueued, published } = setup({ paused: true });
+        const { service, calls, alerts, states, enqueued, published } = setup({ suppressing: aSuppressingPause() });
 
         await service.ingest(reading({ temperature: -3 }));
 
-        expect(calls).toEqual(['store', 'touch']);
+        expect(calls).toEqual(['store', 'touch', 'mark']);
         expect(alerts.length).toBe(0);
         expect(states.length).toBe(0);
         expect(enqueued.length).toBe(0);
-        expect(published[0].event.paused).toBe(true);
+        expect(published[0].event.monitoring.status).toBe('PAUSED');
         expect(published[0].event.state).toBe('NORMAL');
     });
 
@@ -351,56 +377,74 @@ describe('TemperatureService.ingest: consistency', () => {
     });
 });
 
-describe('TemperatureService.findReport', () => {
-    const query = { deviceId: 'device-1', from: '2026-10-01', to: '2026-10-07', page: 2, pageSize: 50 };
+describe('TemperatureService.ingest: the snapshot stored with the reading', () => {
+    it('should store the state the reading has at the thresholds of that moment', async () => {
+        const { service, stored } = setup();
 
-    it('should say which of device, from and to is missing', async () => {
-        const { service } = setup();
+        await service.ingest(reading({ temperature: -12 }));
+        await service.ingest(reading({ temperature: -22, timestamp: '2026-10-15T00:01:00.000Z' }));
 
-        const error = await service
-            .findReport({ page: 1, pageSize: 50 })
-            .then(() => null)
-            .catch((e: unknown) => e);
-
-        expect(error instanceof ValidationException).toBe(true);
-        expect(Object.keys((error as ValidationException).errors ?? {}).sort()).toEqual(['deviceId', 'from', 'to']);
+        expect(stored[0]).toMatchObject({ temperature: -12, state: 'WARNING' });
+        expect(stored[1]).toMatchObject({ temperature: -22, state: 'NORMAL' });
     });
 
-    it('should return the readings of the page with the pagination metadata', async () => {
-        const items: TemperatureReading[] = [
-            {
-                recordedAt: new Date('2026-10-15T00:00:30.000Z'),
-                temperature: -22,
-                receivedAt: new Date('2026-10-15T00:00:31.000Z'),
-            },
-        ];
-        const { service, pageCalls } = setup({ page: { items, total: 101 } });
+    it('should store the state even when it did not change the device state (an ongoing WARNING)', async () => {
+        const { service, stored, alerts } = setup({ device: aDevice({ state: 'WARNING' }) });
 
-        const result = await service.findReport(query);
+        await service.ingest(reading({ temperature: -12 }));
 
-        expect(result.data).toEqual(items);
-        expect(result.metadata).toEqual({ page: 2, pageSize: 50, totalItems: 101, totalPages: 3 });
-
-        // findPage(deviceId, range, page, pageSize)
-        expect(pageCalls[0][0]).toBe('device-1');
-        expect(pageCalls[0][2]).toBe(2);
-        expect(pageCalls[0][3]).toBe(50);
+        expect(alerts.length).toBe(0);
+        expect(stored[0]).toMatchObject({ state: 'WARNING', evaluation: 'EVALUATED' });
     });
 
-    it('should report zero pages when nothing was recorded in the period', async () => {
-        const { service } = setup();
+    it('should mark a normally handled reading EVALUATED and not touch it again', async () => {
+        const { service, stored, evaluations } = setup();
 
-        const result = await service.findReport(query);
+        await service.ingest(reading({ temperature: -21.5 }));
 
-        expect(result.data).toEqual([]);
-        expect(result.metadata.totalItems).toBe(0);
-        expect(result.metadata.totalPages).toBe(0);
+        expect(stored[0]).toMatchObject({ deviceId: 'device-1', evaluation: 'EVALUATED' });
+        expect(evaluations.length).toBe(0);
     });
 
-    it('should reject an unknown device with a 404 instead of an empty report', async () => {
-        const { service, pageCalls } = setup({ device: null });
+    it('should explain a reading above the threshold during a planned pause: state CRITICAL, evaluation PAUSED', async () => {
+        const { service, stored, evaluations } = setup({ suppressing: aSuppressingPause('PAUSED') });
 
-        await expect(service.findReport(query)).rejects.toThrow(EntityNotFoundException);
-        expect(pageCalls.length).toBe(0);
+        await service.ingest(reading({ temperature: -3 }));
+
+        expect(stored[0]).toMatchObject({ state: 'CRITICAL' });
+        expect(evaluations).toEqual([{ evaluation: 'PAUSED', pauseId: PAUSE_ID }]);
+    });
+
+    it('should record PULLING_DOWN with the pause behind it', async () => {
+        const { service, evaluations } = setup({ suppressing: aSuppressingPause('PULLING_DOWN') });
+
+        await service.ingest(reading({ temperature: -3 }));
+
+        expect(evaluations).toEqual([{ evaluation: 'PULLING_DOWN', pauseId: PAUSE_ID }]);
+    });
+
+    it('should record DEVICE_INACTIVE, without a pause, for a device whose monitoring is switched off', async () => {
+        const { service, evaluations } = setup({ device: aDevice({ isActive: false }) });
+
+        await service.ingest(reading({ temperature: -3 }));
+
+        expect(evaluations).toEqual([{ evaluation: 'DEVICE_INACTIVE', pauseId: null }]);
+    });
+
+    it('should store a late arrival as LATE_ARRIVAL from the start, with its own state', async () => {
+        const { service, stored, evaluations } = setup({ device: aDevice({ state: 'CRITICAL' }) });
+
+        await service.ingest(reading({ timestamp: '2026-10-14T23:59:00.000Z', temperature: -22 }));
+
+        expect(stored[0]).toMatchObject({ state: 'NORMAL', evaluation: 'LATE_ARRIVAL' });
+        expect(evaluations.length).toBe(0);
+    });
+
+    it('should leave the stored evaluation alone for a duplicate', async () => {
+        const { service, evaluations } = setup({ stored: false });
+
+        await service.ingest(reading({ temperature: -3 }));
+
+        expect(evaluations.length).toBe(0);
     });
 });

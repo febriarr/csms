@@ -1,8 +1,6 @@
 import { AlertService } from '@/alert/alert.service';
-import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
-import type { FieldErrors } from '@/common/exception/error_response.type';
+import { EntityNotFoundException } from '@/common/exception/app.exception';
 import { DatabaseTransaction } from '@/database/database.type';
-import { dayRangeInAppTimezone } from '@/common/utils/app_timezone';
 import { DeviceRepository } from '@/device/device.repository';
 import { DeviceUtils } from '@/device/device.utils';
 import { DiagnosticService } from '@/diagnostic/diagnostic.service';
@@ -11,18 +9,10 @@ import { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.serv
 import { NotificationUtils } from '@/notification/notification.utils';
 import { NotificationOutboxService } from '@/notification/notification_outbox.service';
 import { Injectable } from '@nestjs/common';
-import type { RecentReadingsQuery, TelemetryInput, TemperatureReportQuery } from '@workspace/validator';
+import type { RecentReadingsQuery, TelemetryInput } from '@workspace/validator';
 import { TemperatureRepository } from './temperature.repository';
 import { TemperatureUtils } from './temperature.utils';
-import {
-    DeviceWithPlace,
-    IngestOutcome,
-    RecentReading,
-    ReportDevice,
-    TelemetryAck,
-    TemperatureReading,
-    WithMetadata,
-} from '@workspace/shared';
+import { DeviceWithPlace, IngestOutcome, RecentReading, TelemetryAck } from '@workspace/shared';
 
 @Injectable()
 export class TemperatureService {
@@ -41,11 +31,13 @@ export class TemperatureService {
      * locked device row; what only informs others (the live screen) happens after it has committed:
      *
      * 1. lock the device, so two readings of one device are handled one after the other
-     * 2. store the reading; a retry of the same moment stops here as a successful duplicate
+     * 2. store the reading with the state it classifies as at the thresholds of this moment (a snapshot, so a report
+     *    never has to guess it later); a retry of the same moment stops here as a successful duplicate
      * 3. keep the diagnostics the device sent along, when there is anything to keep
      * 4. update last seen / last reading (the last reading only when this one is the newest)
-     * 5. stop when the reading is not the newest, the device is not monitored, or a planned pause suppresses alerts
-     * 6. work out the state; when it changed, record the alert and queue its notifications
+     * 5. stop when the reading is not the newest, the device is not monitored, or a planned pause suppresses alerts;
+     *    the last two are written on the stored reading, so the report can say why no alert was raised
+     * 6. when the state changed, record the alert and queue its notifications
      *
      * Readings are always stored, even during a pause: they are audit data.
      */
@@ -62,39 +54,6 @@ export class TemperatureService {
         return outcome.ack;
     }
 
-    /** A page of readings for one device and period. Device and both dates are required here. */
-    async findReport(query: TemperatureReportQuery): Promise<WithMetadata<TemperatureReading[]>> {
-        const { deviceId, from, to } = query;
-
-        if (!deviceId || !from || !to) {
-            const missing: FieldErrors = {};
-
-            if (!deviceId) missing.deviceId = ['Device wajib dipilih'];
-            if (!from) missing.from = ['Tanggal mulai wajib diisi'];
-            if (!to) missing.to = ['Tanggal akhir wajib diisi'];
-
-            throw new ValidationException(missing);
-        }
-
-        const device = await this.requireDevice(deviceId);
-        const { items, total } = await this.temperatures.findPage(
-            device.id,
-            dayRangeInAppTimezone(from, to),
-            query.page,
-            query.pageSize,
-        );
-
-        return {
-            data: items,
-            metadata: {
-                page: query.page,
-                pageSize: query.pageSize,
-                totalItems: total,
-                totalPages: Math.ceil(total / query.pageSize),
-            },
-        };
-    }
-
     /** Recent readings of several devices at once, for the sparklines of the live page. Oldest first. */
     async findRecent(query: RecentReadingsQuery): Promise<Record<string, RecentReading[]>> {
         const since = new Date(Date.now() - query.minutes * 60_000);
@@ -108,15 +67,6 @@ export class TemperatureService {
         }
 
         return result;
-    }
-
-    /** Reports also cover soft-deleted devices: their history is audit data. */
-    async requireDevice(id: string): Promise<ReportDevice> {
-        const device = await this.devices.findAnyById(id);
-
-        if (!device) throw new EntityNotFoundException('Device', id);
-
-        return { id: device.id, code: device.code, name: device.name };
     }
 
     private async ingestInTransaction(
@@ -135,17 +85,28 @@ export class TemperatureService {
             duplicate: false,
         };
 
+        // decided from the row as it was BEFORE touch: touch is what moves last_recorded_at forward
+        const isNewest = device.lastRecordedAt === null || recordedAt > device.lastRecordedAt;
+
+        // what this reading is at the device's thresholds right now; stored, never recomputed by reports
+        const newState = TemperatureUtils.getTemperatureState(device, input.temperature);
+
         const stored = await this.temperatures.insertIgnoreDuplicate(
-            { deviceId: device.id, recordedAt, temperature: input.temperature },
+            {
+                deviceId: device.id,
+                recordedAt,
+                temperature: input.temperature,
+                state: newState,
+                // Provisional. A planned pause can only be looked up once the reading is stored (the reading itself
+                // may end a pull-down), so the pause cases replace this below, inside this same transaction.
+                evaluation: isNewest ? 'EVALUATED' : 'LATE_ARRIVAL',
+            },
             tx,
         );
 
         if (!stored) return { ack: { ...ack, duplicate: true }, event: null };
 
         await this.diagnostics.record(device.id, recordedAt, input, tx);
-
-        // decided from the row as it was BEFORE touch: touch is what moves last_recorded_at forward
-        const isNewest = device.lastRecordedAt === null || recordedAt > device.lastRecordedAt;
 
         await this.devices.touch(device.id, { temperature: input.temperature, recordedAt }, tx);
 
@@ -165,13 +126,19 @@ export class TemperatureService {
         const monitoring = this.pauses.toMonitoring(suppressing.get(device.id));
 
         if (monitoring.status !== 'ACTIVE' || !device.isActive) {
+            // say on the stored reading why no alert is looked at: this is what a report shows next to the number
+            await this.temperatures.markEvaluation(
+                device.id,
+                recordedAt,
+                TemperatureUtils.getEvaluation({ isActive: device.isActive, monitoring }),
+                tx,
+            );
+
             return {
                 ack,
                 event: DeviceUtils.toUpdateEvent(afterReading, monitoring),
             };
         }
-
-        const newState = TemperatureUtils.getTemperatureState(device, input.temperature);
 
         if (newState === device.state) {
             return {

@@ -3,14 +3,17 @@ import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import {
     type RecentReadingsQuery,
     recentReadingsQuerySchema,
+    temperatureEventsQuerySchema,
     temperatureExportQuerySchema,
     temperatureReportQuerySchema,
+    type TemperatureEventsQuery,
     type TemperatureExportQuery,
     type TemperatureReportQuery,
 } from '@workspace/validator';
 import { DeviceKeyGuard } from '@/common/guards/device_key.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod_validation.pipe';
 import { TemperatureExportService } from './temperature_export.service';
+import { TemperatureReportService } from './temperature_report.service';
 import { TemperatureService } from './temperature.service';
 import { telemetrySchema, type TelemetryInput } from '@workspace/validator';
 
@@ -18,6 +21,7 @@ import { telemetrySchema, type TelemetryInput } from '@workspace/validator';
 export class TemperatureController {
     constructor(
         private readonly temperatureService: TemperatureService,
+        private readonly reportService: TemperatureReportService,
         private readonly exportService: TemperatureExportService,
     ) {}
 
@@ -35,7 +39,15 @@ export class TemperatureController {
 
     @Get('report')
     findReport(@Query(new ZodValidationPipe(temperatureReportQuerySchema)) query: TemperatureReportQuery) {
-        return this.temperatureService.findReport(query);
+        return this.reportService.findReport(query);
+    }
+
+    /** Alerts and planned pauses of the period, in time order: the "what happened" next to the readings. */
+    @Get('report/events')
+    async findEvents(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
+        const device = await this.reportService.requireDevice(query.deviceId);
+
+        return this.reportService.findEvents(device, { from: query.from, to: query.to });
     }
 
     @Get('recent')
@@ -47,7 +59,7 @@ export class TemperatureController {
     async export(
         @Query(new ZodValidationPipe(temperatureExportQuerySchema)) query: TemperatureExportQuery,
     ): Promise<StreamableFile> {
-        const device = await this.temperatureService.requireDevice(query.deviceId);
+        const device = await this.reportService.requireDevice(query.deviceId);
         const days = { from: query.from, to: query.to };
 
         return query.format === 'csv' ? this.exportService.csv(device, days) : this.exportService.xlsx(device, days);

@@ -3,10 +3,11 @@ import { DatabaseService } from '@/database/database.service';
 import { DatabaseTransaction } from '@/database/database.type';
 import { coldStorages, devices, monitoringPauses, SelectMonitoringPause, temperatureLogs } from '@/database/schema';
 import { Injectable } from '@nestjs/common';
-import { ExpiredPause, SuppressingPause, SuppressionPhase } from '@workspace/shared';
+import { ExpiredPause, ReportPauseEvent, SuppressingPause, SuppressionPhase } from '@workspace/shared';
 import { PauseQuery } from '@workspace/validator';
 import {
     and,
+    asc,
     desc,
     eq,
     getTableColumns,
@@ -216,6 +217,48 @@ export class MonitoringPauseRepository extends BaseRepository<typeof monitoringP
             .limit(1);
 
         return row && row.endedAt ? { kind: row.kind, endedAt: row.endedAt } : null;
+    }
+
+    /**
+     * The pauses that touched a device in the half-open range `[from, to)`, oldest first, for the temperature
+     * report: pauses on the device itself or on the cold storage it sits in, from their start until their pull-down
+     * allowance ran out. A pause that started before the range and still suppresses inside it is included.
+     */
+    async findOverlapping(
+        target: { deviceId: string; coldStorageId: string },
+        range: { from: Date; to: Date },
+    ): Promise<ReportPauseEvent[]> {
+        const suppressedUntil = sql`${monitoringPauses.endsAt} + make_interval(mins => ${monitoringPauses.maxPulldownMinutes})`;
+
+        const rows = await this.db
+            .select({
+                id: monitoringPauses.id,
+                kind: monitoringPauses.kind,
+                startsAt: monitoringPauses.startsAt,
+                endsAt: monitoringPauses.endsAt,
+                maxPulldownMinutes: monitoringPauses.maxPulldownMinutes,
+                note: monitoringPauses.note,
+                deviceId: monitoringPauses.deviceId,
+            })
+            .from(monitoringPauses)
+            .where(
+                and(
+                    or(
+                        eq(monitoringPauses.deviceId, target.deviceId),
+                        eq(monitoringPauses.coldStorageId, target.coldStorageId),
+                    ),
+                    lt(monitoringPauses.startsAt, range.to),
+                    or(isNull(monitoringPauses.endsAt), sql`${suppressedUntil} > ${range.from}`),
+                ),
+            )
+            .orderBy(asc(monitoringPauses.startsAt));
+
+        return rows.map(({ deviceId, startsAt, ...pause }) => ({
+            type: 'PAUSE' as const,
+            at: startsAt,
+            scope: deviceId === null ? ('COLD_STORAGE' as const) : ('DEVICE' as const),
+            ...pause,
+        }));
     }
 
     private async selectWithTarget(where: SQL | undefined, tx?: DatabaseTransaction): Promise<PauseRow[]> {

@@ -359,3 +359,46 @@ describe('TemperatureUtils.buildAlertReason', () => {
         }
     });
 });
+
+describe('TemperatureUtils.getEvaluation', () => {
+    const active = { status: 'ACTIVE' as const, pause: null };
+
+    it('should be EVALUATED for a monitored device with no pause', () => {
+        expect(TemperatureUtils.getEvaluation({ isActive: true, monitoring: active })).toEqual({
+            evaluation: 'EVALUATED',
+            pauseId: null,
+        });
+    });
+
+    it('should name the pause for PAUSED and PULLING_DOWN', () => {
+        expect(
+            TemperatureUtils.getEvaluation({ isActive: true, monitoring: { status: 'PAUSED', pause: { id: 'p1' } } }),
+        ).toEqual({ evaluation: 'PAUSED', pauseId: 'p1' });
+        expect(
+            TemperatureUtils.getEvaluation({
+                isActive: true,
+                monitoring: { status: 'PULLING_DOWN', pause: { id: 'p1' } },
+            }),
+        ).toEqual({ evaluation: 'PULLING_DOWN', pauseId: 'p1' });
+    });
+
+    it('should be DEVICE_INACTIVE, without a pause, when monitoring is switched off', () => {
+        expect(TemperatureUtils.getEvaluation({ isActive: false, monitoring: active })).toEqual({
+            evaluation: 'DEVICE_INACTIVE',
+            pauseId: null,
+        });
+    });
+
+    it('should prefer the pause over a switched-off device, because it names the reason', () => {
+        expect(
+            TemperatureUtils.getEvaluation({ isActive: false, monitoring: { status: 'PAUSED', pause: { id: 'p1' } } }),
+        ).toEqual({ evaluation: 'PAUSED', pauseId: 'p1' });
+    });
+});
+
+describe('TemperatureUtils.pauseLabel', () => {
+    it('should give the words alert texts use', () => {
+        expect(TemperatureUtils.pauseLabel('MAINTENANCE')).toBe('maintenance');
+        expect(TemperatureUtils.pauseLabel('MACHINE_OFF')).toBe('machine-off period');
+    });
+});

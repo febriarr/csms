@@ -26,6 +26,15 @@ export const temperatureExportQuerySchema = z
     })
     .superRefine(withinReportRange);
 
+/** The alerts and planned pauses of a period: same device and dates as the export, no format. */
+export const temperatureEventsQuerySchema = z
+    .object({
+        deviceId: idSchema,
+        from: isoDateSchema("Tanggal mulai"),
+        to: isoDateSchema("Tanggal akhir"),
+    })
+    .superRefine(withinReportRange);
+
 /* diagnostics report */
 
 export const diagnosticsReportQuerySchema = z
@@ -48,5 +57,6 @@ export const diagnosticsDetailQuerySchema = z
 
 export type TemperatureReportQuery = z.infer<typeof temperatureReportQuerySchema>;
 export type TemperatureExportQuery = z.infer<typeof temperatureExportQuerySchema>;
+export type TemperatureEventsQuery = z.infer<typeof temperatureEventsQuerySchema>;
 export type DiagnosticsReportQuery = z.infer<typeof diagnosticsReportQuerySchema>;
 export type DiagnosticsDetailQuery = z.infer<typeof diagnosticsDetailQuerySchema>;

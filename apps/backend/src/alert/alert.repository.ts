@@ -4,9 +4,9 @@ import { DatabaseService } from '@/database/database.service';
 import { DatabaseTransaction } from '@/database/database.type';
 import { alerts, coldStorages, devices, InserAlert, SelectAlert, user } from '@/database/schema';
 import { Injectable } from '@nestjs/common';
-import { and, count, desc, eq, getTableColumns, gte, isNotNull, isNull, lt, SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gte, isNotNull, isNull, lt, SQL } from 'drizzle-orm';
 import type { AlertQuery } from '@workspace/validator';
-import type { ListAlert } from '@workspace/shared';
+import type { ListAlert, ReportAlertEvent } from '@workspace/shared';
 
 @Injectable()
 export class AlertRepository extends BaseRepository<typeof alerts> {
@@ -61,6 +61,30 @@ export class AlertRepository extends BaseRepository<typeof alerts> {
             })),
             total,
         };
+    }
+
+    /**
+     * Every alert of one device in the half-open range `[from, to)`, oldest first, for the temperature report.
+     * Alerts raised by a reading carry that reading's time, which is how a report line finds its alert.
+     * DEVICE_OFFLINE alerts have no reading: they only show up in the event list.
+     */
+    async findForReport(deviceId: string, range: { from: Date; to: Date }): Promise<ReportAlertEvent[]> {
+        const rows = await this.db
+            .select({
+                at: alerts.occurredAt,
+                fromState: alerts.fromState,
+                toState: alerts.toState,
+                reasonCode: alerts.reasonCode,
+                reason: alerts.reason,
+                temperature: alerts.temperature,
+            })
+            .from(alerts)
+            .where(
+                and(eq(alerts.deviceId, deviceId), gte(alerts.occurredAt, range.from), lt(alerts.occurredAt, range.to)),
+            )
+            .orderBy(asc(alerts.occurredAt));
+
+        return rows.map((row) => ({ type: 'ALERT' as const, ...row }));
     }
 
     /**

@@ -31,6 +31,18 @@ export const pauseKindEnum = pgEnum('pause_kind', ['MAINTENANCE', 'MACHINE_OFF']
 
 export const resetReasonEnum = pgEnum('reset_reason', ['BROWNOUT', 'PANIC', 'WATCHDOG', 'UNKNOWN']);
 
+/** How one stored reading classified against its device's thresholds. No OFFLINE: a reading means the device is up. */
+export const temperatureStateEnum = pgEnum('temperature_state', ['NORMAL', 'DEFROST', 'WARNING', 'CRITICAL']);
+
+/** Whether the alert logic looked at a stored reading and, if not, why (see `temperature_logs`). */
+export const readingEvaluationEnum = pgEnum('reading_evaluation', [
+    'EVALUATED',
+    'PAUSED',
+    'PULLING_DOWN',
+    'DEVICE_INACTIVE',
+    'LATE_ARRIVAL',
+]);
+
 /* Union types derived from the enums above (single source of truth). */
 export type DevicesState = (typeof deviceStateEnum.enumValues)[number];
 export type AlertReason = (typeof alertReasonEnum.enumValues)[number];
@@ -39,3 +51,5 @@ export type NotificationStatus = (typeof notificationStatusEnum.enumValues)[numb
 export type SubscriptionScope = (typeof subscriptionScopeEnum.enumValues)[number];
 export type PauseKind = (typeof pauseKindEnum.enumValues)[number];
 export type ResetReason = (typeof resetReasonEnum.enumValues)[number];
+export type ReadingState = (typeof temperatureStateEnum.enumValues)[number];
+export type ReadingEvaluation = (typeof readingEvaluationEnum.enumValues)[number];
