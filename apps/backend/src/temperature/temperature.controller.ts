@@ -16,6 +16,7 @@ import { TemperatureExportService } from './temperature_export.service';
 import { TemperatureReportService } from './temperature_report.service';
 import { TemperatureService } from './temperature.service';
 import { telemetrySchema, type TelemetryInput } from '@workspace/validator';
+import { SkipTransform } from '@/common/decorators/skip_transform.decorator';
 
 @Controller('temperature')
 export class TemperatureController {
@@ -63,6 +64,7 @@ export class TemperatureController {
         return this.temperatureService.findRecent(query);
     }
 
+    @SkipTransform()
     @Get('report/export')
     async export(
         @Query(new ZodValidationPipe(temperatureExportQuerySchema)) query: TemperatureExportQuery,
