@@ -1,1 +1,0 @@
-ALTER TABLE "device_diagnostics_logs" ADD COLUMN "rssi" integer;
