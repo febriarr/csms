@@ -1,8 +1,13 @@
 {
     "name": "web",
-    "version": "0.0.1",
+    "version": "2.0.0",
     "type": "module",
     "private": true,
+    "license": "MIT",
+    "author": {
+        "name": "Febri Ardiansyah",
+        "email": "hello.febriar@gmail.com"
+    },
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",

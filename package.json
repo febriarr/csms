@@ -1,7 +1,12 @@
 {
     "name": "stp",
-    "version": "0.0.1",
+    "version": "2.0.0",
     "private": true,
+    "license": "MIT",
+    "author": {
+        "name": "Febri Ardiansyah",
+        "email": "hello.febriar@gmail.com"
+    },
     "scripts": {
         "build": "turbo build",
         "dev": "turbo dev",
@@ -17,6 +22,6 @@
     },
     "packageManager": "pnpm@12.15.0",
     "engines": {
-        "node": ">=20.19.0"
+        "node": ">=24.22.1"
     }
 }

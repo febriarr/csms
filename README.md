@@ -43,7 +43,7 @@ csms/
 
 ## Getting started
 
-You need Node.js 20.19 or newer, pnpm and a PostgreSQL database.
+You need Node.js 24.22.1 or newer, pnpm and a PostgreSQL database.
 
 ```bash
 git clone https://github.com/febriarr/csms.git
