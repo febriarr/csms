@@ -42,6 +42,14 @@ export class TemperatureController {
         return this.reportService.findReport(query);
     }
 
+    /** How many readings of the period fall in each state, and how many the alert logic did not look at. */
+    @Get('report/summary')
+    async findSummary(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
+        const device = await this.reportService.requireDevice(query.deviceId);
+
+        return this.reportService.findSummary(device, { from: query.from, to: query.to });
+    }
+
     /** Alerts and planned pauses of the period, in time order: the "what happened" next to the readings. */
     @Get('report/events')
     async findEvents(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
