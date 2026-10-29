@@ -12,6 +12,8 @@ import { Eye, MenuIcon, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { roleLabels } from "./constants";
 import { formatDateTime } from "@/lib/format-date-time";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import { getInitials } from "@/components/profile-drawer";
 
 export type UserAction = "view" | "edit" | "delete";
 
@@ -91,12 +93,24 @@ export function getUserColumns(
         columnHelper.accessor("name", {
             header: LABELS.name,
             enableHiding: false,
-            cell: (info) => (
-                <span className="font-medium">
-                    {info.getValue()}
-                    {info.row.original.id === currentUserId && <Muted>(You)</Muted>}
-                </span>
-            ),
+            cell: (info) => {
+                const { name, image, id } = info.row.original;
+
+                return (
+                    <div className="flex items-center gap-3">
+                        <Avatar className="size-8 rounded-lg">
+                            {image ? <AvatarImage src={image} alt={name} /> : null}
+
+                            <AvatarFallback className="rounded-lg">{getInitials(name)}</AvatarFallback>
+                        </Avatar>
+
+                        <span className="font-medium">
+                            {name}
+                            {id === currentUserId && <Muted>(You)</Muted>}
+                        </span>
+                    </div>
+                );
+            },
         }),
         columnHelper.accessor("username", {
             header: LABELS.username,

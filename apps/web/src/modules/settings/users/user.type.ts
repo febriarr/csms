@@ -1,6 +1,9 @@
 import type { PaginationMeta, User } from "@workspace/shared";
 
-export type UserListItem = Pick<User, "id" | "name" | "username" | "displayUsername" | "role" | "banned" | "createdAt">;
+export type UserListItem = Pick<
+    User,
+    "id" | "name" | "username" | "displayUsername" | "role" | "banned" | "createdAt" | "image"
+>;
 
 export type UserList = {
     data: UserListItem[];

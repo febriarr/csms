@@ -81,11 +81,6 @@ export class UserController {
         });
     }
 
-    /**
-     * Paginated user list, newest first. `search` matches the display name (the admin plugin can only search
-     * `name` and `email`, and the email here is a placeholder), `role` filters by exact role.
-     */
-    @Roles(['super_admin'])
     @Get()
     async list(@Query(new ZodValidationPipe(listUsersQuery)) query: ListUsersQuery, @Req() req: Request) {
         const { page, pageSize, search, role } = query;
@@ -125,6 +120,7 @@ export class UserController {
                 role: user.role,
                 banned: user.banned ?? false,
                 createdAt: user.createdAt,
+                image: user.image,
             })),
             metadata,
         };
