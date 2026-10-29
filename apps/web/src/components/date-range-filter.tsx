@@ -42,6 +42,8 @@ function describe(value: DayRange | undefined): string | null {
 type DateRangeFilterProps = {
     value: DayRange | undefined;
     onChange: (value: DayRange | undefined) => void;
+    /** Shown while nothing is picked. */
+    placeholder?: string;
     className?: string;
 };
 
@@ -49,7 +51,7 @@ type DateRangeFilterProps = {
  * A range of calendar days. While only the first day is picked the filter is not applied yet: the API takes both
  * `from` and `to` or neither.
  */
-export function DateRangeFilter({ value, onChange, className }: DateRangeFilterProps) {
+export function DateRangeFilter({ value, onChange, placeholder = "All dates", className }: DateRangeFilterProps) {
     const [open, setOpen] = useState(false);
     const text = describe(value);
 
@@ -63,7 +65,7 @@ export function DateRangeFilter({ value, onChange, className }: DateRangeFilterP
                     className={cn("justify-start font-normal", !text && "text-muted-foreground", className)}
                 >
                     <CalendarIcon />
-                    {text ?? "All dates"}
+                    {text ?? placeholder}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">

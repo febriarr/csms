@@ -17,6 +17,7 @@ export const router = createBrowserRouter([
                     { path: "/", element: <Navigate to="/dashboard" replace /> },
                     { path: "/dashboard", lazy: () => import("@/App") },
 
+                    // Monitoring
                     {
                         path: "/dashboard/monitoring/live",
                         lazy: () => import("@/modules/monitoring/live/page"),
@@ -30,6 +31,13 @@ export const router = createBrowserRouter([
                         lazy: () => import("@/modules/monitoring/monitoring-pauses/page"),
                     },
 
+                    // Reports
+                    {
+                        path: "/dashboard/reports/temperature-history",
+                        lazy: () => import("@/modules/reports/temperature-history/page"),
+                    },
+
+                    // Settings
                     {
                         path: "/dashboard/settings/master-data/division",
                         lazy: () => import("@/modules/settings/master-data/division/page"),
