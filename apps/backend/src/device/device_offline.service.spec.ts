@@ -1,8 +1,9 @@
 import type { AlertService } from '@/alert/alert.service';
 import type { InserAlert } from '@/database/schema';
 import type { DeviceEventService } from '@/event/device_event.service';
-import type { DeviceUpdateEvent, DeviceWithPlace } from '@workspace/shared';
-import type { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
+import type { DeviceUpdateEvent, DeviceWithPlace, SuppressingPause } from '@workspace/shared';
+import type { MonitoringPauseRepository } from '@/monitoring_pause/monitoring_pause.repository';
+import { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
 import type { NotificationOutboxService } from '@/notification/notification_outbox.service';
 import { aDevice } from './device.fixture';
 import type { DeviceRepository } from './device.repository';
@@ -11,7 +12,10 @@ import { DeviceOfflineService, STARTUP_GRACE_MS } from './device_offline.service
 const NOW = new Date('2026-10-15T01:00:00.000Z');
 const STALE = new Date('2026-10-14T23:00:00.000Z'); // two hours of silence
 
-function setup(devices: Record<string, DeviceWithPlace | null>, options: { failFor?: string } = {}) {
+function setup(
+    devices: Record<string, DeviceWithPlace | null>,
+    options: { failFor?: string; suppressing?: SuppressingPause[] } = {},
+) {
     let committed = false;
 
     const alerts: InserAlert[] = [];
@@ -82,9 +86,10 @@ function setup(devices: Record<string, DeviceWithPlace | null>, options: { failF
             },
         } as unknown as DeviceEventService,
 
-        {
-            isPaused: () => Promise.resolve(false),
-        } as unknown as MonitoringPauseService,
+        // the real pause service on a fake repository: no pause is running unless a test says so
+        new MonitoringPauseService({
+            findSuppressing: () => Promise.resolve(options.suppressing ?? []),
+        } as unknown as MonitoringPauseRepository),
     );
 
     return {
@@ -129,6 +134,25 @@ describe('DeviceOfflineService.detectOnce', () => {
 
         expect(published[0].event.state).toBe('OFFLINE');
         expect(published[0].afterCommit).toBe(true);
+    });
+
+    it('should carry the pause state in the live event: a device can go offline during a planned pause', async () => {
+        const silent = aDevice({ id: 'd1', state: 'NORMAL', lastSeenAt: STALE });
+        const pause: SuppressingPause = {
+            deviceId: 'd1',
+            pauseId: 'p1',
+            kind: 'MAINTENANCE',
+            startsAt: new Date('2026-10-14T22:00:00.000Z'),
+            endsAt: null,
+            phase: 'PAUSED',
+        };
+
+        const { service, published } = setup({ d1: silent }, { suppressing: [pause] });
+
+        await service.detectOnce(NOW);
+
+        expect(published[0].event.state).toBe('OFFLINE');
+        expect(published[0].event.monitoring.status).toBe('PAUSED');
     });
 
     it('should check again under the lock and leave a device alone that has reported in the meantime', async () => {

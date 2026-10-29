@@ -1,5 +1,6 @@
 import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
-import type { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
+import type { MonitoringPauseRepository } from '@/monitoring_pause/monitoring_pause.repository';
+import { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
 import type { SuppressingPause } from '@workspace/shared';
 import type { CreateDeviceInput, UpdateDeviceInput } from '@workspace/validator';
 import { aDevice } from './device.fixture';
@@ -36,11 +37,13 @@ function setup(fake: Fake = {}) {
         softDelete: () => Promise.resolve(fake.softDeleted ?? true),
     };
 
-    const pauses = {
-        findSuppressing: () => Promise.resolve(new Map((fake.suppressing ?? []).map((row) => [row.deviceId, row]))),
-    };
+    // The real pause service on a fake repository: only the database query is faked, so the way a pause becomes
+    // `monitoring` (findSuppressing + toMonitoring) cannot drift away from what this spec expects.
+    const pauses = new MonitoringPauseService({
+        findSuppressing: () => Promise.resolve(fake.suppressing ?? []),
+    } as unknown as MonitoringPauseRepository);
 
-    const service = new DeviceService(repo as unknown as DeviceRepository, pauses as unknown as MonitoringPauseService);
+    const service = new DeviceService(repo as unknown as DeviceRepository, pauses);
 
     return { service, created, changes };
 }
@@ -72,7 +75,7 @@ describe('DeviceService.findAll / findOne', () => {
 
         expect(first.monitoring).toEqual({
             status: 'PAUSED',
-            pause: { id: 'p1', kind: 'MACHINE_OFF', startsAt: pause.startsAt, endsAt: null },
+            pause: { id: 'p1', kind: 'MACHINE_OFF', startsAt: pause.startsAt, endsAt: null, phase: 'PAUSED' },
         });
         expect(second.monitoring).toEqual({ status: 'ACTIVE', pause: null });
     });
