@@ -36,6 +36,10 @@ export const router = createBrowserRouter([
                         path: "/dashboard/reports/temperature-history",
                         lazy: () => import("@/modules/reports/temperature-history/page"),
                     },
+                    {
+                        path: "/dashboard/reports/device-diagnostic",
+                        lazy: () => import("@/modules/reports/device-diagnostic/page"),
+                    },
 
                     // Settings
                     {

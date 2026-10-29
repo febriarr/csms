@@ -31,7 +31,6 @@ export function getReportEvents(params: ReportParams, signal?: AbortSignal): Pro
     return apiData(http.get<ApiSuccessResponse<ReportEvent[]>>("/temperature/report/events", { params, signal }));
 }
 
-/** NEEDS A NEW BACKEND ENDPOINT: GET /temperature/report/summary (same query as /report/events). */
 export function getReportSummary(params: ReportParams, signal?: AbortSignal): Promise<TemperatureReportSummary> {
     return apiData(
         http.get<ApiSuccessResponse<TemperatureReportSummary>>("/temperature/report/summary", { params, signal })
