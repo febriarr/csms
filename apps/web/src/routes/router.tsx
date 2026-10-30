@@ -40,6 +40,10 @@ export const router = createBrowserRouter([
                         path: "/dashboard/reports/device-diagnostic",
                         lazy: () => import("@/modules/reports/device-diagnostic/page"),
                     },
+                    {
+                        path: "/dashboard/reports/notification-log",
+                        lazy: () => import("@/modules/reports/notification-log/page"),
+                    },
 
                     // Settings
                     {
