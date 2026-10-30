@@ -8,6 +8,7 @@ import { CircleQuestionMark } from "lucide-react";
 import { useAuth } from "@/modules/auth/auth.context";
 import { WhatsappDialog, WhatsappStatusButton } from "./whatsapp-dialog";
 import { useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 
 export default function HeaderDashboard() {
     const { state } = useSidebar();
@@ -27,7 +28,19 @@ export default function HeaderDashboard() {
             )}
         >
             <div className="flex min-w-0 items-center gap-2">
-                <SidebarTrigger className="shrink-0" />
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <SidebarTrigger className="shrink-0" />
+                    </TooltipTrigger>
+
+                    <TooltipContent className="flex items-center gap-2">
+                        <span>Collapse sidebar</span>
+                        <kbd className="rounded border border-background/20 bg-background/10 px-1.5 py-0.5 text-[10px] font-medium text-background">
+                            ⌘ B
+                        </kbd>
+                    </TooltipContent>
+                </Tooltip>
+
                 <Separator orientation="vertical" className="data-[orientation=vertical]:h-6" />
                 <AppBreadcrumb />
             </div>
