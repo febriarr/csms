@@ -13,7 +13,7 @@ import {
 } from "@workspace/ui/components/dialog";
 
 import { channelLabel } from "./constants";
-import { getNotificationErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useReplaceSubscriptions } from "./hooks";
 import { getDraftsError, toDrafts, toPayload } from "./subscription-draft";
 import { SubscriptionEditor } from "./subscription-editor";
@@ -52,7 +52,7 @@ function SubscriptionForm({
     const [drafts, setDrafts] = useState(() => toDrafts(recipient.subscriptions));
     const [clientError, setClientError] = useState<string | null>(null);
 
-    const error = clientError ?? (save.error ? getNotificationErrorMessage(save.error) : undefined);
+    const error = clientError ?? (save.error ? getErrorMessage(save.error) : undefined);
 
     function handleSave() {
         if (save.isPending) return;

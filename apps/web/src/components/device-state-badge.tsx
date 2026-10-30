@@ -8,7 +8,7 @@ export function DeviceStateBadge({ state, className }: { state: string; classNam
     const meta = stateMeta(state);
 
     return (
-        <Badge variant="outline" className={cn("gap-1.5", meta.badge, className)}>
+        <Badge variant={meta.badge} className={cn("gap-1.5", className)}>
             <span aria-hidden className={cn("size-1.5 rounded-full", meta.dot)} />
             {meta.label}
         </Badge>

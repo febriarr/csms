@@ -13,7 +13,7 @@ import {
 } from "@workspace/ui/components/alert-dialog";
 import { FieldError } from "@workspace/ui/components/field";
 
-import { getNotificationErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useDeleteRecipient } from "./hooks";
 
 type DeleteRecipientDialogProps = {
@@ -57,7 +57,7 @@ function DeleteRecipientContent({
                 </AlertDialogDescription>
             </AlertDialogHeader>
 
-            {remove.error && <FieldError>{getNotificationErrorMessage(remove.error)}</FieldError>}
+            {remove.error && <FieldError>{getErrorMessage(remove.error)}</FieldError>}
 
             <AlertDialogFooter>
                 <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>

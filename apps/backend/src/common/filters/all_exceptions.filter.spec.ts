@@ -1,7 +1,7 @@
 import type { ArgumentsHost } from '@nestjs/common';
 import type { HttpAdapterHost } from '@nestjs/core';
 import { EntityNotFoundException } from '../exception/app.exception';
-import type { ErrorResponse } from '../exception/error_response.type';
+import type { ErrorResponse } from '@workspace/shared';
 import { AllExceptionsFilter } from './all_exceptions.filter';
 
 type LogCall = { level: 'error' | 'warn'; args: unknown[] };

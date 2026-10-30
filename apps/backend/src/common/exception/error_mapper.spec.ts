@@ -13,7 +13,7 @@ import {
     ResourceInUseException,
     ValidationException,
 } from './app.exception';
-import { ErrorCode } from './error_codes';
+import { ErrorCode } from '@workspace/shared';
 import { mapException } from './error_mapper';
 
 /** Shapes the drivers really produce, so the mapper is tested without a database. */

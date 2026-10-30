@@ -14,7 +14,7 @@ import {
 import { FieldError } from "@workspace/ui/components/field";
 
 import { pauseTargetName } from "./constants";
-import { getPauseErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useDeletePause } from "./hooks";
 
 type DeletePauseDialogProps = {
@@ -67,7 +67,7 @@ function DeletePauseContent({
                 </AlertDialogDescription>
             </AlertDialogHeader>
 
-            {remove.error && <FieldError>{getPauseErrorMessage(remove.error)}</FieldError>}
+            {remove.error && <FieldError>{getErrorMessage(remove.error)}</FieldError>}
 
             <AlertDialogFooter>
                 <AlertDialogCancel disabled={remove.isPending}>Back</AlertDialogCancel>

@@ -1,3 +1,5 @@
+import type { BadgeVariants } from "@workspace/ui/components/badge";
+
 /** What a device is shown as. Inactive devices are not monitored, so they get a state of their own. */
 export type DisplayState = "CRITICAL" | "WARNING" | "OFFLINE" | "DEFROST" | "NORMAL" | "INACTIVE" | "UNKNOWN";
 
@@ -15,7 +17,7 @@ export const STATE_ORDER: readonly DisplayState[] = [
 type StateMeta = {
     label: string;
     /** Badge and chip colors. */
-    badge: string;
+    badge: BadgeVariants["variant"];
     /** Accent strip on the left edge of the card. */
     strip: string;
     /** Text color of the big reading and small accents. */
@@ -28,7 +30,7 @@ type StateMeta = {
 
 // Tailwind only generates classes it can see as complete strings, so none of these are built from pieces.
 const MUTED: Omit<StateMeta, "label"> = {
-    badge: "border-border bg-muted text-muted-foreground",
+    badge: "muted",
     strip: "bg-muted-foreground/40",
     text: "text-muted-foreground",
     dot: "bg-muted-foreground",
@@ -38,7 +40,7 @@ const MUTED: Omit<StateMeta, "label"> = {
 export const STATE_META: Record<DisplayState, StateMeta> = {
     CRITICAL: {
         label: "Critical",
-        badge: "border-destructive/40 bg-destructive/10 text-destructive",
+        badge: "destructive",
         strip: "bg-destructive",
         text: "text-destructive",
         dot: "bg-destructive",
@@ -46,7 +48,7 @@ export const STATE_META: Record<DisplayState, StateMeta> = {
     },
     WARNING: {
         label: "Warning",
-        badge: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+        badge: "warning",
         strip: "bg-amber-500",
         text: "text-amber-600 dark:text-amber-400",
         dot: "bg-amber-500",
@@ -55,7 +57,7 @@ export const STATE_META: Record<DisplayState, StateMeta> = {
     OFFLINE: { label: "Offline", ...MUTED },
     DEFROST: {
         label: "Defrost",
-        badge: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+        badge: "info",
         strip: "bg-sky-500",
         text: "text-sky-600 dark:text-sky-400",
         dot: "bg-sky-500",
@@ -63,7 +65,7 @@ export const STATE_META: Record<DisplayState, StateMeta> = {
     },
     NORMAL: {
         label: "Normal",
-        badge: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+        badge: "success",
         strip: "bg-emerald-500",
         text: "text-emerald-600 dark:text-emerald-400",
         dot: "bg-emerald-500",

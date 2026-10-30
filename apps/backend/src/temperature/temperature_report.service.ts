@@ -1,6 +1,6 @@
 import { AlertService } from '@/alert/alert.service';
 import { EntityNotFoundException, ValidationException } from '@/common/exception/app.exception';
-import type { FieldErrors } from '@/common/exception/error_response.type';
+import type { FieldErrors } from '@workspace/shared';
 import { dayRangeInAppTimezone } from '@/common/utils/app_timezone';
 import { DeviceRepository } from '@/device/device.repository';
 import { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';

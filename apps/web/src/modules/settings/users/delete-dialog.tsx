@@ -12,7 +12,7 @@ import {
 } from "@workspace/ui/components/alert-dialog";
 import { FieldError } from "@workspace/ui/components/field";
 
-import { getUserErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useDeleteUser } from "./hooks";
 import type { UserListItem } from "./user.type";
 
@@ -50,7 +50,7 @@ function DeleteUserContent({ user, onDeleted }: { user: UserListItem; onDeleted:
                 </AlertDialogDescription>
             </AlertDialogHeader>
 
-            {remove.error && <FieldError>{getUserErrorMessage(remove.error)}</FieldError>}
+            {remove.error && <FieldError>{getErrorMessage(remove.error)}</FieldError>}
 
             <AlertDialogFooter>
                 <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>

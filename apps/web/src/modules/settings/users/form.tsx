@@ -19,10 +19,11 @@ import { createUserInput, updateRoleInput, updateUserInput, userRoles } from "@w
 import { toFieldErrors } from "@/lib/form-errors";
 
 import { roleLabels } from "./constants";
-import { getServerFieldErrors, getUserErrorMessage } from "./errors";
+import { getServerFieldErrors } from "./errors";
 import { useCreateUser, useUpdateUser } from "./hooks";
 import type { UserChanges } from "./user.api";
 import type { UserListItem } from "./user.type";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export type UserFormResult = "created" | "updated";
 
@@ -89,7 +90,7 @@ function UserForm({ user, onCancel, onSuccess }: UserFormProps) {
     const errors = { ...serverFields, ...clientErrors };
 
     const hasFieldError = Object.keys(errors).some((field) => field !== "_root");
-    const rootError = errors._root ?? (serverError && !hasFieldError ? getUserErrorMessage(serverError) : undefined);
+    const rootError = errors._root ?? (serverError && !hasFieldError ? getErrorMessage(serverError) : undefined);
 
     function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();

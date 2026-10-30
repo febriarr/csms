@@ -23,7 +23,8 @@ import { useDevices } from "@/modules/settings/master-data/device/hooks";
 
 import { KIND_LABELS, PAUSE_KINDS, type PauseTarget } from "./constants";
 import { DateTimePicker } from "./date-time-picker";
-import { getPauseErrorMessage, getServerFieldErrors } from "./errors";
+import { getServerFieldErrors } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useCreatePause } from "./hooks";
 
 type StartMode = "NOW" | "SCHEDULED";
@@ -87,7 +88,7 @@ function PauseForm({ onCancel, onSuccess }: PauseFormProps) {
     const targetError = errors.deviceId ?? errors.coldStorageId;
 
     const hasFieldError = Object.keys(errors).some((field) => field !== "_root");
-    const rootError = errors._root ?? (serverError && !hasFieldError ? getPauseErrorMessage(serverError) : undefined);
+    const rootError = errors._root ?? (serverError && !hasFieldError ? getErrorMessage(serverError) : undefined);
 
     const targetOptions =
         targetType === "DEVICE"

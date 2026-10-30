@@ -1,4 +1,4 @@
-import { ErrorCode } from './error_codes';
+import { ErrorCode } from '@workspace/shared';
 
 /**
  * Everything the API knows about the database's named constraints, in one place. When a query violates one of

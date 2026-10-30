@@ -19,7 +19,7 @@ import { useDevices } from "@/modules/settings/master-data/device/hooks";
 
 import { alertTableFeatures, getAlertColumns, type AlertAction } from "./columns";
 import { ACK_FILTERS, ACK_LABELS, acknowledgedParam, reasonLabel, type AckFilter } from "./constants";
-import { getAlertErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useAcknowledgeAlert, useAlerts } from "./hooks";
 import { AlertViewDialog } from "./view-dialog";
 
@@ -78,7 +78,7 @@ export function Component() {
                     setViewing(null);
                     toast.success("Success", { description: `Alert "${alert.deviceName}" berhasil di-acknowledge.` });
                 },
-                onError: (error) => toast.error("Error", { description: getAlertErrorMessage(error) }),
+                onError: (error) => toast.error("Error", { description: getErrorMessage(error) }),
             });
         },
         [acknowledgeMutate]

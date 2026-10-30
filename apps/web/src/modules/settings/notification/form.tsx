@@ -26,7 +26,8 @@ import { toFieldErrors } from "@/lib/form-errors";
 import { useDivisions } from "@/modules/settings/master-data/division/hooks";
 
 import { channelLabel } from "./constants";
-import { getNotificationErrorMessage, getServerFieldErrors } from "./errors";
+import { getServerFieldErrors } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useCreateRecipient, useUpdateRecipient } from "./hooks";
 import { getDraftsError, toPayload, type DraftSubscription } from "./subscription-draft";
 import { SubscriptionEditor } from "./subscription-editor";
@@ -123,8 +124,7 @@ function RecipientForm({ recipient, onCancel, onSuccess }: RecipientFormProps) {
     const errors = { ...getServerFieldErrors(serverError), ...clientErrors };
 
     const hasFieldError = Object.keys(errors).some((field) => field !== "_root");
-    const rootError =
-        errors._root ?? (serverError && !hasFieldError ? getNotificationErrorMessage(serverError) : undefined);
+    const rootError = errors._root ?? (serverError && !hasFieldError ? getErrorMessage(serverError) : undefined);
 
     function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();

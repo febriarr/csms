@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ErrorResponse } from '../exception/error_response.type';
+import { ErrorResponse } from '@workspace/shared';
 import { mapException } from '../exception/error_mapper';
 import type { Request, Response } from 'express';
 

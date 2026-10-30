@@ -60,8 +60,7 @@ export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 export type FieldErrors = Record<string, string[]>;
 
 /**
- * The only shape the API ever returns for a failed request. Keep it free of backend imports so the React app
- * can reuse it (move this file and error_codes.ts into a shared package when the frontend needs them).
+ * The only shape the API ever returns for a failed request.
  */
 export type ErrorResponse = {
     success: false;

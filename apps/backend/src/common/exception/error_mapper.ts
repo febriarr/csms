@@ -2,8 +2,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { ZodError } from 'zod';
 import { AppException } from './app.exception';
 import { CHECK_CONSTRAINTS, TABLE_LABELS, UNIQUE_CONSTRAINTS, type ConstraintRule } from './db_constraints';
-import { ErrorCode } from './error_codes';
-import type { FieldErrors } from './error_response.type';
+import { ErrorCode, FieldErrors } from '@workspace/shared';
 
 /**
  * Turns ANY thrown value into the status / code / message the client will see. Pure: no Nest request objects, no

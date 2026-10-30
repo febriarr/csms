@@ -1,23 +1,5 @@
+import { getErrorMessage } from "@/lib/get-error-message";
 import { ErrorCode, type ErrorResponse } from "@workspace/shared";
-
-/**
- * Maps backend error codes to (Indonesian) messages; falls back to whatever the backend said.
- */
-export function getUserErrorMessage(error: ErrorResponse): string {
-    switch (error.code) {
-        case ErrorCode.USERNAME_TAKEN:
-            return "Username sudah digunakan.";
-        case ErrorCode.EMAIL_TAKEN:
-            return "Email sudah digunakan.";
-        case ErrorCode.ENTITY_NOT_FOUND:
-        case ErrorCode.NOT_FOUND:
-            return "User tidak ditemukan. Mungkin sudah dihapus.";
-        case ErrorCode.FORBIDDEN:
-            return "Anda tidak memiliki akses untuk aksi ini.";
-        default:
-            return error.message;
-    }
-}
 
 /** Error codes that belong to one particular form field. */
 const CODE_TO_FIELD: Partial<Record<ErrorCode, string>> = {
@@ -34,7 +16,7 @@ export function getServerFieldErrors(error: ErrorResponse | null | undefined): R
     }
 
     const field = CODE_TO_FIELD[error.code];
-    if (field) result[field] ??= getUserErrorMessage(error);
+    if (field) result[field] ??= getErrorMessage(error);
 
     return result;
 }

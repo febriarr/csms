@@ -19,7 +19,8 @@ import { toFieldErrors } from "@/lib/form-errors";
 
 import { pauseTargetName } from "./constants";
 import { DateTimePicker } from "./date-time-picker";
-import { getPauseErrorMessage, getServerFieldErrors } from "./errors";
+import { getServerFieldErrors } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useEndPause } from "./hooks";
 
 type EndPauseDialogProps = {
@@ -58,7 +59,7 @@ function EndPauseForm({
     const errors = { ...getServerFieldErrors(serverError), ...clientErrors };
 
     const hasFieldError = Object.keys(errors).some((field) => field !== "_root");
-    const rootError = errors._root ?? (serverError && !hasFieldError ? getPauseErrorMessage(serverError) : undefined);
+    const rootError = errors._root ?? (serverError && !hasFieldError ? getErrorMessage(serverError) : undefined);
 
     function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault();

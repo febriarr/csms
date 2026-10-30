@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCode } from './error_codes';
-import type { FieldErrors } from './error_response.type';
+import { ErrorCode, FieldErrors } from '@workspace/shared';
 
 export type AppExceptionOptions = {
     code: ErrorCode;

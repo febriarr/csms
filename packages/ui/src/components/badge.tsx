@@ -10,16 +10,17 @@ const badgeVariants = cva(
             variant: {
                 default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
                 secondary: "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-                destructive:
-                    "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
+                destructive: "border-destructive/40 bg-destructive/10 text-destructive",
                 outline:
                     "border-border bg-input/20 text-foreground dark:bg-input/30 [a]:hover:bg-muted [a]:hover:text-muted-foreground",
                 ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
                 link: "text-primary underline-offset-4 hover:underline",
                 success:
-                    "bg-success/10 text-success focus-visible:ring-success/20 dark:bg-success/20 dark:focus-visible:ring-success/40 [a]:hover:bg-success/20",
+                    "border border-success/40 bg-success/10 text-success-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
                 warning:
-                    "bg-warning/10 text-warning focus-visible:ring-warning/20 dark:bg-warning/20 dark:focus-visible:ring-warning/40 [a]:hover:bg-warning/20",
+                    "border border-warning/40 bg-warning/10 text-warning-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
+                info: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+                muted: "border-border bg-muted text-muted-foreground",
             },
         },
         defaultVariants: {
@@ -46,4 +47,6 @@ function Badge({
     );
 }
 
-export { Badge, badgeVariants };
+type BadgeVariants = VariantProps<typeof badgeVariants>;
+
+export { Badge, badgeVariants, type BadgeVariants };

@@ -33,7 +33,7 @@ import {
     readingTableFeatures,
 } from "./columns";
 import { exportFilename, getRangeProblem } from "./constants";
-import { getReportErrorMessage } from "./errors";
+import { getErrorMessage } from "@/lib/get-error-message";
 import {
     useExportReport,
     useRefreshReport,
@@ -140,7 +140,7 @@ export function Component() {
                     toast.success("Success", {
                         description: `${group.toast} ${format.toUpperCase()} berhasil diunduh.`,
                     }),
-                onError: (error) => toast.error("Error", { description: getReportErrorMessage(error) }),
+                onError: (error) => toast.error("Error", { description: getErrorMessage(error) }),
             }
         );
     }
