@@ -3,11 +3,13 @@ import type {
     ReportAlertEvent,
     ReportEvent,
     ReportPauseEvent,
+    TemperatureHourlyRow,
     TemperatureReading,
     TemperatureReportRow,
     TemperatureReportSummary,
 } from '@workspace/shared';
 import { READING_EVALUATIONS, TEMPERATURE_STATES } from '@workspace/validator';
+import type { HourlyAggregate } from './temperature.type';
 import { TemperatureUtils } from './temperature.utils';
 
 /** What a report needs to explain a reading: the alerts and pauses of the period, indexed for lookup. */
@@ -16,6 +18,11 @@ export type ReportContext = {
     alertsByTime: Map<number, ReportAlertEvent[]>;
     pausesById: Map<string, ReportPauseEvent>;
 };
+
+const HOUR_MS = 3_600_000;
+
+/** Below this share of the expected readings, an hour gets a "low coverage" note. */
+export const LOW_COVERAGE_PERCENT = 80;
 
 /**
  * Pure rules of the temperature report: which note goes with a reading, how events are ordered, how the summary is
@@ -119,6 +126,82 @@ export class ReportUtils {
         return { total, byState, byEvaluation };
     }
 
+    /**
+     * The hourly report: one row per hour from the start of the period up to now (or its end, whichever is first).
+     * Hours the database has no summary for are filled in as "no readings" rows, so a silent device shows up as a
+     * gap with its reason instead of as a missing line.
+     *
+     * Hours are matched by epoch milliseconds. The plant time zone has whole-hour offsets (WIB is UTC+7), so a
+     * period starts exactly on an hour boundary and the database buckets (`date_trunc` in that zone) fall on the same
+     * boundaries as `HOUR_MS` steps. A zone with a half-hour offset would need real calendar math here.
+     */
+    static buildHourly(
+        this: void,
+        input: {
+            aggregates: HourlyAggregate[];
+            alerts: ReportAlertEvent[];
+            range: { from: Date; to: Date };
+            heartbeatSeconds: number;
+            now: Date;
+        },
+    ): TemperatureHourlyRow[] {
+        const { aggregates, alerts, range, heartbeatSeconds, now } = input;
+
+        const byHour = new Map(aggregates.map((aggregate) => [aggregate.hour.getTime(), aggregate]));
+        const alertsByHour = new Map<number, ReportAlertEvent[]>();
+
+        for (const alert of alerts) {
+            const key = Math.floor(alert.at.getTime() / HOUR_MS) * HOUR_MS;
+
+            alertsByHour.set(key, [...(alertsByHour.get(key) ?? []), alert]);
+        }
+
+        const rows: TemperatureHourlyRow[] = [];
+        const until = Math.min(range.to.getTime(), now.getTime());
+
+        for (let start = range.from.getTime(); start < until; start += HOUR_MS) {
+            const aggregate = byHour.get(start);
+            const hourAlerts = alertsByHour.get(start) ?? [];
+
+            // an hour still going has only had part of its readings so far
+            const inProgress = start + HOUR_MS > now.getTime();
+            const elapsedSeconds = Math.min(HOUR_MS, now.getTime() - start) / 1000;
+            const expectedReadings = heartbeatSeconds > 0 ? Math.round(elapsedSeconds / heartbeatSeconds) : 0;
+            const readings = aggregate?.readings ?? 0;
+            const coverage =
+                expectedReadings > 0 ? Math.min(100, Math.round((readings / expectedReadings) * 100)) : null;
+
+            const notEvaluated = aggregate
+                ? aggregate.pausedCount + aggregate.pullingDownCount + aggregate.inactiveCount + aggregate.lateCount
+                : 0;
+
+            rows.push({
+                hour: new Date(start),
+                readings,
+                expectedReadings,
+                coverage,
+                minTemperature: aggregate?.min ?? null,
+                avgTemperature: aggregate?.avg ?? null,
+                maxTemperature: aggregate?.max ?? null,
+                worstState: aggregate?.worstState ?? null,
+                warningCount: aggregate?.warningCount ?? 0,
+                criticalCount: aggregate?.criticalCount ?? 0,
+                notEvaluated,
+                inProgress,
+                note: ReportUtils.hourNote({
+                    aggregate,
+                    hourAlerts,
+                    coverage,
+                    expectedReadings,
+                    notEvaluated,
+                    inProgress,
+                }),
+            });
+        }
+
+        return rows;
+    }
+
     /** One line for the Events sheet and the timeline: what happened, in words. */
     static describeEvent(this: void, event: ReportEvent): string {
         if (event.type === 'ALERT') {
@@ -132,6 +215,65 @@ export class ReportUtils {
             event.maxPulldownMinutes > 0 ? `, then up to ${event.maxPulldownMinutes} min pull-down allowance` : '';
 
         return `Planned ${label} on ${target}, ${until}${pullDown}. Alerts are suppressed.`;
+    }
+
+    /** "10:12" of a moment, in the plant time zone. */
+    private static clock(date: Date): string {
+        // formatDateTime gives "15-OCT-2026 10:12:30": the clock starts after the date and its space
+        return formatDateTime(date).slice(12, 17);
+    }
+
+    /**
+     * What explains an hour, in order: it is not over, no data came, alerts were raised, alerts were not looked at,
+     * an excursion went on without a state change, or data came in thinly. Null when there is nothing to explain.
+     */
+    private static hourNote(context: {
+        aggregate: HourlyAggregate | undefined;
+        hourAlerts: ReportAlertEvent[];
+        coverage: number | null;
+        expectedReadings: number;
+        notEvaluated: number;
+        inProgress: boolean;
+    }): string | null {
+        const { aggregate, hourAlerts, coverage, expectedReadings, notEvaluated, inProgress } = context;
+        const notes: string[] = [];
+
+        if (inProgress) notes.push('Hour in progress: numbers may still change.');
+
+        if (!aggregate) {
+            notes.push('No readings received.');
+        }
+
+        if (hourAlerts.length > 0) {
+            const items = hourAlerts.map((alert) => `${alert.toState} at ${ReportUtils.clock(alert.at)}`);
+
+            notes.push(`${hourAlerts.length} alert${hourAlerts.length > 1 ? 's' : ''}: ${items.join(', ')}.`);
+        }
+
+        if (aggregate && notEvaluated > 0) {
+            const causes = [
+                aggregate.pausedCount > 0 && `planned pause ${aggregate.pausedCount}`,
+                aggregate.pullingDownCount > 0 && `pull-down ${aggregate.pullingDownCount}`,
+                aggregate.inactiveCount > 0 && `monitoring off ${aggregate.inactiveCount}`,
+                aggregate.lateCount > 0 && `late arrival ${aggregate.lateCount}`,
+            ].filter(Boolean);
+
+            notes.push(
+                `Alerts not evaluated for ${notEvaluated} of ${aggregate.readings} readings (${causes.join(', ')}).`,
+            );
+        }
+
+        if (aggregate && aggregate.evaluatedExcursions > 0 && hourAlerts.length === 0) {
+            notes.push('WARNING/CRITICAL continued without a state change, so no new alert.');
+        }
+
+        if (aggregate && !inProgress && coverage !== null && coverage < LOW_COVERAGE_PERCENT) {
+            notes.push(
+                `Low coverage: ${aggregate.readings} of about ${expectedReadings} expected readings (device offline or reporting late).`,
+            );
+        }
+
+        return notes.length > 0 ? notes.join(' ') : null;
     }
 
     private static pauseNote(reading: TemperatureReading, context: ReportContext): string {

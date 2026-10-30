@@ -2,14 +2,14 @@ import type { ReactNode } from "react";
 import { createColumnHelper, tableFeatures } from "@tanstack/react-table";
 import { ArrowRight } from "lucide-react";
 
-import type { ReportEvent, TemperatureReportRow } from "@workspace/shared";
+import type { ReportEvent, TemperatureHourlyRow, TemperatureReportRow } from "@workspace/shared";
 import { Badge } from "@workspace/ui/components/badge";
 
 import { DeviceStateBadge } from "@/components/device-state-badge";
 import { formatTemperature, humanizeEnum } from "@/lib/format";
 import { formatDateTime } from "@/lib/format-date-time";
 
-import { EVALUATION_META } from "./constants";
+import { EVALUATION_META, LOW_COVERAGE_PERCENT } from "./constants";
 
 /* shared bits */
 
@@ -30,6 +30,17 @@ function EvaluationCell({ evaluation }: { evaluation: TemperatureReportRow["eval
         <Badge variant="outline" className={NOT_EVALUATED_STYLE} title={meta.hint}>
             {meta.label}
         </Badge>
+    );
+}
+
+/** The explanation of a row, cut to one line with the full text on hover. */
+function NoteCell({ note }: { note: string | null }) {
+    return note ? (
+        <span className="block max-w-md truncate text-muted-foreground" title={note}>
+            {note}
+        </span>
+    ) : (
+        <Muted>-</Muted>
     );
 }
 
@@ -59,21 +70,130 @@ export const readingColumns = readingHelper.columns([
     }),
     readingHelper.accessor("note", {
         header: "Note",
-        cell: (info) => {
-            const note = info.getValue();
-
-            return note ? (
-                <span className="block max-w-md truncate text-muted-foreground" title={note}>
-                    {note}
-                </span>
-            ) : (
-                <Muted>-</Muted>
-            );
-        },
+        cell: (info) => <NoteCell note={info.getValue()} />,
     }),
     readingHelper.accessor("receivedAt", {
         header: "Received",
         cell: (info) => <Muted>{formatDateTime(info.getValue())}</Muted>,
+    }),
+]);
+
+/* hourly */
+
+export const hourlyTableFeatures = tableFeatures({});
+
+const hourlyHelper = createColumnHelper<typeof hourlyTableFeatures, TemperatureHourlyRow>();
+
+/** A temperature of the hour, or a dash for an hour without readings. */
+function HourTemperature({ value }: { value: number | null }) {
+    return value === null ? (
+        <Muted>-</Muted>
+    ) : (
+        <span className="font-mono tabular-nums">{formatTemperature(value)}</span>
+    );
+}
+
+/** How many readings of the hour were in a state; quiet when none. */
+function HourCount({ value }: { value: number }) {
+    return value === 0 ? <Muted>0</Muted> : <span className="font-mono font-medium tabular-nums">{value}</span>;
+}
+
+/** Readings against what the heartbeat says should have arrived. Amber when thin, unless the hour is not over. */
+function CoverageCell({ row }: { row: TemperatureHourlyRow }) {
+    if (row.coverage === null) return <Muted>-</Muted>;
+
+    const thin = !row.inProgress && row.coverage < LOW_COVERAGE_PERCENT;
+
+    return (
+        <span
+            className={
+                thin
+                    ? "font-mono font-medium text-amber-600 tabular-nums dark:text-amber-400"
+                    : "font-mono tabular-nums"
+            }
+            title={`${row.readings} of about ${row.expectedReadings} expected readings`}
+        >
+            {row.coverage}%
+        </span>
+    );
+}
+
+export const hourlyColumns = hourlyHelper.columns([
+    hourlyHelper.accessor("hour", {
+        header: "Hour",
+        cell: (info) => (
+            <div className="flex items-center gap-2 whitespace-nowrap">
+                {formatDateTime(info.getValue())}
+                {info.row.original.inProgress && (
+                    <Badge
+                        variant="outline"
+                        className={PAUSE_STYLE}
+                        title="The hour is not over yet: numbers may still change."
+                    >
+                        In progress
+                    </Badge>
+                )}
+            </div>
+        ),
+    }),
+    hourlyHelper.accessor("readings", {
+        header: "Readings",
+        cell: (info) => <span className="font-mono tabular-nums">{info.getValue()}</span>,
+    }),
+    hourlyHelper.display({
+        id: "coverage",
+        header: "Coverage",
+        cell: ({ row }) => <CoverageCell row={row.original} />,
+    }),
+    hourlyHelper.accessor("minTemperature", {
+        header: "Min",
+        cell: (info) => <HourTemperature value={info.getValue()} />,
+    }),
+    hourlyHelper.accessor("avgTemperature", {
+        header: "Avg",
+        cell: (info) => <HourTemperature value={info.getValue()} />,
+    }),
+    hourlyHelper.accessor("maxTemperature", {
+        header: "Max",
+        cell: (info) => <HourTemperature value={info.getValue()} />,
+    }),
+    hourlyHelper.accessor("worstState", {
+        header: "Worst state",
+        cell: (info) => {
+            const state = info.getValue();
+
+            return state ? <DeviceStateBadge state={state} /> : <Muted>-</Muted>;
+        },
+    }),
+    hourlyHelper.accessor("warningCount", {
+        header: "Warning",
+        cell: (info) => <HourCount value={info.getValue()} />,
+    }),
+    hourlyHelper.accessor("criticalCount", {
+        header: "Critical",
+        cell: (info) => <HourCount value={info.getValue()} />,
+    }),
+    hourlyHelper.accessor("notEvaluated", {
+        header: "Not evaluated",
+        cell: (info) => {
+            const count = info.getValue();
+
+            return count === 0 ? (
+                <Muted>0</Muted>
+            ) : (
+                <Badge
+                    variant="outline"
+                    className={NOT_EVALUATED_STYLE}
+                    title="Readings the alert logic did not look at (planned pause, pull-down, monitoring off, late arrival). The note names the causes."
+                >
+                    {count}
+                </Badge>
+            );
+        },
+    }),
+    hourlyHelper.accessor("note", {
+        header: "Note",
+        cell: (info) => <NoteCell note={info.getValue()} />,
     }),
 ]);
 

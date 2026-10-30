@@ -19,7 +19,14 @@ export type TemperatureReading = Pick<
     "recordedAt" | "temperature" | "receivedAt" | "state" | "evaluation" | "pauseId"
 >;
 
-export type ReportDevice = { id: string; code: string; name: string; coldStorageId: string };
+export type ReportDevice = {
+    id: string;
+    code: string;
+    name: string;
+    coldStorageId: string;
+    /** Seconds between two readings: what "how many readings should there have been" is measured against. */
+    heartbeatIntervalSeconds: number;
+};
 
 export type ReportDays = { from: string; to: string };
 
@@ -33,6 +40,32 @@ export type TemperatureReportRow = Pick<
     Temperature,
     "recordedAt" | "temperature" | "receivedAt" | "state" | "evaluation"
 > & { note: string | null };
+
+/**
+ * One hour of the hourly report (hours are in the plant time zone). The temperature columns are null for an hour
+ * without readings: an hour with no data is a result too (the device was silent), so it stays in the list.
+ */
+export type TemperatureHourlyRow = {
+    /** Start of the hour. */
+    hour: Date;
+    readings: number;
+    /** What the heartbeat interval says should have arrived (an approximation: see ReportDevice). */
+    expectedReadings: number;
+    /** Readings against expected, 0 to 100. Null when nothing was expected yet. */
+    coverage: number | null;
+    minTemperature: number | null;
+    avgTemperature: number | null;
+    maxTemperature: number | null;
+    /** The worst state any reading of the hour had. Null without readings. */
+    worstState: TemperatureState | null;
+    warningCount: number;
+    criticalCount: number;
+    /** Readings the alert logic did not look at (planned pause, pull-down, monitoring off, late arrival). */
+    notEvaluated: number;
+    /** The hour is not over yet: its numbers will still change. */
+    inProgress: boolean;
+    note: string | null;
+};
 
 /** A state change of the device, as the alert table recorded it. */
 export type ReportAlertEvent = {
@@ -82,5 +115,5 @@ export type IngestOutcome = {
     event: DeviceUpdateEvent | null;
 };
 
-/** One point of a sparkline: the average of the readings in one minute. */
+/** One point of a sparkline: the highest reading of one minute (the worst one, so a spike is not smoothed away). */
 export type RecentReading = Pick<Temperature, "recordedAt" | "temperature">;

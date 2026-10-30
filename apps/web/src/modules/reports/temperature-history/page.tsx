@@ -1,14 +1,16 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useTable } from "@tanstack/react-table";
 import { Download, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import type { ReportEvent, TemperatureReportRow } from "@workspace/shared";
+import type { ReportEvent, TemperatureHourlyRow, TemperatureReportRow } from "@workspace/shared";
 import { Button } from "@workspace/ui/components/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
@@ -22,24 +24,45 @@ import { useScrollToTop } from "@/lib/use-scroll-to-top";
 import { useColdStorages } from "@/modules/settings/master-data/cold-room/hooks";
 import { useDevices } from "@/modules/settings/master-data/device/hooks";
 
-import { eventColumns, eventTableFeatures, readingColumns, readingTableFeatures } from "./columns";
+import {
+    eventColumns,
+    eventTableFeatures,
+    hourlyColumns,
+    hourlyTableFeatures,
+    readingColumns,
+    readingTableFeatures,
+} from "./columns";
 import { exportFilename, getRangeProblem } from "./constants";
 import { getReportErrorMessage } from "./errors";
-import { useExportReport, useRefreshReport, useReport, useReportEvents, useReportSummary } from "./hooks";
+import {
+    useExportReport,
+    useRefreshReport,
+    useReport,
+    useReportEvents,
+    useReportHourly,
+    useReportSummary,
+} from "./hooks";
 import { ReportSummary } from "./report-summary";
-import type { ExportFormat, ReportParams } from "./temperature-history.api";
+import type { ExportFormat, ExportGranularity, ReportParams } from "./temperature-history.api";
 
 const ALL = "all";
 const PAGE_SIZE = 50;
 /** Stable references so the tables don't see "new data" on every render while loading. */
 const NO_READINGS: TemperatureReportRow[] = [];
 const NO_EVENTS: ReportEvent[] = [];
+const NO_HOURS: TemperatureHourlyRow[] = [];
 
-type Tab = "readings" | "events";
+type Tab = "readings" | "hourly" | "events";
 
 const EXPORT_FORMATS: { format: ExportFormat; label: string }[] = [
     { format: "xlsx", label: "Excel (.xlsx)" },
     { format: "csv", label: "CSV (.csv)" },
+];
+
+/** What a file holds: every reading, or one line per hour. The Excel file of either one also has the Events sheet. */
+const EXPORT_GROUPS: { granularity: ExportGranularity; label: string; toast: string }[] = [
+    { granularity: "raw", label: "All readings", toast: "Laporan bacaan" },
+    { granularity: "hourly", label: "Per hour", toast: "Laporan per jam" },
 ];
 
 export function Component() {
@@ -69,6 +92,8 @@ export function Component() {
 
     const report = useReport(pageParams);
     const events = useReportEvents(params);
+    // up to a month of hours: only loaded once the tab is opened
+    const hourly = useReportHourly(tab === "hourly" ? params : undefined);
     const summary = useReportSummary(params);
     const refresh = useRefreshReport();
 
@@ -81,6 +106,12 @@ export function Component() {
         columns: readingColumns,
         getRowId: (row) => String(row.recordedAt),
     });
+    const hourlyTable = useTable({
+        features: hourlyTableFeatures,
+        data: hourly.data ?? NO_HOURS,
+        columns: hourlyColumns,
+        getRowId: (row) => String(row.hour),
+    });
     const eventsTable = useTable({
         features: eventTableFeatures,
         data: events.data ?? NO_EVENTS,
@@ -88,14 +119,27 @@ export function Component() {
         getRowId: (row, index) => `${row.type}-${String(row.at)}-${index}`,
     });
 
-    function handleExport(format: ExportFormat) {
+    function handleExport(group: (typeof EXPORT_GROUPS)[number], format: ExportFormat) {
         if (!params) return;
 
         exportMutate(
-            { ...params, format, filename: exportFilename(selectedDevice?.code ?? "device", params.from, params.to, format) },
+            {
+                ...params,
+                format,
+                granularity: group.granularity,
+                filename: exportFilename(
+                    selectedDevice?.code ?? "device",
+                    params.from,
+                    params.to,
+                    format,
+                    group.granularity
+                ),
+            },
             {
                 onSuccess: () =>
-                    toast.success("Success", { description: `Laporan ${format.toUpperCase()} berhasil diunduh.` }),
+                    toast.success("Success", {
+                        description: `${group.toast} ${format.toUpperCase()} berhasil diunduh.`,
+                    }),
                 onError: (error) => toast.error("Error", { description: getReportErrorMessage(error) }),
             }
         );
@@ -117,7 +161,8 @@ export function Component() {
                     <div>
                         <h1 className="font-heading text-xl font-semibold">Temperature History</h1>
                         <p className="text-sm text-muted-foreground">
-                            Every reading of a device in a period, with its state and why an alert was or was not raised.
+                            Every reading of a device in a period, with its state and why an alert was or was not
+                            raised.
                         </p>
                     </div>
 
@@ -140,10 +185,19 @@ export function Component() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                {EXPORT_FORMATS.map((item) => (
-                                    <DropdownMenuItem key={item.format} onSelect={() => handleExport(item.format)}>
-                                        {item.label}
-                                    </DropdownMenuItem>
+                                {EXPORT_GROUPS.map((group, index) => (
+                                    <Fragment key={group.granularity}>
+                                        {index > 0 && <DropdownMenuSeparator />}
+                                        <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                                        {EXPORT_FORMATS.map((item) => (
+                                            <DropdownMenuItem
+                                                key={item.format}
+                                                onSelect={() => handleExport(group, item.format)}
+                                            >
+                                                {item.label}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </Fragment>
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -213,10 +267,20 @@ export function Component() {
                                         </span>
                                     )}
                                 </TabsTrigger>
+                                <TabsTrigger value="hourly">
+                                    Hourly
+                                    {hourly.data && (
+                                        <span className="ml-1.5 text-xs text-muted-foreground">
+                                            {hourly.data.length}
+                                        </span>
+                                    )}
+                                </TabsTrigger>
                                 <TabsTrigger value="events">
                                     Events
                                     {events.data && (
-                                        <span className="ml-1.5 text-xs text-muted-foreground">{events.data.length}</span>
+                                        <span className="ml-1.5 text-xs text-muted-foreground">
+                                            {events.data.length}
+                                        </span>
                                     )}
                                 </TabsTrigger>
                             </TabsList>
@@ -267,6 +331,43 @@ export function Component() {
                                     onPageChange={setPage}
                                 />
                             </>
+                        ) : tab === "hourly" ? (
+                            <div className="wrapper-table">
+                                <Table>
+                                    <TableHeader>
+                                        {hourlyTable.getHeaderGroups().map((headerGroup) => (
+                                            <TableRow key={headerGroup.id}>
+                                                {headerGroup.headers.map((header) => (
+                                                    <TableHead key={header.id}>
+                                                        {header.isPlaceholder ? null : (
+                                                            <hourlyTable.FlexRender header={header} />
+                                                        )}
+                                                    </TableHead>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableStatusRows
+                                            query={hourly}
+                                            columnCount={hourlyColumns.length}
+                                            isEmpty={hourly.data?.length === 0}
+                                            emptyMessage="Belum ada jam yang berlalu pada periode ini."
+                                        />
+
+                                        {hourly.isSuccess &&
+                                            hourlyTable.getRowModel().rows.map((row) => (
+                                                <TableRow key={row.id}>
+                                                    {row.getAllCells().map((cell) => (
+                                                        <TableCell key={cell.id}>
+                                                            <hourlyTable.FlexRender cell={cell} />
+                                                        </TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         ) : (
                             <div className="wrapper-table">
                                 <Table>

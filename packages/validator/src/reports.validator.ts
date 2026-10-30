@@ -31,6 +31,8 @@ export const temperatureExportQuerySchema = z
         from: isoDateSchema("Tanggal mulai"),
         to: isoDateSchema("Tanggal akhir"),
         format: z.enum(["xlsx", "csv"], { message: "Format tidak valid" }),
+        // raw = every reading; hourly = one line per hour (min, avg, max, worst status)
+        granularity: z.enum(["raw", "hourly"], { message: "Granularity tidak valid" }).default("raw"),
     })
     .superRefine(withinReportRange);
 
@@ -42,6 +44,9 @@ export const temperatureEventsQuerySchema = z
         to: isoDateSchema("Tanggal akhir"),
     })
     .superRefine(withinReportRange);
+
+/** The hourly report: one line per hour of the period, for one device. Same period rules as the export. */
+export const temperatureHourlyQuerySchema = temperatureEventsQuerySchema;
 
 /* diagnostics report */
 
@@ -82,5 +87,6 @@ export type NotificationLogQuery = z.infer<typeof notificationLogQuerySchema>;
 export type TemperatureReportQuery = z.infer<typeof temperatureReportQuerySchema>;
 export type TemperatureExportQuery = z.infer<typeof temperatureExportQuerySchema>;
 export type TemperatureEventsQuery = z.infer<typeof temperatureEventsQuerySchema>;
+export type TemperatureHourlyQuery = z.infer<typeof temperatureHourlyQuerySchema>;
 export type DiagnosticsReportQuery = z.infer<typeof diagnosticsReportQuerySchema>;
 export type DiagnosticsDetailQuery = z.infer<typeof diagnosticsDetailQuerySchema>;

@@ -5,9 +5,11 @@ import {
     recentReadingsQuerySchema,
     temperatureEventsQuerySchema,
     temperatureExportQuerySchema,
+    temperatureHourlyQuerySchema,
     temperatureReportQuerySchema,
     type TemperatureEventsQuery,
     type TemperatureExportQuery,
+    type TemperatureHourlyQuery,
     type TemperatureReportQuery,
 } from '@workspace/validator';
 import { DeviceKeyGuard } from '@/common/guards/device_key.guard';
@@ -43,6 +45,14 @@ export class TemperatureController {
         return this.reportService.findReport(query);
     }
 
+    /** Alerts and planned pauses of the period, in time order: the "what happened" next to the readings. */
+    @Get('report/events')
+    async findEvents(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
+        const device = await this.reportService.requireDevice(query.deviceId);
+
+        return this.reportService.findEvents(device, { from: query.from, to: query.to });
+    }
+
     /** How many readings of the period fall in each state, and how many the alert logic did not look at. */
     @Get('report/summary')
     async findSummary(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
@@ -51,12 +61,12 @@ export class TemperatureController {
         return this.reportService.findSummary(device, { from: query.from, to: query.to });
     }
 
-    /** Alerts and planned pauses of the period, in time order: the "what happened" next to the readings. */
-    @Get('report/events')
-    async findEvents(@Query(new ZodValidationPipe(temperatureEventsQuerySchema)) query: TemperatureEventsQuery) {
+    /** One row per hour of the period (min, avg, max, worst status, coverage, note). At most 744 rows: no paging. */
+    @Get('report/hourly')
+    async findHourly(@Query(new ZodValidationPipe(temperatureHourlyQuerySchema)) query: TemperatureHourlyQuery) {
         const device = await this.reportService.requireDevice(query.deviceId);
 
-        return this.reportService.findEvents(device, { from: query.from, to: query.to });
+        return this.reportService.findHourly(device, { from: query.from, to: query.to });
     }
 
     @Get('recent')
@@ -72,6 +82,8 @@ export class TemperatureController {
         const device = await this.reportService.requireDevice(query.deviceId);
         const days = { from: query.from, to: query.to };
 
-        return query.format === 'csv' ? this.exportService.csv(device, days) : this.exportService.xlsx(device, days);
+        return query.format === 'csv'
+            ? this.exportService.csv(device, days, query.granularity)
+            : this.exportService.xlsx(device, days, query.granularity);
     }
 }

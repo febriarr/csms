@@ -5,6 +5,7 @@ import {
     downloadReport,
     getReport,
     getReportEvents,
+    getReportHourly,
     getReportSummary,
     type ExportParams,
     type ReportPageParams,
@@ -15,6 +16,7 @@ export const reportKeys = {
     all: ["temperature-report"] as const,
     list: (params: ReportPageParams | undefined) => [...reportKeys.all, "list", params] as const,
     events: (params: ReportParams | undefined) => [...reportKeys.all, "events", params] as const,
+    hourly: (params: ReportParams | undefined) => [...reportKeys.all, "hourly", params] as const,
     summary: (params: ReportParams | undefined) => [...reportKeys.all, "summary", params] as const,
 };
 
@@ -40,6 +42,15 @@ export function useReportEvents(params: ReportParams | undefined) {
     return useQuery({
         queryKey: reportKeys.events(params),
         queryFn: params ? ({ signal }) => getReportEvents(params, signal) : skipToken,
+        staleTime: STALE_MS,
+    });
+}
+
+/** A month is at most 744 hours, so everything comes at once. Pass `undefined` to not load it (tab not open). */
+export function useReportHourly(params: ReportParams | undefined) {
+    return useQuery({
+        queryKey: reportKeys.hourly(params),
+        queryFn: params ? ({ signal }) => getReportHourly(params, signal) : skipToken,
         staleTime: STALE_MS,
     });
 }

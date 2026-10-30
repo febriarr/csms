@@ -2,6 +2,7 @@ import { apiData, apiPaginated, http } from "@/lib/http-client";
 import type {
     ApiSuccessResponse,
     ReportEvent,
+    TemperatureHourlyRow,
     TemperatureReportRow,
     TemperatureReportSummary,
     WithMetadata,
@@ -14,7 +15,10 @@ export type ReportPageParams = ReportParams & { page: number; pageSize: number }
 
 export type ExportFormat = "xlsx" | "csv";
 
-export type ExportParams = ReportParams & { format: ExportFormat; filename: string };
+/** raw = every reading, hourly = one line per hour (min, avg, max, worst state). */
+export type ExportGranularity = "raw" | "hourly";
+
+export type ExportParams = ReportParams & { format: ExportFormat; granularity: ExportGranularity; filename: string };
 
 /** One page of readings, newest first. */
 export function getReport(
@@ -29,6 +33,13 @@ export function getReport(
 /** Alerts and planned pauses of the period, in time order. */
 export function getReportEvents(params: ReportParams, signal?: AbortSignal): Promise<ReportEvent[]> {
     return apiData(http.get<ApiSuccessResponse<ReportEvent[]>>("/temperature/report/events", { params, signal }));
+}
+
+/** One row per hour of the period, oldest first, hours without readings included. At most a month: no paging. */
+export function getReportHourly(params: ReportParams, signal?: AbortSignal): Promise<TemperatureHourlyRow[]> {
+    return apiData(
+        http.get<ApiSuccessResponse<TemperatureHourlyRow[]>>("/temperature/report/hourly", { params, signal })
+    );
 }
 
 export function getReportSummary(params: ReportParams, signal?: AbortSignal): Promise<TemperatureReportSummary> {

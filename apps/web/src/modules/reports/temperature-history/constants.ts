@@ -1,6 +1,6 @@
 import { MAX_REPORT_RANGE_DAYS, type ReadingEvaluation } from "@workspace/validator";
 
-import type { ExportFormat } from "./temperature-history.api";
+import type { ExportFormat, ExportGranularity } from "./temperature-history.api";
 
 export const EVALUATION_META: Record<ReadingEvaluation, { label: string; hint: string }> = {
     EVALUATED: { label: "Evaluated", hint: "The reading went through the normal alert rules." },
@@ -12,6 +12,9 @@ export const EVALUATION_META: Record<ReadingEvaluation, { label: string; hint: s
     DEVICE_INACTIVE: { label: "Inactive", hint: "Monitoring was switched off for the device." },
     LATE_ARRIVAL: { label: "Late arrival", hint: "Older than the newest reading: kept as history only." },
 };
+
+/** Same limit as the API: below this share of the expected readings an hour is called thinly covered. */
+export const LOW_COVERAGE_PERCENT = 80;
 
 const MS_PER_DAY = 86_400_000;
 
@@ -25,8 +28,15 @@ export function getRangeProblem(from: string | undefined, to: string | undefined
 }
 
 /** Same pattern as the API's own file name, so a downloaded file looks the same wherever it was made. */
-export function exportFilename(deviceCode: string, from: string, to: string, format: ExportFormat): string {
+export function exportFilename(
+    deviceCode: string,
+    from: string,
+    to: string,
+    format: ExportFormat,
+    granularity: ExportGranularity = "raw"
+): string {
     const code = deviceCode.replace(/[^A-Za-z0-9_-]/g, "_");
+    const prefix = granularity === "hourly" ? "temperature-hourly" : "temperature-report";
 
-    return `temperature-report-${code}-${from}_${to}.${format}`;
+    return `${prefix}-${code}-${from}_${to}.${format}`;
 }

@@ -4,6 +4,7 @@ import type { DeviceRepository } from '@/device/device.repository';
 import { aDevice } from '@/device/device.fixture';
 import type { MonitoringPauseService } from '@/monitoring_pause/monitoring_pause.service';
 import type { ReportAlertEvent, ReportDevice, ReportPauseEvent, TemperatureReading } from '@workspace/shared';
+import type { HourlyAggregate } from './temperature.type';
 import type { TemperatureRepository } from './temperature.repository';
 import { TemperatureReportService } from './temperature_report.service';
 
@@ -11,6 +12,7 @@ type Options = {
     device?: ReturnType<typeof aDevice> | null;
     page?: { items: TemperatureReading[]; total: number };
     chunks?: TemperatureReading[][];
+    hourly?: HourlyAggregate[];
     alerts?: ReportAlertEvent[];
     pauses?: ReportPauseEvent[];
 };
@@ -20,6 +22,7 @@ function setup(options: Options = {}) {
     const pageCalls: unknown[][] = [];
     const alertCalls: unknown[][] = [];
     const pauseCalls: unknown[][] = [];
+    const hourlyCalls: unknown[][] = [];
 
     const temperatures = {
         findPage: (...args: unknown[]) => {
@@ -30,6 +33,11 @@ function setup(options: Options = {}) {
         // eslint-disable-next-line @typescript-eslint/require-await
         iterateRange: async function* () {
             for (const chunk of options.chunks ?? []) yield chunk;
+        },
+        findHourly: (...args: unknown[]) => {
+            hourlyCalls.push(args);
+
+            return Promise.resolve(options.hourly ?? []);
         },
         countByStateAndEvaluation: () => Promise.resolve([{ state: 'NORMAL', evaluation: 'EVALUATED', total: 3 }]),
     };
@@ -56,7 +64,7 @@ function setup(options: Options = {}) {
         pauses as unknown as MonitoringPauseService,
     );
 
-    return { service, pageCalls, alertCalls, pauseCalls };
+    return { service, pageCalls, alertCalls, pauseCalls, hourlyCalls };
 }
 
 const at = (seconds: number) => new Date(Date.UTC(2026, 9, 15, 0, 0, seconds));
@@ -81,7 +89,13 @@ const warningAlert = (seconds: number): ReportAlertEvent => ({
     temperature: -12,
 });
 
-const device: ReportDevice = { id: 'device-1', code: 'FRZ-01', name: 'Chiller 1', coldStorageId: 'cs-1' };
+const device: ReportDevice = {
+    id: 'device-1',
+    code: 'FRZ-01',
+    name: 'Chiller 1',
+    coldStorageId: 'cs-1',
+    heartbeatIntervalSeconds: 30,
+};
 const days = { from: '2026-10-15', to: '2026-10-15' };
 
 describe('TemperatureReportService.findReport', () => {
@@ -124,7 +138,6 @@ describe('TemperatureReportService.findReport', () => {
 
         const expected = { from: at(0), to: new Date(at(30).getTime() + 1) };
 
-        // findForReport(deviceId, range) / findForReport({ deviceId, coldStorageId }, range)
         expect(alertCalls[0]).toEqual(['device-1', expected]);
         expect(pauseCalls[0][0]).toEqual({ deviceId: 'device-1', coldStorageId: aDevice().coldStorageId });
         expect(pauseCalls[0][1]).toEqual(expected);
@@ -207,5 +220,79 @@ describe('TemperatureReportService.findEvents / findSummary', () => {
 
         expect(summary.total).toBe(3);
         expect(summary.byState.NORMAL).toBe(3);
+    });
+});
+
+describe('TemperatureReportService.findHourly', () => {
+    // the whole of 15 OCT 2026 in WIB, looked at when it is over
+    const AFTER = new Date('2026-10-20T00:00:00.000Z');
+    const firstHour = new Date('2026-10-14T17:00:00.000Z');
+
+    const aggregate = (overrides: Partial<HourlyAggregate> = {}): HourlyAggregate => ({
+        hour: firstHour,
+        readings: 120,
+        min: -23,
+        avg: -22,
+        max: -21,
+        worstState: 'NORMAL',
+        warningCount: 0,
+        criticalCount: 0,
+        pausedCount: 0,
+        pullingDownCount: 0,
+        inactiveCount: 0,
+        lateCount: 0,
+        evaluatedExcursions: 0,
+        ...overrides,
+    });
+
+    it('should ask the database for the range of the period, in the plant time zone', async () => {
+        const { service, hourlyCalls } = setup();
+
+        await service.findHourly(device, days, AFTER);
+
+        expect(hourlyCalls[0]).toEqual(['device-1', { from: firstHour, to: new Date('2026-10-15T17:00:00.000Z') }]);
+    });
+
+    it('should return a row for every hour of the period, with the hours the database had nothing for', async () => {
+        const { service } = setup({ hourly: [aggregate()] });
+
+        const rows = await service.findHourly(device, days, AFTER);
+
+        expect(rows.length).toBe(24);
+        expect(rows[0]).toMatchObject({ readings: 120, coverage: 100, minTemperature: -23, maxTemperature: -21 });
+        expect(rows[1]).toMatchObject({ readings: 0, note: 'No readings received.' });
+    });
+
+    it('should measure coverage against the heartbeat of the device', async () => {
+        const { service } = setup({ hourly: [aggregate({ readings: 60 })] });
+
+        const [first] = await service.findHourly({ ...device, heartbeatIntervalSeconds: 60 }, days, AFTER);
+
+        // 60 s heartbeat: 60 an hour
+        expect(first).toMatchObject({ expectedReadings: 60, coverage: 100 });
+    });
+
+    it('should put the alerts of the hour in its note', async () => {
+        const { service, alertCalls } = setup({
+            hourly: [aggregate()],
+            alerts: [warningAlert(0)],
+        });
+
+        // warningAlert(0) is 00:00:00 UTC on 15 OCT = 07:00 WIB: that hour has no aggregate, so it is a gap with an alert
+        const rows = await service.findHourly(device, days, AFTER);
+        const hour = rows.find((row) => row.hour.getTime() === Date.UTC(2026, 9, 15, 0));
+
+        expect(hour?.note).toBe('No readings received. 1 alert: WARNING at 07:00.');
+        expect(alertCalls.length).toBe(1);
+    });
+
+    it('should leave out hours that have not happened yet', async () => {
+        const { service } = setup();
+
+        // 02:30 WIB on the 15th: the hours of 00:00, 01:00 and 02:00 WIB
+        const rows = await service.findHourly(device, days, new Date('2026-10-14T19:30:00.000Z'));
+
+        expect(rows.length).toBe(3);
+        expect(rows[2].inProgress).toBe(true);
     });
 });

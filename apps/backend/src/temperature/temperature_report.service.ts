@@ -10,6 +10,7 @@ import type {
     ReportDays,
     ReportDevice,
     ReportEvent,
+    TemperatureHourlyRow,
     TemperatureReportRow,
     TemperatureReportSummary,
     WithMetadata,
@@ -22,8 +23,8 @@ type InstantRange = { from: Date; to: Date };
 /**
  * The read side of the temperature report. Every reading stays a row of its own (no aggregation); what this service
  * adds is the context that explains it: the state and evaluation stored with the reading when it arrived, plus the
- * alerts and planned pauses of the period. The hourly report will sit next to `findReport` and reuse the same
- * export and context code.
+ * alerts and planned pauses of the period. The hourly report (`findHourly`) summarizes the same readings per hour
+ * and reuses the alerts and the export code.
  *
  * Alerts and pauses of one device and period are few, so they are read once per request and matched to readings
  * in memory. Readings can be tens of thousands, so those are never held all at once.
@@ -43,7 +44,13 @@ export class TemperatureReportService {
 
         if (!device) throw new EntityNotFoundException('Device', id);
 
-        return { id: device.id, code: device.code, name: device.name, coldStorageId: device.coldStorageId };
+        return {
+            id: device.id,
+            code: device.code,
+            name: device.name,
+            coldStorageId: device.coldStorageId,
+            heartbeatIntervalSeconds: device.heartbeatIntervalSeconds,
+        };
     }
 
     /** A page of readings for one device and period, newest first. Device and both dates are required here. */
@@ -87,6 +94,26 @@ export class TemperatureReportService {
                 totalPages: Math.ceil(total / query.pageSize),
             },
         };
+    }
+
+    /**
+     * One row per hour of the period, oldest first. A month is at most 744 rows, so there is no paging. `now` is a
+     * parameter so a test can pin "the hour in progress".
+     */
+    async findHourly(device: ReportDevice, days: ReportDays, now: Date = new Date()): Promise<TemperatureHourlyRow[]> {
+        const range = dayRangeInAppTimezone(days.from, days.to);
+        const [aggregates, alerts] = await Promise.all([
+            this.temperatures.findHourly(device.id, range),
+            this.alerts.findForReport(device.id, range),
+        ]);
+
+        return ReportUtils.buildHourly({
+            aggregates,
+            alerts,
+            range,
+            heartbeatSeconds: device.heartbeatIntervalSeconds,
+            now,
+        });
     }
 
     /** Alerts and planned pauses of the period in one chronological list. */

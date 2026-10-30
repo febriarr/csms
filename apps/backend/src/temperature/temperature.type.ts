@@ -1,4 +1,4 @@
-import type { DevicesState, ReadingEvaluation, SelectDevices } from '../database/schema';
+import type { DevicesState, ReadingEvaluation, ReadingState, SelectDevices } from '../database/schema';
 
 /* states */
 
@@ -26,6 +26,28 @@ export type TemperatureThresholds = {
     defrostThreshold: number | null;
     warningThreshold: number;
     criticalThreshold: number;
+};
+
+/* hourly report */
+
+/** One hour of readings as the database summarizes it. Hours without readings have no aggregate at all. */
+export type HourlyAggregate = {
+    /** Start of the hour. */
+    hour: Date;
+    readings: number;
+    min: number;
+    avg: number;
+    max: number;
+    worstState: ReadingState;
+    warningCount: number;
+    criticalCount: number;
+    /** Readings per reason the alert logic did not look at them. */
+    pausedCount: number;
+    pullingDownCount: number;
+    inactiveCount: number;
+    lateCount: number;
+    /** WARNING / CRITICAL readings the alert logic did look at: the ones an alert (or a state change) could explain. */
+    evaluatedExcursions: number;
 };
 
 /* reading evaluation */
