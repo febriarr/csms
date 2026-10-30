@@ -1,6 +1,14 @@
 import { z } from "zod";
-import { checkDateRange, idSchema, isoDateSchema, optionalQueryId, paginationQuerySchema } from "./common";
-import { MAX_REPORT_RANGE_DAYS } from "./constants";
+import {
+    checkDateRange,
+    idSchema,
+    isoDateSchema,
+    optionalQueryEnum,
+    optionalQueryId,
+    optionalQueryText,
+    paginationQuerySchema,
+} from "./common";
+import { MAX_REPORT_RANGE_DAYS, NOTIFICATION_CHANNELS, NOTIFICATION_STATUSES } from "./constants";
 
 const withinReportRange = (data: { from?: string; to?: string }, ctx: z.RefinementCtx) =>
     checkDateRange(data, ctx, { maxDays: MAX_REPORT_RANGE_DAYS });
@@ -55,6 +63,22 @@ export const diagnosticsDetailQuerySchema = z
     })
     .superRefine(withinReportRange);
 
+/* notification log report */
+
+export const notificationLogQuerySchema = paginationQuerySchema
+    .extend({
+        deviceId: optionalQueryId,
+        coldStorageId: optionalQueryId,
+        channel: optionalQueryEnum(NOTIFICATION_CHANNELS, "Channel tidak valid"),
+        status: optionalQueryEnum(NOTIFICATION_STATUSES, "Status tidak valid"),
+        /** Matches the recipient's target (number / address) or name. */
+        search: optionalQueryText,
+        from: isoDateSchema("Tanggal mulai").optional(),
+        to: isoDateSchema("Tanggal akhir").optional(),
+    })
+    .superRefine(withinReportRange);
+
+export type NotificationLogQuery = z.infer<typeof notificationLogQuerySchema>;
 export type TemperatureReportQuery = z.infer<typeof temperatureReportQuerySchema>;
 export type TemperatureExportQuery = z.infer<typeof temperatureExportQuerySchema>;
 export type TemperatureEventsQuery = z.infer<typeof temperatureEventsQuerySchema>;

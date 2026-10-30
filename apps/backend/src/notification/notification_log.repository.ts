@@ -1,10 +1,21 @@
 import { BaseRepository } from '@/common/abstracts/base.repository';
 import { DatabaseService } from '@/database/database.service';
 import { DatabaseTransaction } from '@/database/database.type';
-import { alerts, InsertNotificationLog, notificationLogs, SelectNotificationLog } from '@/database/schema';
+import {
+    alerts,
+    coldStorages,
+    devices,
+    InsertNotificationLog,
+    notificationLogs,
+    notificationRecipients,
+    SelectNotificationLog,
+} from '@/database/schema';
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, gte, lt, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gte, ilike, lt, or, SQL, sql } from 'drizzle-orm';
 import type { DispatchableLog, NotificationSeverity } from './notification.type';
+import { NotificationLogQuery } from '@workspace/validator';
+import { ListNotificationLog } from '@workspace/shared';
+import { dayRangeInAppTimezone } from '@/common/utils/app_timezone';
 
 /**
  * Seconds to wait after the previous attempt before trying again: attempt n is retried after RETRY_DELAYS[n].
@@ -108,6 +119,65 @@ export class NotificationLogRepository extends BaseRepository<typeof notificatio
             .returning({ id: notificationLogs.id });
 
         return rows.length;
+    }
+
+    /** One page of notification logs, newest first, with the alert, device and recipient they belong to. */
+    async findPage(query: NotificationLogQuery): Promise<{ items: ListNotificationLog[]; total: number }> {
+        const where = this.buildWhere(query);
+
+        const [totalRow] = await this.db
+            .select({ total: count() })
+            .from(notificationLogs)
+            .innerJoin(alerts, eq(alerts.id, notificationLogs.alertId))
+            .innerJoin(devices, eq(devices.id, alerts.deviceId))
+            .leftJoin(notificationRecipients, eq(notificationRecipients.id, notificationLogs.recipientId))
+            .where(where);
+
+        const rows = await this.db
+            .select({
+                log: getTableColumns(notificationLogs),
+                recipientName: notificationRecipients.name,
+                alertState: alerts.toState,
+                alertOccurredAt: alerts.occurredAt,
+                deviceId: devices.id,
+                deviceCode: devices.code,
+                deviceName: devices.name,
+                coldStorageName: coldStorages.name,
+            })
+            .from(notificationLogs)
+            .innerJoin(alerts, eq(alerts.id, notificationLogs.alertId))
+            .innerJoin(devices, eq(devices.id, alerts.deviceId))
+            .innerJoin(coldStorages, eq(coldStorages.id, devices.coldStorageId))
+            .leftJoin(notificationRecipients, eq(notificationRecipients.id, notificationLogs.recipientId))
+            .where(where)
+            // the rows of one alert are inserted together and share created_at: the id keeps the paging stable
+            .orderBy(desc(notificationLogs.createdAt), desc(notificationLogs.id))
+            .limit(query.pageSize)
+            .offset((query.page - 1) * query.pageSize);
+
+        return {
+            items: rows.map(({ log, ...context }) => ({ ...log, ...context })),
+            total: totalRow?.total ?? 0,
+        };
+    }
+
+    private buildWhere(query: NotificationLogQuery): SQL | undefined {
+        // from / to are calendar days in the plant's time zone, applied to the moment the message was queued
+        const range = query.from && query.to ? dayRangeInAppTimezone(query.from, query.to) : undefined;
+        // % and _ typed by the user are text, not wildcards
+        const pattern = query.search ? `%${query.search.replace(/[\\%_]/g, '\\$&')}%` : undefined;
+
+        return and(
+            query.deviceId ? eq(alerts.deviceId, query.deviceId) : undefined,
+            query.coldStorageId ? eq(devices.coldStorageId, query.coldStorageId) : undefined,
+            query.channel ? eq(notificationLogs.channel, query.channel) : undefined,
+            query.status ? eq(notificationLogs.status, query.status) : undefined,
+            pattern
+                ? or(ilike(notificationLogs.recipient, pattern), ilike(notificationRecipients.name, pattern))
+                : undefined,
+            range ? gte(notificationLogs.createdAt, range.from) : undefined,
+            range ? lt(notificationLogs.createdAt, range.to) : undefined,
+        );
     }
 }
 

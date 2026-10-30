@@ -18,6 +18,8 @@ export type AlertReason = (typeof ALERT_REASONS)[number];
 
 export const NOTIFICATION_CHANNELS = ["WHATSAPP", "EMAIL"] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
+export const NOTIFICATION_STATUSES = ["PENDING", "SUCCESS", "FAILED"] as const;
+export type NotificationStatus = (typeof NOTIFICATION_STATUSES)[number];
 
 export const SUBSCRIPTION_SCOPES = ["ALL", "DIVISION", "LOCATION", "COLD_STORAGE", "DEVICE"] as const;
 export type SubscriptionScope = (typeof SUBSCRIPTION_SCOPES)[number];

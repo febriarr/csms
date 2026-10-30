@@ -1,0 +1,1 @@
+CREATE INDEX "notification_logs_created_at_idx" ON "notification_logs" USING btree ("created_at");

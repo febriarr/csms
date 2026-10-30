@@ -7,6 +7,8 @@ import { NotificationLogRepository } from './notification_log.repository';
 import { NotificationOutboxService } from './notification_outbox.service';
 import { NotificationRecipientRepository } from './notification_recipient.repository';
 import { NotificationSubscriptionRepository } from './notification_subscription.repository';
+import { NotificationLogService } from './notification_log.service';
+import { NotificationLogController } from './notification_log.controller';
 
 @Module({
     imports: [WhatsappModule],
@@ -16,6 +18,8 @@ import { NotificationSubscriptionRepository } from './notification_subscription.
         NotificationRecipientRepository,
         NotificationSubscriptionRepository,
         NotificationLogRepository,
+        NotificationLogService,
+        NotificationLogController,
         NotificationOutboxService,
         NotificationDispatcherService,
     ],

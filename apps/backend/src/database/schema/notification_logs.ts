@@ -33,6 +33,7 @@ export const notificationLogs = pgTable(
         index('notification_logs_open_idx')
             .on(t.createdAt)
             .where(sql`${t.status} <> 'SUCCESS'`),
+        index('notification_logs_created_at_idx').on(t.createdAt),
     ],
 );
 
