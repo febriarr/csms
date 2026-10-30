@@ -12,14 +12,13 @@ import { NotificationLogController } from './notification_log.controller';
 
 @Module({
     imports: [WhatsappModule],
-    controllers: [NotificationController],
+    controllers: [NotificationController, NotificationLogController],
     providers: [
         NotificationService,
         NotificationRecipientRepository,
         NotificationSubscriptionRepository,
         NotificationLogRepository,
         NotificationLogService,
-        NotificationLogController,
         NotificationOutboxService,
         NotificationDispatcherService,
     ],
