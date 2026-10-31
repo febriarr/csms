@@ -12,6 +12,6 @@ import { DeviceService } from './device.service';
     imports: [AlertModule, DeviceEventModule, MonitoringPauseModule, NotificationModule],
     controllers: [DeviceController],
     providers: [DeviceService, DeviceRepository, DeviceOfflineService],
-    exports: [DeviceRepository, DeviceService],
+    exports: [DeviceRepository, DeviceService, DeviceOfflineService],
 })
 export class DeviceModule {}

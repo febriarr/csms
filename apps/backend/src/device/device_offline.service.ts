@@ -17,11 +17,15 @@ import { DeviceUtils } from './device.utils';
  */
 export const STARTUP_GRACE_MS = 2 * 60_000;
 
+/** The detector runs every 30 seconds: three missed runs and the scheduler is considered stuck. */
+export const SCHEDULER_STALE_AFTER_MS = 90_000;
+
 @Injectable()
 export class DeviceOfflineService {
     private readonly logger = new Logger(DeviceOfflineService.name);
     private readonly startedAt = Date.now();
     private running = false;
+    private lastTickAt: Date | null = null;
 
     constructor(
         private readonly devices: DeviceRepository,
@@ -34,6 +38,8 @@ export class DeviceOfflineService {
     @Cron(CronExpression.EVERY_30_SECONDS)
     async detect(): Promise<void> {
         const now = new Date();
+
+        this.lastTickAt = now;
 
         if (now.getTime() - this.startedAt < STARTUP_GRACE_MS) return;
 
@@ -49,6 +55,17 @@ export class DeviceOfflineService {
         } finally {
             this.running = false;
         }
+    }
+
+    /**
+     * Whether the scheduler is still calling `detect`. It ticks every 30 seconds, so three missed ticks (or no tick at
+     * all since startup) mean the event loop is stuck or the scheduler stopped: nobody would be told about an
+     * offline device anymore, which is why the health check looks at this.
+     */
+    isSchedulerAlive(now: Date = new Date()): boolean {
+        const since = this.lastTickAt ?? new Date(this.startedAt);
+
+        return now.getTime() - since.getTime() <= SCHEDULER_STALE_AFTER_MS;
     }
 
     /**

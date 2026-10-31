@@ -270,3 +270,38 @@ describe('DeviceOfflineService.detect (the scheduled run)', () => {
         expect(markedOffline).toEqual(['d1']);
     });
 });
+
+describe('DeviceOfflineService scheduler health', () => {
+    afterEach(() => jest.useRealTimers());
+
+    function build() {
+        return new DeviceOfflineService(
+            { findStaleIds: () => Promise.resolve([]) } as unknown as DeviceRepository,
+            {} as AlertService,
+            {} as NotificationOutboxService,
+            {} as DeviceEventService,
+            {} as MonitoringPauseService,
+        );
+    }
+
+    it('should be alive right after startup, before the first tick', () => {
+        expect(build().isSchedulerAlive(new Date())).toBe(true);
+    });
+
+    it('should be alive while it keeps ticking, and stuck after three missed ticks', async () => {
+        jest.useFakeTimers({ now: new Date('2026-10-30T00:00:00.000Z') });
+        const service = build();
+
+        await service.detect();
+
+        expect(service.isSchedulerAlive(new Date('2026-10-30T00:01:00.000Z'))).toBe(true);
+        expect(service.isSchedulerAlive(new Date('2026-10-30T00:01:31.000Z'))).toBe(false);
+    });
+
+    it('should be stuck when it never ticked and has been up longer than three ticks', () => {
+        jest.useFakeTimers({ now: new Date('2026-10-30T00:00:00.000Z') });
+        const service = build();
+
+        expect(service.isSchedulerAlive(new Date('2026-10-30T00:02:00.000Z'))).toBe(false);
+    });
+});
