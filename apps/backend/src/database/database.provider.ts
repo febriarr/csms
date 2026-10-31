@@ -58,7 +58,7 @@ export const DatabaseProvider: Provider = {
     provide: DB_CONNECTION,
     inject: [ConfigService],
     useFactory: async (config: ConfigService): Promise<DrizzleClient> => {
-        const isProd = config.get<string>('NODE_ENV') === 'production';
+        const isDevelopment = config.get<string>('NODE_ENV') === 'development';
 
         const client = new DrizzleClient({
             url: config.getOrThrow<string>('DATABASE_URL'),
@@ -69,7 +69,8 @@ export const DatabaseProvider: Provider = {
             statementTimeoutMs: config.get<number>('DB_STATEMENT_TIMEOUT_MS', 30_000),
             idleInTransactionTimeoutMs: config.get<number>('DB_IDLE_IN_TX_TIMEOUT_MS', 15_000),
             ssl: config.get<boolean>('DB_SSL', false),
-            logQueries: !isProd,
+            // only while developing: in production it is noise and a leak, in the tests it drowns the results
+            logQueries: isDevelopment,
         });
 
         await client.connect();
