@@ -32,4 +32,14 @@ export default tseslint.config(
             'prettier/prettier': ['error', { endOfLine: 'auto', tabWidth: 4, printWidth: 120 }],
         },
     },
+    {
+        // supertest answers with `any` bodies; the specs check their shape with expect(), which is the point
+        files: ['test/**/*.ts'],
+        rules: {
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
+            '@typescript-eslint/no-unsafe-call': 'off',
+            '@typescript-eslint/no-unsafe-return': 'off',
+        },
+    },
 );

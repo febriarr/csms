@@ -19,6 +19,6 @@ import { WhatsappService } from './whatsapp.service';
                 config.get('WHATSAPP_ENABLED', { infer: true }) ? [sender] : [],
         },
     ],
-    exports: [NOTIFICATION_SENDERS],
+    exports: [NOTIFICATION_SENDERS, WhatsappService],
 })
 export class WhatsappModule {}
