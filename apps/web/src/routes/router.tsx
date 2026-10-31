@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
                 // Paths are absolute and identical to navLinks, so sidebar links, breadcrumbs and routes always match.
                 children: [
                     { path: "/", element: <Navigate to="/dashboard" replace /> },
-                    { path: "/dashboard", lazy: () => import("@/App") },
+                    { path: "/dashboard", lazy: () => import("@/modules/overview/page") },
 
                     // Monitoring
                     {
