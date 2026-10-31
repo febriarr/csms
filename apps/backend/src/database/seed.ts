@@ -22,7 +22,7 @@ async function main() {
     const db: Database = drizzle(pool, { schema });
 
     const auth = createAuth({
-        db: db, // sesuaikan dengan tipe Database Anda
+        db: db,
         secret: process.env.BETTER_AUTH_SECRET!,
         baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
         trustedOrigins: [],
