@@ -9,6 +9,7 @@ import { TemperatureController } from './temperature.controller';
 import { TemperatureExportService } from './temperature_export.service';
 import { TemperatureReportService } from './temperature_report.service';
 import { TemperatureRepository } from './temperature.repository';
+import { TemperatureRetentionService } from './temperature_retention.service';
 import { TemperatureService } from './temperature.service';
 
 @Module({
@@ -21,7 +22,13 @@ import { TemperatureService } from './temperature.service';
         NotificationModule,
     ],
     controllers: [TemperatureController],
-    providers: [TemperatureService, TemperatureReportService, TemperatureExportService, TemperatureRepository],
+    providers: [
+        TemperatureService,
+        TemperatureReportService,
+        TemperatureExportService,
+        TemperatureRetentionService,
+        TemperatureRepository,
+    ],
     exports: [TemperatureService],
 })
 export class TemperatureModule {}
