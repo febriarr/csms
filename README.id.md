@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://cdn.febriardiansyah.my.id/csms-assets/csms-banner.png" alt="CSMS, Cold Storage Monitoring System" width="640">
+</p>
+
 # CSMS (Cold Storage Monitoring System)
 
 [English](./README.md) | Bahasa Indonesia
@@ -92,7 +96,7 @@ pnpm --filter backend db:migrate   # jalankan migrasi
 pnpm --filter backend db:seed      # buat super admin
 ```
 
-Seed membuat `admin@csms.local` dengan password dari `SEED_ADMIN_PASSWORD`. Ganti setelah login pertama.
+Seed membuat super admin dengan username `febri` (email `superadmin@csms.local`) dan password dari `SEED_ADMIN_PASSWORD`. Login memakai username. Ganti password setelah login pertama.
 
 Script lain: `db:generate` (migrasi baru), `db:push` (push schema langsung, hanya untuk dev), dan `db:studio` (Drizzle Studio).
 
@@ -163,6 +167,12 @@ pnpm --filter backend test
 pnpm --filter backend test:cov
 pnpm --filter backend test:e2e
 ```
+
+## Dokumentasi
+
+- Backend: [docs/backend.id.md](docs/backend.id.md): alur data, referensi API, konvensi, operasional
+- Frontend: [docs/frontend.id.md](docs/frontend.id.md): struktur, menambah halaman, operasional
+- Deployment: [docs/deployment.id.md](docs/deployment.id.md): Docker Compose, HTTPS, backup
 
 ## Roadmap
 

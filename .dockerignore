@@ -1,0 +1,21 @@
+# Keep the build context small and keep secrets out of image layers.
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+.git
+.github
+.vscode
+.idea
+.DS_Store
+
+# local env files, never inside an image (the compose file passes the values at run time)
+**/.env
+**/.env.*
+!**/.env.example
+
+# WhatsApp session of a local run
+**/.baileys*
+
+docs
+*.md

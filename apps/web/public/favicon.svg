@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1230" width="1280" height="1230">
+  <defs>
+    <linearGradient id="gTop" x1="170" y1="420" x2="860" y2="130" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0646c8"/>
+      <stop offset="0.35" stop-color="#0a8cf5"/>
+      <stop offset="0.7" stop-color="#2cc0fd"/>
+      <stop offset="1" stop-color="#6fe0ff"/>
+    </linearGradient>
+    <linearGradient id="gArmTop" x1="640" y1="300" x2="1130" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0236a8"/>
+      <stop offset="0.35" stop-color="#0a78fa"/>
+      <stop offset="0.75" stop-color="#2cb8fc"/>
+      <stop offset="1" stop-color="#70e2ff"/>
+    </linearGradient>
+    <linearGradient id="gFold" x1="175" y1="600" x2="375" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#05266e"/>
+      <stop offset="0.45" stop-color="#0a4fc4"/>
+      <stop offset="1" stop-color="#1a8ff8"/>
+    </linearGradient>
+    <linearGradient id="gBottom" x1="170" y1="650" x2="800" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6fe0ff"/>
+      <stop offset="0.3" stop-color="#19a8fb"/>
+      <stop offset="0.6" stop-color="#0a5fe0"/>
+      <stop offset="1" stop-color="#021a4d"/>
+    </linearGradient>
+    <linearGradient id="gArmBottom" x1="650" y1="960" x2="1130" y2="860" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5ad8ff"/>
+      <stop offset="0.5" stop-color="#17a2fc"/>
+      <stop offset="1" stop-color="#0460e6"/>
+    </linearGradient>
+    <linearGradient id="gMain" x1="440" y1="400" x2="860" y2="870" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a9bfa"/>
+      <stop offset="0.5" stop-color="#0646dc"/>
+      <stop offset="1" stop-color="#0a84f8"/>
+    </linearGradient>
+    <linearGradient id="gLight" x1="0" y1="450" x2="0" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5cdcfc"/>
+      <stop offset="0.5" stop-color="#2cc4fc"/>
+      <stop offset="1" stop-color="#08a8fa"/>
+    </linearGradient>
+    <linearGradient id="gVert" x1="0" y1="368" x2="0" y2="897" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a9bfa"/>
+      <stop offset="0.5" stop-color="#0540d8"/>
+      <stop offset="1" stop-color="#0a84f8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Lipatan kiri (di belakang pita, menutup celah) -->
+  <path d="M156,535 L400,440 L372,742 Q372,768 390,785 L156,670 Z" fill="url(#gFold)"/>
+  <!-- Pita atas -->
+  <path d="M155,590 L155,450 Q155,360 230,318 L590,98 Q660,60 735,98 L885,188 L610,320 L395,452 L190,570 Q165,585 155,590 Z" fill="url(#gTop)"/>
+  <!-- Lengan kanan atas -->
+  <path d="M610,320 L830,190 Q860,175 890,188 L1110,320 Q1160,355 1135,395 L990,475 Q960,490 930,475 L690,330 Q650,305 610,320 Z" fill="url(#gArmTop)"/>
+  <!-- Pita bawah -->
+  <path d="M155,590 L155,790 Q155,870 215,915 L560,1150 Q650,1190 740,1150 L885,1068 L625,935 L385,780 L190,645 Q160,625 155,590 Z" fill="url(#gBottom)"/>
+  <!-- Lengan kanan bawah -->
+  <path d="M625,935 L940,785 Q965,770 995,790 L1115,860 Q1150,890 1125,925 L885,1068 Q840,1085 800,1060 Z" fill="url(#gArmBottom)"/>
+
+  <!-- Kepingan salju: cabang terang -->
+  <g stroke="url(#gLight)" stroke-width="46" stroke-linecap="round" fill="none">
+    <path d="M519,490 L519,580"/>
+    <path d="M519,705 L519,795"/>
+    <path d="M772,490 L772,580"/>
+    <path d="M772,705 L772,795"/>
+    <path d="M572,450 L648,502"/>
+    <path d="M724,450 L648,502"/>
+    <path d="M574,825 L648,775"/>
+    <path d="M722,825 L648,775"/>
+    <path d="M448,617 L525,575"/>
+    <path d="M448,672 L525,710"/>
+    <path d="M845,617 L768,575"/>
+    <path d="M845,672 L768,710"/>
+  </g>
+  <!-- Kepingan salju: garis utama -->
+  <g stroke-width="46" stroke-linecap="round" fill="none">
+    <path d="M437,530 L858,752" stroke="url(#gMain)"/>
+    <path d="M437,752 L858,530" stroke="url(#gMain)"/>
+    <path d="M648,391 L648,874" stroke="url(#gVert)"/>
+  </g>
+</svg>
