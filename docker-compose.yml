@@ -20,7 +20,9 @@ services:
         volumes:
             - db-data:/var/lib/postgresql/data
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+            # -h 127.0.0.1 makes it a TCP check. On the first start the image runs a temporary server that listens on the
+            # socket only, and a socket check passes while other containers still cannot connect.
+            test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
             interval: 5s
             timeout: 5s
             retries: 10
