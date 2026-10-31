@@ -28,7 +28,7 @@ export class NotificationOutboxService {
         input: { alertId: string; deviceId: string; message: string },
         tx: DatabaseTransaction,
     ): Promise<SelectNotificationLog[]> {
-        const recipients = await this.recipients.findForDevice(input.deviceId, 'WHATSAPP');
+        const recipients = await this.recipients.findForDevice(input.deviceId, 'WHATSAPP', tx);
 
         if (recipients.length === 0) {
             this.logger.warn(`No active WhatsApp recipient is subscribed to device ${input.deviceId}`);

@@ -1,5 +1,6 @@
 import { BaseRepository } from '@/common/abstracts/base.repository';
 import { DatabaseService } from '@/database/database.service';
+import { DatabaseTransaction } from '@/database/database.type';
 import {
     coldStorages,
     devices,
@@ -78,8 +79,9 @@ export class NotificationRecipientRepository extends BaseRepository<typeof notif
     async findForDevice(
         deviceId: string,
         channel: SelectNotificationRecipient['channel'],
+        tx?: DatabaseTransaction,
     ): Promise<SelectNotificationRecipient[]> {
-        return this.db
+        return this.executor(tx)
             .selectDistinct(getTableColumns(notificationRecipients))
             .from(notificationRecipients)
             .innerJoin(notificationSubscriptions, eq(notificationSubscriptions.recipientId, notificationRecipients.id))
