@@ -1,7 +1,7 @@
 import { BaseRepository } from '@/common/abstracts/base.repository';
 import { DatabaseService } from '@/database/database.service';
 import { DatabaseTransaction } from '@/database/database.type';
-import { InsertTemperature, ReadingEvaluation, ReadingState, temperatureLogs } from '@/database/schema';
+import { devices, InsertTemperature, ReadingEvaluation, ReadingState, temperatureLogs } from '@/database/schema';
 import { APP_TIMEZONE } from '@/common/utils/app_timezone';
 import { Injectable } from '@nestjs/common';
 import { and, asc, count, desc, eq, gt, gte, inArray, lt, sql, SQL } from 'drizzle-orm';
@@ -41,6 +41,34 @@ export class TemperatureRepository extends BaseRepository<typeof temperatureLogs
             .returning({ deviceId: temperatureLogs.deviceId });
 
         return inserted.length > 0;
+    }
+
+    /** Every device that ever existed, deleted ones included: their readings are audit data and expire too. */
+    async findAllDeviceIds(): Promise<string[]> {
+        const rows = await this.db.select({ id: devices.id }).from(devices);
+
+        return rows.map((row) => row.id);
+    }
+
+    /**
+     * Deletes up to `limit` readings of one device that were recorded before `cutoff`, the oldest first, and returns how
+     * many it deleted. Looking by device keeps the search on the primary key (device_id, recorded_at); a plain
+     * `WHERE recorded_at < cutoff` has no index to use and would scan the whole table for every batch. The small batch
+     * keeps each transaction short, so the delete never holds up the readings coming in.
+     */
+    async deleteOlderThan(deviceId: string, cutoff: Date, limit: number): Promise<number> {
+        const result = await this.db.execute(sql`
+            DELETE FROM ${temperatureLogs}
+            WHERE ctid IN (
+                SELECT ctid FROM ${temperatureLogs}
+                WHERE ${temperatureLogs.deviceId} = ${deviceId}
+                  AND ${temperatureLogs.recordedAt} < ${cutoff.toISOString()}::timestamptz
+                ORDER BY ${temperatureLogs.recordedAt}
+                LIMIT ${limit}
+            )
+        `);
+
+        return result.rowCount ?? 0;
     }
 
     /**

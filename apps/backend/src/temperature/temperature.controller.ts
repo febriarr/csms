@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, StreamableFile, UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import {
     type RecentReadingsQuery,
@@ -31,8 +32,10 @@ export class TemperatureController {
     /**
      * The endpoint the devices post to. They have no user session, so the route skips the session guard and is
      * protected by the device key instead (header `x-device-key`). A duplicate (a retry) is a success too.
+     * Not rate limited: every device behind one gateway shares an address, and a device that is cut off looks offline.
      */
     @Post()
+    @SkipThrottle()
     @AllowAnonymous()
     @UseGuards(DeviceKeyGuard)
     @HttpCode(HttpStatus.CREATED)
