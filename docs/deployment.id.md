@@ -9,10 +9,11 @@
 `docker-compose.yml` di root repository menjalankan seluruh sistem: PostgreSQL, API, dan dashboard. Dipakai untuk deploy. Untuk development tetap gunakan `pnpm dev`.
 
 ```
-browser / device ──> web (nginx, port WEB_PORT)
-                        ├── /          file statis dashboard
-                        └── /api/*  ─> backend (NestJS, port 3000, tidak dipublish)
-                                          └──> db (PostgreSQL 16, tidak dipublish)
+browser / device ──HTTPS──> reverse proxy (Caddy, nginx, cloudflared; milikmu)
+                               └──> web (nginx, 127.0.0.1:WEB_PORT)
+                                      ├── /          file statis dashboard
+                                      └── /api/*  ─> backend (NestJS, port 3000, tidak dipublish)
+                                                        └──> db (PostgreSQL 16, tidak dipublish)
 ```
 
 | Service   | Image                | Catatan                                                                                                                 |
@@ -23,7 +24,7 @@ browser / device ──> web (nginx, port WEB_PORT)
 | `web`     | `csms-web`           | Dibangun dari `apps/web/Dockerfile`. nginx menyajikan dashboard dan meneruskan `/api` ke backend                        |
 | `seed`    | `csms-backend`       | Hanya jalan jika diminta (profile `tools`)                                                                              |
 
-Hanya `web` yang dipublish. Browser dan device memakai alamat yang sama.
+Hanya `web` yang dipublish, dan secara default hanya di `127.0.0.1` milik host. Reverse proxy yang memegang domain dan sertifikatmu adalah satu-satunya pintu masuk. Browser dan device memakai alamat yang sama.
 
 ## Kenapa satu origin
 
@@ -41,42 +42,79 @@ docker compose up -d --build
 docker compose run --rm seed        # super admin pertama, sekali saja
 ```
 
-Buka `PUBLIC_URL`. Login dengan username `febri` dan password dari `SEED_ADMIN_PASSWORD`, lalu ganti. Buat lokasi, cold room, dan device di Settings, Master Data. Pembacaan dari kode device yang belum ada ditolak dengan 404.
+Arahkan reverse proxy ke `127.0.0.1:8080` (lihat [Reverse proxy dan HTTPS](#reverse-proxy-dan-https)), lalu buka `PUBLIC_URL`. Login dengan username `febri` dan password dari `SEED_ADMIN_PASSWORD`, lalu ganti. Buat lokasi, cold room, dan device di Settings, Master Data. Pembacaan dari kode device yang belum ada ditolak dengan 404.
 
-Device mengirim ke `<PUBLIC_URL>/api/temperature` dengan header `x-device-key: <DEVICE_API_KEY>`.
+Device mengirim ke `<PUBLIC_URL>/api/temperature` dengan header `x-device-key: <DEVICE_API_KEY>`. `PUBLIC_URL` adalah alamat HTTPS, jadi firmware device harus bisa melakukan request TLS. Kalau tidak bisa, beri proxy satu route HTTP biasa untuk `/api/temperature` di dalam jaringanmu.
 
 ## Variabel (`.env`)
 
-| Variabel                                 | Default           | Fungsi                                                                                                                       |
-| ---------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_URL`                             | tidak ada (wajib) | Persis seperti yang diketik di address bar browser, tanpa garis miring di akhir. Menjadi `WEB_URL` dan `BETTER_AUTH_URL` API |
-| `WEB_PORT`                               | `8080`            | Port host untuk container web                                                                                                |
-| `POSTGRES_USER`, `POSTGRES_DB`           | `csms`, `csms`    |                                                                                                                              |
-| `POSTGRES_PASSWORD`                      | tidak ada (wajib) | Masuk ke dalam URL: pakai huruf dan angka saja, misalnya `openssl rand -hex 24`                                              |
-| `BETTER_AUTH_SECRET`                     | tidak ada (wajib) | Minimal 32 karakter                                                                                                          |
-| `DEVICE_API_KEY`                         | tidak ada (wajib) | Minimal 16 karakter                                                                                                          |
-| `SEED_ADMIN_PASSWORD`                    | `ChangeMe123!`    | Hanya dipakai `seed`                                                                                                         |
-| `TRUST_PROXY`                            | `1`               | Jumlah proxy di depan API. Lihat di bawah                                                                                    |
-| `THROTTLE_LIMIT`, `THROTTLE_LOGIN_LIMIT` | `300`, `10`       | Lihat [Rate limiting](backend.id.md#rate-limiting)                                                                           |
-| `WHATSAPP_ENABLED`                       | `false`           |                                                                                                                              |
+| Variabel                                 | Default           | Fungsi                                                                                                                                             |
+| ---------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_URL`                             | tidak ada (wajib) | Persis seperti yang diketik di address bar browser, dengan `https://` dan tanpa garis miring di akhir. Menjadi `WEB_URL` dan `BETTER_AUTH_URL` API |
+| `WEB_BIND`                               | `127.0.0.1`       | Alamat host tempat container web mendengarkan. `0.0.0.0` membukanya ke jaringan                                                                    |
+| `WEB_PORT`                               | `8080`            | Port host untuk container web                                                                                                                      |
+| `POSTGRES_USER`, `POSTGRES_DB`           | `csms`, `csms`    |                                                                                                                                                    |
+| `POSTGRES_PASSWORD`                      | tidak ada (wajib) | Masuk ke dalam URL: pakai huruf dan angka saja, misalnya `openssl rand -hex 24`                                                                    |
+| `BETTER_AUTH_SECRET`                     | tidak ada (wajib) | Minimal 32 karakter                                                                                                                                |
+| `DEVICE_API_KEY`                         | tidak ada (wajib) | Minimal 16 karakter                                                                                                                                |
+| `SEED_ADMIN_PASSWORD`                    | `ChangeMe123!`    | Hanya dipakai `seed`                                                                                                                               |
+| `TRUST_PROXY`                            | `2`               | Jumlah proxy antara browser dan API. Lihat di bawah                                                                                                |
+| `THROTTLE_LIMIT`, `THROTTLE_LOGIN_LIMIT` | `300`, `10`       | Lihat [Rate limiting](backend.id.md#rate-limiting)                                                                                                 |
+| `WHATSAPP_ENABLED`                       | `false`           |                                                                                                                                                    |
 
 Sisanya (ukuran pool, timeout) memakai default `apps/backend/src/config/env.validation.ts`. Untuk mengubahnya, tambahkan ke service `backend` di `docker-compose.yml`.
 
-## HTTPS
+## Reverse proxy dan HTTPS
 
-API berjalan dengan `NODE_ENV=production`, yang membuat cookie sesi bersifat `Secure`. Browser hanya menyimpan cookie `Secure` di HTTPS, dan di `http://localhost`. Jadi:
+API berjalan dengan `NODE_ENV=production`, yang membuat cookie sesi bersifat `Secure`. Browser hanya menyimpan cookie `Secure` di HTTPS (dan di `http://localhost`), jadi dashboard harus dibuka lewat alamat HTTPS. Reverse proxy-mu yang menyediakannya. Proxy itu harus meneruskan ke `127.0.0.1:<WEB_PORT>`, membawa alamat klien di `X-Forwarded-For`, dan tidak mem-buffer stream live di `/api/events/`.
 
-- `http://localhost:8080` di mesin itu sendiri berfungsi.
-- `http://192.168.1.20:8080` atau `http://server.local:8080` **tidak**: login dijawab 200 dan request berikutnya 401, karena browser membuang cookie-nya.
+Caddy (sertifikat otomatis):
 
-Untuk selain localhost, pasang TLS di depan container web (Caddy, Traefik, nginx di host, Cloudflare Tunnel) dan isi `PUBLIC_URL=https://...`.
+```
+csms.example.com {
+    reverse_proxy 127.0.0.1:8080
+}
+```
 
-Jika ada proxy lain di depan container web:
+nginx di host:
 
-- Isi `TRUST_PROXY=2`: proxy luar dan nginx di dalam container. Dengan default `1`, semua user terlihat sebagai proxy luar dan berbagi satu batas rate limit.
-- Proxy luar harus menjadi satu-satunya pintu masuk. Publish port web hanya di loopback, misalnya `ports: ["127.0.0.1:8080:80"]`, kalau tidak klien bisa menjangkau nginx langsung dan mengirim `X-Forwarded-For` palsu.
+```nginx
+server {
+    listen 443 ssl;
+    server_name csms.example.com;
+    # ssl_certificate ...; ssl_certificate_key ...;
 
-Device tidak butuh proxy yang paham HTTPS, tetapi firmware harus bisa HTTPS jika `PUBLIC_URL` HTTPS dan device lewat alamat itu.
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;       # halaman live memakai server-sent events
+        proxy_read_timeout 1h;
+    }
+}
+```
+
+Cloudflare Tunnel: arahkan public hostname ke `http://localhost:8080`.
+
+### `TRUST_PROXY`
+
+Isi dengan jumlah proxy antara browser dan API, **termasuk nginx di dalam container web**:
+
+| Susunan                                                          | `TRUST_PROXY` |
+| ---------------------------------------------------------------- | ------------- |
+| Caddy, nginx, atau cloudflared di host, lalu container web       | `2` (default) |
+| Sama seperti di atas, di belakang proxy Cloudflare (awan oranye) | `3`           |
+| Tidak ada proxy di depan, `WEB_BIND=0.0.0.0`                     | `1`           |
+
+Terlalu kecil: semua user terlihat sebagai proxy dan berbagi satu batas (semua orang kena 429 bersamaan). Terlalu besar: klien bisa memalsukan alamatnya lewat `X-Forwarded-For` miliknya sendiri. Default loopback pada `WEB_BIND` yang membuat nilai `2` aman: tidak ada yang bisa menjangkau container web tanpa melewati proxy-mu.
+
+Untuk mengecek, login dengan password salah lebih dari `THROTTLE_LOGIN_LIMIT` kali dari satu browser, lalu coba dari jaringan lain. Jaringan kedua tidak boleh ikut terblokir.
+
+### Tanpa HTTPS
+
+`http://localhost:8080` di server itu sendiri berfungsi tanpa sertifikat. Lewat HTTP biasa di alamat lain, browser membuang cookie: login dijawab 200 dan request berikutnya 401. Untuk uji coba di LAN kamu tetap butuh HTTPS di depan; tidak ada pengaturan untuk mematikan cookie secure.
 
 ## Operasi sehari-hari
 
@@ -125,12 +163,13 @@ Ubah `DEVICE_API_KEY` di `.env`, jalankan `docker compose up -d backend`, lalu p
 
 ## Pemecahan masalah
 
-| Gejala                                                              | Penyebab                                                                                               |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `set POSTGRES_PASSWORD in .env` (atau variabel lain)                | Variabel wajib belum ada di `.env`                                                                     |
-| `backend` restart terus, log berisi `Invalid environment variables` | Ada nilai yang terlalu pendek atau salah format, misalnya `BETTER_AUTH_SECRET` kurang dari 32 karakter |
-| `migrate` berhenti dengan error, `backend` tidak pernah start       | Baca `docker compose logs migrate`. Password berisi `@` atau `/` merusak URL koneksi                   |
-| Login 200, lalu semuanya 401                                        | `PUBLIC_URL` tidak sama dengan alamat di browser, atau situs dibuka lewat HTTP biasa selain localhost  |
-| Semua orang kena 429                                                | Ada proxy di depan dan `TRUST_PROXY` terlalu kecil                                                     |
-| `VITE_API_URL` atau kode web diubah, tidak berpengaruh              | Image web harus dibangun ulang: `docker compose up -d --build web`                                     |
-| Dashboard jalan, pembacaan ditolak                                  | `DEVICE_API_KEY` di device salah (401), atau kode device belum ada (404)                               |
+| Gejala                                                              | Penyebab                                                                                                  |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `set POSTGRES_PASSWORD in .env` (atau variabel lain)                | Variabel wajib belum ada di `.env`                                                                        |
+| `backend` restart terus, log berisi `Invalid environment variables` | Ada nilai yang terlalu pendek atau salah format, misalnya `BETTER_AUTH_SECRET` kurang dari 32 karakter    |
+| `migrate` berhenti dengan error, `backend` tidak pernah start       | Baca `docker compose logs migrate`. Password berisi `@` atau `/` merusak URL koneksi                      |
+| Login 200, lalu semuanya 401                                        | `PUBLIC_URL` tidak sama dengan alamat di browser, atau situs dibuka lewat HTTP biasa selain localhost     |
+| 502 atau halaman kosong dari proxy                                  | Proxy tidak mengarah ke `127.0.0.1:<WEB_PORT>`, atau `docker compose ps` menunjukkan `web` tidak berjalan |
+| Semua orang kena 429                                                | `TRUST_PROXY` lebih kecil dari jumlah proxy di depan                                                      |
+| `VITE_API_URL` atau kode web diubah, tidak berpengaruh              | Image web harus dibangun ulang: `docker compose up -d --build web`                                        |
+| Dashboard jalan, pembacaan ditolak                                  | `DEVICE_API_KEY` di device salah (401), atau kode device belum ada (404)                                  |

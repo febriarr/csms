@@ -4,8 +4,9 @@
 #   docker compose up -d --build
 #   docker compose run --rm seed                  # first super admin, once
 #
-# Only the web container is published. It serves the dashboard and forwards /api to the backend, so the browser sees
-# one origin and the devices post to the same address: http://<host>:<WEB_PORT>/api/temperature
+# Only the web container is published, on 127.0.0.1:<WEB_PORT>. Put a reverse proxy with HTTPS in front of it
+# (see docs/deployment.md). It serves the dashboard and forwards /api to the backend, so the browser sees one
+# origin and the devices post to the same address: <PUBLIC_URL>/api/temperature
 
 name: csms
 
@@ -53,8 +54,8 @@ services:
             BETTER_AUTH_URL: ${PUBLIC_URL}
             BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
             DEVICE_API_KEY: ${DEVICE_API_KEY:?set DEVICE_API_KEY in .env}
-            # one proxy (the nginx in the web container) sits in front of the API
-            TRUST_PROXY: ${TRUST_PROXY:-1}
+            # proxies in front of the API: the nginx in the web container, plus the one that terminates TLS
+            TRUST_PROXY: ${TRUST_PROXY:-2}
             THROTTLE_LIMIT: ${THROTTLE_LIMIT:-300}
             THROTTLE_LOGIN_LIMIT: ${THROTTLE_LOGIN_LIMIT:-10}
             WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
@@ -103,7 +104,9 @@ services:
         image: csms-web
         restart: unless-stopped
         ports:
-            - "${WEB_PORT:-8080}:80"
+            # Loopback by default: a reverse proxy on the same host (Caddy, nginx, cloudflared) terminates TLS and is the
+            # only way in. Set WEB_BIND=0.0.0.0 to open the port to the network (plain HTTP, see docs/deployment.md).
+            - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:80"
         depends_on:
             backend:
                 condition: service_healthy
