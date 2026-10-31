@@ -30,6 +30,9 @@ type SparklineProps = {
      * text-destructive
      */
     tone: string;
+
+    /** Shorter chart and a lighter label row, for the compact card. */
+    compact?: boolean;
 };
 
 type ChartPoint = {
@@ -128,7 +131,7 @@ function buildChart(
     };
 }
 
-export function Sparkline({ points, warning, critical, gapMs, tone }: SparklineProps) {
+export function Sparkline({ points, warning, critical, gapMs, tone, compact }: SparklineProps) {
     const now = useNow();
 
     /**
@@ -149,8 +152,13 @@ export function Sparkline({ points, warning, critical, gapMs, tone }: SparklineP
     if (!chart) {
         return (
             <div>
-                <div className="flex h-10 items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground">
-                    Collecting data...
+                <div
+                    className={cn(
+                        "flex items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground",
+                        compact ? "h-8" : "h-10"
+                    )}
+                >
+                    {compact ? "Collecting…" : "Collecting data..."}
                 </div>
 
                 <div className="mt-1 flex justify-between font-mono text-[10px] text-muted-foreground">
@@ -163,7 +171,10 @@ export function Sparkline({ points, warning, critical, gapMs, tone }: SparklineP
 
     return (
         <div>
-            <ChartContainer config={chartConfig} className={cn("h-10 w-full overflow-visible", tone)}>
+            <ChartContainer
+                config={chartConfig}
+                className={cn("w-full overflow-visible", compact ? "h-8" : "h-10", tone)}
+            >
                 <LineChart
                     data={chart.data}
                     margin={{
@@ -200,16 +211,21 @@ export function Sparkline({ points, warning, critical, gapMs, tone }: SparklineP
                 </LineChart>
             </ChartContainer>
 
-            <div className="mt-1 flex justify-between font-mono text-[10px] text-muted-foreground">
+            <div
+                className="mt-1 flex justify-between font-mono text-[10px] text-muted-foreground"
+                title={`min ${chart.min.toFixed(1)}° · max ${chart.max.toFixed(1)}°`}
+            >
                 <span>-{hours}h</span>
 
-                <span
-                    aria-label={`Temperature over the last ${hours} hours, from ${chart.min.toFixed(
-                        1
-                    )} to ${chart.max.toFixed(1)} degrees`}
-                >
-                    min {chart.min.toFixed(1)}° · max {chart.max.toFixed(1)}°
-                </span>
+                {!compact && (
+                    <span
+                        aria-label={`Temperature over the last ${hours} hours, from ${chart.min.toFixed(
+                            1
+                        )} to ${chart.max.toFixed(1)} degrees`}
+                    >
+                        min {chart.min.toFixed(1)}° · max {chart.max.toFixed(1)}°
+                    </span>
+                )}
 
                 <span>now</span>
             </div>

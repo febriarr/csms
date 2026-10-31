@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
+import { LayoutGrid, Rows3 } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { cn } from "@workspace/ui/lib/utils";
 
 import { useColdStorages } from "@/modules/settings/master-data/cold-room/hooks";
 import { useDivisions } from "@/modules/settings/master-data/division/hooks";
 import { useLocations } from "@/modules/settings/master-data/location/hooks";
 import { STATE_ORDER, type DisplayState } from "@/lib/device-state";
 import { getDisplayState } from "./constants";
-import { DeviceCard } from "./device-card";
+import { DeviceCard, type CardDensity } from "./device-card";
 import { useLiveDevices } from "./hooks";
 import type { SeriesPoint } from "./recent.api";
 import { SummaryBar, type StateFilter } from "./summary-bar";
@@ -21,11 +23,38 @@ const NO_POINTS: SeriesPoint[] = [];
 
 const rank = (state: DisplayState) => STATE_ORDER.indexOf(state);
 
+const DENSITY_KEY = "live-monitoring:density";
+
+const GRID_CLASSES: Record<CardDensity, string> = {
+    comfortable: "grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4",
+    // as many columns as fit, each at least 17rem wide
+    compact: "grid gap-3 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]",
+};
+
+function readDensity(): CardDensity {
+    try {
+        return localStorage.getItem(DENSITY_KEY) === "comfortable" ? "comfortable" : "compact";
+    } catch {
+        return "compact";
+    }
+}
+
 export function Component() {
     const [divisionFilter, setDivisionFilter] = useState(ALL);
     const [locationFilter, setLocationFilter] = useState(ALL);
     const [coldStorageFilter, setColdStorageFilter] = useState(ALL);
     const [stateFilter, setStateFilter] = useState<StateFilter>("ALL");
+    const [density, setDensity] = useState<CardDensity>(readDensity);
+
+    const changeDensity = (next: CardDensity) => {
+        setDensity(next);
+
+        try {
+            localStorage.setItem(DENSITY_KEY, next);
+        } catch {
+            // private mode / blocked storage: the choice just lasts until reload
+        }
+    };
 
     const divisionId = divisionFilter === ALL ? undefined : divisionFilter;
     const locationId = locationFilter === ALL ? undefined : locationFilter;
@@ -170,6 +199,23 @@ export function Component() {
                             Reset
                         </Button>
                     )}
+
+                    <div role="group" aria-label="Card size" className="flex gap-1 xl:ml-auto">
+                        <Button
+                            variant={density === "comfortable" ? "secondary" : "ghost"}
+                            aria-pressed={density === "comfortable"}
+                            onClick={() => changeDensity("comfortable")}
+                        >
+                            <LayoutGrid /> Comfortable
+                        </Button>
+                        <Button
+                            variant={density === "compact" ? "secondary" : "ghost"}
+                            aria-pressed={density === "compact"}
+                            onClick={() => changeDensity("compact")}
+                        >
+                            <Rows3 /> Compact
+                        </Button>
+                    </div>
                 </div>
 
                 <SummaryBar
@@ -182,9 +228,12 @@ export function Component() {
                 />
 
                 {isPending && (
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    <div className={GRID_CLASSES[density]}>
                         {Array.from({ length: 8 }).map((_, index) => (
-                            <Skeleton key={index} className="h-80 rounded-xl" />
+                            <Skeleton
+                                key={index}
+                                className={cn("rounded-xl", density === "compact" ? "h-52" : "h-80")}
+                            />
                         ))}
                     </div>
                 )}
@@ -207,9 +256,14 @@ export function Component() {
                 )}
 
                 {!isPending && visible.length > 0 && (
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    <div className={GRID_CLASSES[density]}>
                         {visible.map((device) => (
-                            <DeviceCard key={device.id} device={device} points={series[device.id] ?? NO_POINTS} />
+                            <DeviceCard
+                                key={device.id}
+                                device={device}
+                                points={series[device.id] ?? NO_POINTS}
+                                density={density}
+                            />
                         ))}
                     </div>
                 )}

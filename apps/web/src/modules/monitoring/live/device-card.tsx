@@ -45,12 +45,16 @@ function TrendChip({ delta }: { delta: number }) {
     );
 }
 
+export type CardDensity = "comfortable" | "compact";
+
 type DeviceCardProps = {
     device: DeviceView;
     points: SeriesPoint[];
+    density?: CardDensity;
 };
 
-export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCardProps) {
+export const DeviceCard = memo(function DeviceCard({ device, points, density = "comfortable" }: DeviceCardProps) {
+    const compact = density === "compact";
     const state = getDisplayState(device);
     const meta = STATE_META[state];
     const dim = state === "OFFLINE" || state === "INACTIVE";
@@ -64,7 +68,8 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
         <article
             aria-label={`${device.name}: ${meta.label}`}
             className={cn(
-                "relative flex flex-col gap-3 overflow-hidden rounded-xl border bg-card py-4 pr-4 pl-5 text-card-foreground",
+                "relative flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground",
+                compact ? "gap-2 py-3 pr-3 pl-4" : "gap-3 py-4 pr-4 pl-5",
                 isPaused ? "border-orange-500/50" : meta.card
             )}
         >
@@ -99,7 +104,7 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
             </header>
 
             <p
-                className="-mt-2 truncate text-xs text-muted-foreground"
+                className={cn("truncate text-xs text-muted-foreground", compact ? "-mt-1" : "-mt-2")}
                 title={`${device.divisionName} / ${device.locationName} / ${device.coldStorageName}`}
             >
                 {device.coldStorageName} · {device.locationName}
@@ -118,47 +123,109 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
             )}
 
             {isPaused ? (
-                <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 text-center">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                        <Pause className="size-5 text-muted-foreground" />
-                    </div>
-
-                    <p className="mt-3 font-medium">Monitoring Paused</p>
-
-                    <p className="mt-1 text-xs text-muted-foreground">Temperature monitoring is temporarily paused.</p>
-
-                    {monitoring.pause && (
-                        <div className="mt-3 flex items-center gap-2">
-                            <Badge variant="outline">{humanizeEnum(monitoring.pause.kind)}</Badge>
-                            <span className="text-xs text-muted-foreground">
-                                for <Elapsed date={monitoring.pause.startsAt} className="font-mono" />
-                            </span>
+                compact ? (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed bg-muted/20 px-3 py-2">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                            <Pause className="size-4 text-muted-foreground" />
                         </div>
-                    )}
-                </div>
-            ) : (
-                <>
-                    <div className="flex items-end justify-between gap-2">
-                        <div>
-                            <div
-                                className={cn(
-                                    "font-mono text-3xl leading-none font-semibold tabular-nums",
-                                    dim
-                                        ? "text-muted-foreground"
-                                        : state === "CRITICAL" || state === "WARNING"
-                                          ? meta.text
-                                          : "text-foreground"
-                                )}
-                            >
-                                {reading == null ? "—" : formatTemperature(reading)}
-                            </div>
-                            {dim && reading != null && (
-                                <p className="mt-1 text-xs text-muted-foreground">Last known reading</p>
+
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium">Monitoring Paused</p>
+
+                            {monitoring.pause && (
+                                <p className="truncate text-xs text-muted-foreground">
+                                    {humanizeEnum(monitoring.pause.kind)} · for{" "}
+                                    <Elapsed date={monitoring.pause.startsAt} className="font-mono" />
+                                </p>
                             )}
                         </div>
-
-                        {trend !== null && <TrendChip delta={trend} />}
                     </div>
+                ) : (
+                    <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 text-center">
+                        <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                            <Pause className="size-5 text-muted-foreground" />
+                        </div>
+
+                        <p className="mt-3 font-medium">Monitoring Paused</p>
+
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Temperature monitoring is temporarily paused.
+                        </p>
+
+                        {monitoring.pause && (
+                            <div className="mt-3 flex items-center gap-2">
+                                <Badge variant="outline">{humanizeEnum(monitoring.pause.kind)}</Badge>
+                                <span className="text-xs text-muted-foreground">
+                                    for <Elapsed date={monitoring.pause.startsAt} className="font-mono" />
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )
+            ) : (
+                <>
+                    {compact ? (
+                        <div className="flex items-center gap-3">
+                            <div className="shrink-0">
+                                <div
+                                    className={cn(
+                                        "font-mono text-2xl leading-none font-semibold tabular-nums",
+                                        dim
+                                            ? "text-muted-foreground"
+                                            : state === "CRITICAL" || state === "WARNING"
+                                              ? meta.text
+                                              : "text-foreground"
+                                    )}
+                                >
+                                    {reading == null ? "—" : formatTemperature(reading)}
+                                </div>
+
+                                <div className="mt-1.5 min-h-4">
+                                    {trend !== null ? (
+                                        <TrendChip delta={trend} />
+                                    ) : (
+                                        dim &&
+                                        reading != null && (
+                                            <p className="text-[10px] text-muted-foreground">Last known</p>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                                <Sparkline
+                                    compact
+                                    points={points}
+                                    warning={device.warningThreshold}
+                                    critical={device.criticalThreshold}
+                                    gapMs={Math.max(heartbeatMs * 3, 60_000)}
+                                    tone={dim ? "text-muted-foreground" : meta.text}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-end justify-between gap-2">
+                            <div>
+                                <div
+                                    className={cn(
+                                        "font-mono text-3xl leading-none font-semibold tabular-nums",
+                                        dim
+                                            ? "text-muted-foreground"
+                                            : state === "CRITICAL" || state === "WARNING"
+                                              ? meta.text
+                                              : "text-foreground"
+                                    )}
+                                >
+                                    {reading == null ? "—" : formatTemperature(reading)}
+                                </div>
+                                {dim && reading != null && (
+                                    <p className="mt-1 text-xs text-muted-foreground">Last known reading</p>
+                                )}
+                            </div>
+
+                            {trend !== null && <TrendChip delta={trend} />}
+                        </div>
+                    )}
 
                     <ThresholdBar
                         value={reading}
@@ -168,15 +235,22 @@ export const DeviceCard = memo(function DeviceCard({ device, points }: DeviceCar
                         dim={dim}
                     />
 
-                    <Sparkline
-                        points={points}
-                        warning={device.warningThreshold}
-                        critical={device.criticalThreshold}
-                        gapMs={Math.max(heartbeatMs * 3, 60_000)}
-                        tone={dim ? "text-muted-foreground" : meta.text}
-                    />
+                    {!compact && (
+                        <Sparkline
+                            points={points}
+                            warning={device.warningThreshold}
+                            critical={device.criticalThreshold}
+                            gapMs={Math.max(heartbeatMs * 3, 60_000)}
+                            tone={dim ? "text-muted-foreground" : meta.text}
+                        />
+                    )}
 
-                    <footer className="flex items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
+                    <footer
+                        className={cn(
+                            "flex items-center justify-between gap-2 text-xs text-muted-foreground",
+                            !compact && "border-t pt-3"
+                        )}
+                    >
                         <span className="flex items-center gap-1.5">
                             <Clock className="size-3" />
                             <TimeAgo date={device.lastSeenAt} staleAfterMs={dim ? undefined : heartbeatMs * 2} />
