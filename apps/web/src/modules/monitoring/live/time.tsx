@@ -69,11 +69,7 @@ export function TimeAgo({ date, staleAfterMs, className }: TimeProps & { staleAf
     const age = now - new Date(date).getTime();
     const stale = staleAfterMs !== undefined && age > staleAfterMs;
 
-    return (
-        <span className={cn(className, stale && "text-amber-600 dark:text-amber-400")}>
-            {formatAgo(age)}
-        </span>
-    );
+    return <span className={cn(className, stale && "text-amber-600 dark:text-amber-400")}>{formatAgo(age)}</span>;
 }
 
 /** "4m", the time elapsed since `date`. */

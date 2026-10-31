@@ -8,8 +8,18 @@ const PENDING_STYLE = "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:t
 export function StatusBadge({ status }: { status: NotificationStatus }) {
     const meta = STATUS_META[status];
 
-    if (status === "SUCCESS") return <Badge variant="success" title={meta.hint}>{meta.label}</Badge>;
-    if (status === "FAILED") return <Badge variant="destructive" title={meta.hint}>{meta.label}</Badge>;
+    if (status === "SUCCESS")
+        return (
+            <Badge variant="success" title={meta.hint}>
+                {meta.label}
+            </Badge>
+        );
+    if (status === "FAILED")
+        return (
+            <Badge variant="destructive" title={meta.hint}>
+                {meta.label}
+            </Badge>
+        );
 
     return (
         <Badge variant="outline" className={PENDING_STYLE} title={meta.hint}>

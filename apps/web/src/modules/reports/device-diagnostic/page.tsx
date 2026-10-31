@@ -41,7 +41,8 @@ export function Component() {
 
     // The cold rooms to choose from are the ones that have a device with failures in this period.
     const coldStorages = useMemo(
-        () => [...new Set((report?.items ?? []).map((item) => item.coldStorageName))].sort((a, b) => a.localeCompare(b)),
+        () =>
+            [...new Set((report?.items ?? []).map((item) => item.coldStorageName))].sort((a, b) => a.localeCompare(b)),
         [report]
     );
     // a cold room that disappeared from the list (another period) must not keep filtering everything out

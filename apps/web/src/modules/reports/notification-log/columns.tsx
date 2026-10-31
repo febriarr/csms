@@ -36,7 +36,11 @@ export function getLogColumns(onAction: (action: LogAction, log: ListNotificatio
             cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label={`Actions for the message to ${row.original.recipient ?? "recipient"}`}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Actions for the message to ${row.original.recipient ?? "recipient"}`}
+                        >
                             <MenuIcon />
                         </Button>
                     </DropdownMenuTrigger>
@@ -73,9 +77,7 @@ export function getLogColumns(onAction: (action: LogAction, log: ListNotificatio
             cell: ({ row }) => (
                 <div>
                     {/* the name is the current one, the target is what was used at send time */}
-                    <div className="font-medium">
-                        {row.original.recipientName ?? <Muted>Deleted recipient</Muted>}
-                    </div>
+                    <div className="font-medium">{row.original.recipientName ?? <Muted>Deleted recipient</Muted>}</div>
                     <div className="font-mono text-xs text-muted-foreground">{row.original.recipient ?? "-"}</div>
                 </div>
             ),

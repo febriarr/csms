@@ -101,9 +101,7 @@ export function getSummaryColumns(onAction: (action: DiagnosticAction, item: Dia
         }),
         summaryHelper.accessor("wifiFailTotal", {
             header: "Wi-Fi",
-            cell: (info) => (
-                <FailCount value={info.getValue()} className="text-amber-600 dark:text-amber-400" />
-            ),
+            cell: (info) => <FailCount value={info.getValue()} className="text-amber-600 dark:text-amber-400" />,
         }),
         summaryHelper.accessor("httpFailTotal", {
             header: "HTTP",
@@ -181,7 +179,7 @@ export const detailColumns = detailHelper.columns([
             if (!item.resetReason) return <Muted>-</Muted>;
 
             return (
-                <div className="flex items-center gap-3 whitespace-nowrap text-xs">
+                <div className="flex items-center gap-3 text-xs whitespace-nowrap">
                     <span className="flex items-center gap-1">
                         <Muted>S</Muted>
                         <FailCount value={item.lastSensorFailCount} className="text-destructive" />

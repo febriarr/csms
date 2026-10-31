@@ -20,7 +20,10 @@ export function getDiagnosticSummary(params: DiagnosticPeriod, signal?: AbortSig
 }
 
 /** Failures per calendar day of one device. */
-export function getDiagnosticTrend(params: DiagnosticTrendParams, signal?: AbortSignal): Promise<DiagnosticTrendReport> {
+export function getDiagnosticTrend(
+    params: DiagnosticTrendParams,
+    signal?: AbortSignal
+): Promise<DiagnosticTrendReport> {
     return apiData(http.get<ApiSuccessResponse<DiagnosticTrendReport>>("/diagnostic/trend", { params, signal }));
 }
 
@@ -29,7 +32,5 @@ export function getDiagnosticDetail(
     params: DiagnosticDetailParams,
     signal?: AbortSignal
 ): Promise<WithMetadata<DiagnosticLogItem[]>> {
-    return apiPaginated(
-        http.get<ApiSuccessResponse<DiagnosticLogItem[]>>("/diagnostic/detail", { params, signal })
-    );
+    return apiPaginated(http.get<ApiSuccessResponse<DiagnosticLogItem[]>>("/diagnostic/detail", { params, signal }));
 }

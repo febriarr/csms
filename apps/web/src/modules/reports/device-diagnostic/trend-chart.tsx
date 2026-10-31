@@ -2,12 +2,7 @@ import { useMemo } from "react";
 import { Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 import type { DiagnosticTrendReport } from "@workspace/shared";
-import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-    type ChartConfig,
-} from "@workspace/ui/components/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@workspace/ui/components/chart";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 import { FAILURES, fillDays, shortDay } from "./constants";

@@ -59,9 +59,7 @@ export function fillDays(from: string, to: string, points: DiagnosticTrendPoint[
     for (let time = Date.parse(from); time <= Date.parse(to); time += MS_PER_DAY) {
         const day = new Date(time).toISOString().slice(0, 10);
 
-        result.push(
-            byDay.get(day) ?? { day, sensorFailTotal: 0, wifiFailTotal: 0, httpFailTotal: 0, avgRssi: null }
-        );
+        result.push(byDay.get(day) ?? { day, sensorFailTotal: 0, wifiFailTotal: 0, httpFailTotal: 0, avgRssi: null });
     }
 
     return result;

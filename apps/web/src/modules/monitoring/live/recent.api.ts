@@ -9,12 +9,6 @@ export type SeriesPoint = { t: number; v: number };
 type RecentReadingsResponse = Record<string, { recordedAt: string; temperature: number }[]>;
 
 /**
- * NEEDS A NEW BACKEND ENDPOINT. GET /temperature/report works per calendar day, per device and returns raw rows
- * page by page, which is far too heavy for one sparkline per card. Contract expected here:
- *
- *   GET /temperature/recent?deviceIds=<id,id,...>&minutes=180
- *   -> { success: true, data: { "<deviceId>": [{ recordedAt: ISO string, temperature: number }, ...] } }
- *
  * Oldest first, readings of the last `minutes` minutes, downsampled on the server (for example the average per
  * minute, so at most ~180 points per device).
  */

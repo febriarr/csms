@@ -66,10 +66,7 @@ function DetailBody({ item, from, to }: BodyProps) {
                     note={item.lastReason ? formatDateTime(item.lastReason.recordedAt) : "No abnormal reset"}
                 >
                     {item.lastReason ? (
-                        <ResetReasonBadge
-                            reason={item.lastReason.resetReason}
-                            code={item.lastReason.resetReasonCode}
-                        />
+                        <ResetReasonBadge reason={item.lastReason.resetReason} code={item.lastReason.resetReasonCode} />
                     ) : (
                         <span className="text-muted-foreground">-</span>
                     )}
@@ -139,7 +136,8 @@ export function DiagnosticDetailDialog({ item, period, onOpenChange }: Diagnosti
                     <>
                         <DialogHeader>
                             <DialogTitle>
-                                {item.deviceName} <span className="font-mono text-sm font-normal">({item.deviceCode})</span>
+                                {item.deviceName}{" "}
+                                <span className="font-mono text-sm font-normal">({item.deviceCode})</span>
                             </DialogTitle>
                             <DialogDescription>
                                 {item.coldStorageName} · {formatDate(period.from)} to {formatDate(period.to)}
