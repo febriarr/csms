@@ -1,19 +1,15 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { configureApp } from './app.setup';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         bodyParser: false,
     });
-    app.setGlobalPrefix('api');
-    app.enableCors({
-        origin: [process.env.WEB_URL!], // URL Vite
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        // lets the browser read thw file name of a report download
-        exposedHeaders: ['Content-Disposition'],
-    });
-    app.enableShutdownHooks();
+
+    configureApp(app);
+
     await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

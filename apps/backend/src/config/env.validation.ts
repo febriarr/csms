@@ -24,6 +24,13 @@ const envSchema = z.object({
 
     DEVICE_API_KEY: z.string().min(16),
 
+    // How many reverse proxies sit in front of the API (nginx, Cloudflare, ...). 0 = none: the socket address is the
+    // client. Wrong here means every user shares the proxy's address and the rate limit hits them all together.
+    TRUST_PROXY: z.coerce.number().int().min(0).default(0),
+    // Requests per minute and per client address. The login limit is separate and much stricter.
+    THROTTLE_LIMIT: z.coerce.number().int().min(1).default(300),
+    THROTTLE_LOGIN_LIMIT: z.coerce.number().int().min(1).default(10),
+
     WHATSAPP_ENABLED: z
         .enum(['true', 'false'])
         .default('false')
