@@ -1,0 +1,91 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+# a newer push to the same branch makes the older run pointless
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    # the same Node the project asks for in package.json "engines"
+    NODE_VERSION: 24
+
+jobs:
+    verify:
+        name: Lint, typecheck, unit tests, build
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v4
+
+            # reads the version from "packageManager" in package.json
+            - uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            # first: the apps import the built output of the shared packages
+            - name: Build
+              run: pnpm build
+              env:
+                  VITE_API_URL: http://localhost:3000/api
+
+            - name: Lint
+              run: pnpm lint
+
+            - name: Typecheck
+              run: pnpm typecheck
+
+            - name: Unit tests
+              run: pnpm test
+
+    e2e:
+        name: End-to-end tests (real PostgreSQL)
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: csms_e2e
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U postgres"
+                    --health-interval 5s
+                    --health-timeout 5s
+                    --health-retries 10
+        env:
+            # a throwaway database: the tests empty its tables (see apps/backend/test/support/env.ts)
+            E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/csms_e2e
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            # only the shared packages: the backend tests import their built output
+            - name: Build shared packages
+              run: pnpm turbo build --filter="./packages/*"
+
+            - name: End-to-end tests
+              run: pnpm --filter backend test:e2e

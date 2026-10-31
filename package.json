@@ -1,5 +1,5 @@
 {
-    "name": "stp",
+    "name": "CSMS",
     "version": "2.0.0",
     "private": true,
     "license": "MIT",
@@ -12,7 +12,8 @@
         "dev": "turbo dev",
         "lint": "turbo lint",
         "format": "turbo format",
-        "typecheck": "turbo typecheck"
+        "typecheck": "turbo typecheck",
+        "test": "turbo test"
     },
     "devDependencies": {
         "prettier": "^3.9.9",
