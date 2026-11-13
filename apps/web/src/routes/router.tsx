@@ -4,6 +4,7 @@ import AuthLayout, { AuthShell } from "@/layouts/auth-layout";
 import LayoutDefault from "@/layouts/default";
 import { LoginSkeleton } from "@/modules/auth/auth.skeleton";
 import { createBrowserRouter, Navigate } from "react-router";
+import { PageSkeleton } from "@/components/page-skeleton";
 
 export const router = createBrowserRouter([
     {
@@ -24,10 +25,12 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "/dashboard/monitoring/alerts",
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={5} />,
                         lazy: () => import("@/modules/monitoring/alert/page"),
                     },
                     {
                         path: "/dashboard/monitoring/monitoring-pauses",
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={1} />,
                         lazy: () => import("@/modules/monitoring/monitoring-pauses/page"),
                     },
 
@@ -35,41 +38,50 @@ export const router = createBrowserRouter([
                     {
                         path: "/dashboard/reports/temperature-history",
                         lazy: () => import("@/modules/reports/temperature-history/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={3} />,
                     },
                     {
                         path: "/dashboard/reports/device-diagnostic",
                         lazy: () => import("@/modules/reports/device-diagnostic/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={3} />,
                     },
                     {
                         path: "/dashboard/reports/notification-log",
                         lazy: () => import("@/modules/reports/notification-log/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={6} />,
                     },
 
                     // Settings
                     {
                         path: "/dashboard/settings/master-data/division",
                         lazy: () => import("@/modules/settings/master-data/division/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} showToolbar={false} />,
                     },
                     {
                         path: "/dashboard/settings/master-data/location",
                         lazy: () => import("@/modules/settings/master-data/location/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={2} />,
                     },
                     {
                         path: "/dashboard/settings/master-data/cold-room",
                         lazy: () => import("@/modules/settings/master-data/cold-room/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={3} />,
                     },
                     {
                         path: "/dashboard/settings/master-data/device",
                         lazy: () => import("@/modules/settings/master-data/device/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={5} />,
                     },
 
                     {
                         path: "/dashboard/settings/users",
                         lazy: () => import("@/modules/settings/users/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={3} />,
                     },
                     {
                         path: "/dashboard/settings/notifications",
                         lazy: () => import("@/modules/settings/notification/page"),
+                        hydrateFallbackElement: <PageSkeleton showAction={false} columns={5} filters={4} />,
                     },
 
                     // Parent menus (Settings, Master Data, ...) have no page of their own: send them to their
