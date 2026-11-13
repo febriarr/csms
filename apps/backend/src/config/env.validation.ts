@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
+const envObject = z.object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     DATABASE_URL: z.string().min(1),
     DB_POOL_MAX: z.coerce.number().int().min(1).default(10),
@@ -36,6 +36,27 @@ const envSchema = z.object({
         .default('false')
         .transform((v) => v === 'true'),
     WHATSAPP_AUTH_DIR: z.string().min(1).default('.baileys_auth'),
+
+    // E-mail through Resend. Off by default, like WhatsApp: EMAIL recipients then simply get no messages.
+    EMAIL_ENABLED: z
+        .enum(['true', 'false'])
+        .default('false')
+        .transform((v) => v === 'true'),
+    RESEND_API_KEY: z.string().optional(),
+    // "CSMS Alert <alerts@your-verified-domain.com>": the domain must be verified in Resend.
+    EMAIL_FROM: z.string().optional(),
+    // always   = every active EMAIL recipient subscribed to the device gets the message, next to WhatsApp.
+    // fallback = EMAIL recipients only get it when WhatsApp cannot deliver right now (disabled, not linked or
+    //            disconnected, or nobody subscribed on WhatsApp).
+    EMAIL_MODE: z.enum(['always', 'fallback']).default('always'),
+});
+
+const envSchema = envObject.superRefine((env, ctx) => {
+    if (!env.EMAIL_ENABLED) return;
+
+    for (const key of ['RESEND_API_KEY', 'EMAIL_FROM'] as const) {
+        if (!env[key]) ctx.addIssue({ code: 'custom', path: [key], message: 'Required when EMAIL_ENABLED=true' });
+    }
 });
 
 export type Env = z.infer<typeof envSchema>;

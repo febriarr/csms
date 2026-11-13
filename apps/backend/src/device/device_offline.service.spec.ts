@@ -9,6 +9,9 @@ import { aDevice } from './device.fixture';
 import type { DeviceRepository } from './device.repository';
 import { DeviceOfflineService, STARTUP_GRACE_MS } from './device_offline.service';
 
+// Baileys is an ES module Jest cannot load; the service only needs the class as an injection token
+jest.mock('@/whatsapp/whatsapp.service', () => ({ WhatsappService: class {} }));
+
 const NOW = new Date('2026-10-15T01:00:00.000Z');
 const STALE = new Date('2026-10-14T23:00:00.000Z'); // two hours of silence
 

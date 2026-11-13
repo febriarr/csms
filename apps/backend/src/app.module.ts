@@ -25,6 +25,7 @@ import { DeviceEventModule } from './event/device_event.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from './user/user.module';
 import { OverviewModule } from './overview/overview.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -84,6 +85,8 @@ import { OverviewModule } from './overview/overview.module';
         OverviewModule,
 
         HealthModule,
+
+        MailModule,
     ],
     providers: [
         {

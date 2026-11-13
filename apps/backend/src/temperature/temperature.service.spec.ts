@@ -13,6 +13,9 @@ import type { TemperatureRepository } from './temperature.repository';
 import type { DeviceUpdateEvent, DeviceWithPlace, ExpiredPause } from '@workspace/shared';
 import type { TelemetryInput } from '@workspace/validator';
 
+// Baileys is an ES module Jest cannot load; the service only needs the class as an injection token
+jest.mock('@/whatsapp/whatsapp.service', () => ({ WhatsappService: class {} }));
+
 const TX = { tx: true };
 
 type Options = {

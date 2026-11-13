@@ -60,6 +60,10 @@ services:
             THROTTLE_LOGIN_LIMIT: ${THROTTLE_LOGIN_LIMIT:-10}
             WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
             WHATSAPP_AUTH_DIR: .baileys_auth
+            EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+            RESEND_API_KEY: ${RESEND_API_KEY:-}
+            EMAIL_FROM: ${EMAIL_FROM:-}
+            EMAIL_MODE: ${EMAIL_MODE:-always}
         volumes:
             - whatsapp-auth:/app/.baileys_auth
         depends_on:
