@@ -183,10 +183,10 @@ Selesai:
 - [x] Export laporan Excel
 - [x] Notifikasi WhatsApp
 - [x] Dashboard live dengan SSE
+- [x] Notifikasi Email
 
 Berikutnya:
 
-- [ ] Notifikasi email (schema dan recipient sudah tersedia, sender belum)
 - [ ] MQTT untuk penerimaan telemetry dari device
 - [ ] Remote device management, termasuk update firmware dan kontrol perangkat untuk maintenance
 - [ ] Multi-tenancy dan deployment multi-instance

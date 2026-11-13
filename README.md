@@ -183,10 +183,10 @@ Done:
 - [x] Excel report export
 - [x] WhatsApp notifications
 - [x] SSE live dashboard
+- [x] Email notifications
 
 Next:
 
-- [ ] Email notifications (the schema and recipients exist, the sender does not)
 - [ ] MQTT for device telemetry ingestion
 - [ ] Remote device management, including firmware updates and maintenance controls
 - [ ] Multi-tenancy and multi-instance deployment
