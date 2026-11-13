@@ -14,15 +14,17 @@ import {
 import logoWhite from "@/assets/logo-white.svg";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "./nav-user";
+import { useCloseMobileSidebar } from "@/lib/use-close-mobile-sidebar";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+    const closeMobileSidebar = useCloseMobileSidebar();
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link to="/dashboard">
+                            <Link to="/dashboard" onClick={closeMobileSidebar}>
                                 <div className="flex aspect-square size-8 items-center justify-center">
                                     <img src={logoWhite} alt="" className="size-full object-contain" />
                                 </div>

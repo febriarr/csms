@@ -186,3 +186,17 @@
 .cn-toast-description {
     @apply text-popover-foreground!;
 }
+
+@keyframes navigation-progress {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+.navigation-progress-bar {
+    animation: navigation-progress 1.2s ease-in-out infinite;
+}

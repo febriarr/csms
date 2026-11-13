@@ -26,6 +26,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 
 import { navLinks, type NavItem } from "./nav-links";
+import { useCloseMobileSidebar } from "@/lib/use-close-mobile-sidebar";
 
 /** untuk halaman detail, misal /device/123 tetap menandai /device */
 function isPathActive(pathname: string, path: string, exact = false) {
@@ -71,11 +72,18 @@ export function NavMain() {
 /** Level 1 tanpa anak: link biasa */
 function NavLeaf({ item, pathname }: { item: NavItem; pathname: string }) {
     const active = isPathActive(pathname, item.path, item.exact);
+    const { isMobile, setOpenMobile } = useSidebar();
 
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                <Link to={item.path} aria-current={active ? "page" : undefined}>
+                <Link
+                    to={item.path}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => {
+                        if (isMobile) setOpenMobile(false);
+                    }}
+                >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                 </Link>
@@ -142,13 +150,14 @@ function NavParent({ item, pathname }: { item: NavItem; pathname: string }) {
 function SubItem({ item, pathname }: { item: NavItem; pathname: string }) {
     const branchActive = isBranchActive(pathname, item);
     const [open, setOpen] = useAutoOpen(branchActive);
+    const closeMobileSidebar = useCloseMobileSidebar();
 
     if (!item.children) {
         const active = isPathActive(pathname, item.path, item.exact);
         return (
             <SidebarMenuSubItem>
                 <SidebarMenuSubButton asChild isActive={active}>
-                    <Link to={item.path} aria-current={active ? "page" : undefined}>
+                    <Link to={item.path} aria-current={active ? "page" : undefined} onClick={closeMobileSidebar}>
                         <span>{item.title}</span>
                     </Link>
                 </SidebarMenuSubButton>
@@ -181,6 +190,7 @@ function SubItem({ item, pathname }: { item: NavItem; pathname: string }) {
 
 /** Isi dropdown saat sidebar menciut: link, atau sub-menu untuk level 3 */
 function DropdownEntry({ item, pathname }: { item: NavItem; pathname: string }) {
+    const closeMobileSidebar = useCloseMobileSidebar();
     if (item.children) {
         const branchActive = isBranchActive(pathname, item);
         return (
@@ -200,7 +210,7 @@ function DropdownEntry({ item, pathname }: { item: NavItem; pathname: string }) 
     const active = isPathActive(pathname, item.path, item.exact);
     return (
         <DropdownMenuItem asChild className={active ? "bg-accent font-medium" : undefined}>
-            <Link to={item.path} aria-current={active ? "page" : undefined}>
+            <Link to={item.path} aria-current={active ? "page" : undefined} onClick={closeMobileSidebar}>
                 {item.title}
             </Link>
         </DropdownMenuItem>
