@@ -12,20 +12,22 @@ import { Resend } from 'resend';
 @Injectable()
 export class ResendSender implements NotificationSender {
     readonly channel = 'EMAIL' as const;
-    private readonly resend: Resend;
-    private readonly from: string;
+    private client?: Resend;
     private readonly logger = new Logger(ResendSender.name);
 
-    constructor(config: ConfigService<Env, true>) {
-        this.resend = new Resend(config.get<string>('RESEND_API_KEY'));
-        this.from = config.get<string>('EMAIL_FROM');
+    constructor(private readonly config: ConfigService<Env, true>) {}
+
+    private get resend(): Resend {
+        this.client ??= new Resend(this.config.getOrThrow('RESEND_API_KEY', { infer: true }));
+
+        return this.client;
     }
 
     async send(target: string, message: string, severity: NotificationSeverity): Promise<void> {
         const { subject, text, html } = EmailUtils.build(message, severity);
 
         const { error } = await this.resend.emails.send({
-            from: this.from,
+            from: this.config.getOrThrow('EMAIL_FROM', { infer: true }),
             to: [target],
             subject,
             text,
