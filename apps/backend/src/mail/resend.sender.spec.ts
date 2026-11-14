@@ -1,36 +1,49 @@
 import type { ConfigService } from '@nestjs/config';
 import { ResendSender } from './resend.sender';
 
+const mockSend = jest.fn();
+const mockCtor = jest.fn();
+
+jest.mock('resend', () => ({
+    Resend: class {
+        emails = { send: mockSend };
+        constructor(apiKey: string) {
+            mockCtor(apiKey);
+        }
+    },
+}));
+
+const values: Record<string, string> = {
+    RESEND_API_KEY: 're_test',
+    EMAIL_FROM: 'CSMS <alerts@example.com>',
+};
+
 const config = {
-    get: (key: string) => ({ RESEND_API_KEY: 're_test', EMAIL_FROM: 'CSMS <alerts@example.com>' })[key],
+    get: (key: string) => values[key],
+    getOrThrow: (key: string) => values[key],
 } as unknown as ConfigService<never, true>;
 
 describe('ResendSender', () => {
-    afterEach(() => jest.restoreAllMocks());
+    afterEach(() => jest.clearAllMocks());
 
-    it('posts the message to Resend with the bearer key', async () => {
-        const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(new Response('{"id":"1"}', { status: 200 }));
+    it('sends the message through the Resend SDK', async () => {
+        mockSend.mockResolvedValue({ data: { id: '1' }, error: null });
 
         await new ResendSender(config).send('pic@example.com', 'Device: *A*', 'WARNING');
 
-        const [url, init] = fetchMock.mock.calls[0];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-base-to-string
-        const body = JSON.parse(String((init as RequestInit).body));
-
-        expect(url).toBe('https://api.resend.com/emails');
-        expect((init as RequestInit).headers).toMatchObject({ Authorization: 'Bearer re_test' });
-        expect(body).toMatchObject({
-            from: 'CSMS <alerts@example.com>',
-            to: ['pic@example.com'],
-            subject: '[CSMS] WARNING - A',
-        });
+        expect(mockCtor).toHaveBeenCalledWith('re_test');
+        expect(mockSend).toHaveBeenCalledWith(
+            expect.objectContaining({
+                from: 'CSMS <alerts@example.com>',
+                to: ['pic@example.com'],
+                subject: '[CSMS] WARNING - A',
+            }),
+        );
     });
 
-    it('throws when Resend answers with an error so the dispatcher retries', async () => {
-        jest.spyOn(global, 'fetch').mockResolvedValue(new Response('{"message":"bad"}', { status: 422 }));
+    it('throws when Resend returns an error so the dispatcher retries', async () => {
+        mockSend.mockResolvedValue({ data: null, error: { name: 'validation_error', message: 'bad' } });
 
-        await expect(new ResendSender(config as never).send('x@example.com', 'm', 'WARNING')).rejects.toThrow(
-            /Resend 422/,
-        );
+        await expect(new ResendSender(config).send('x@example.com', 'm', 'WARNING')).rejects.toThrow(/Resend: bad/);
     });
 });
